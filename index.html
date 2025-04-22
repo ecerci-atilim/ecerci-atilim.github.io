@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ana Sayfa - [Web Sitenizin Adı Buraya]</title>
-    <meta name="description" content="[Web sitenizin kısa bir açıklaması buraya]">
-    <!-- İsteğe bağlı: Google Fonts gibi özel fontlar ekleyebilirsiniz -->
+    <title>Homepage - [Your Website Name Here]</title> <!-- İngilizce başlık -->
+    <meta name="description" content="[A brief description of your website here]"> <!-- İngilizce açıklama -->
+    <!-- Optional: Google Fonts link (Roboto is already included) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Genel Sıfırlamalar ve Temel Ayarlar */
+        /* General Resets and Base Settings */
         * {
             margin: 0;
             padding: 0;
@@ -19,93 +19,92 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif; /* Google Font veya varsayılan sans-serif */
+            font-family: 'Roboto', sans-serif; /* Google Font or default sans-serif */
             line-height: 1.6;
-            background-color: #f8f9fa; /* Çok açık gri arka plan */
-            color: #343a40; /* Koyu gri metin */
-            display: flex; /* İçeriği dikeyde ortalamak için */
+            background-color: #f8f9fa; /* Very light gray background */
+            color: #343a40; /* Dark gray text */
+            display: flex; /* To center content vertically */
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Sayfanın en az ekran yüksekliğinde olmasını sağla */
-            padding: 20px; /* Kenarlardan boşluk */
+            min-height: 100vh; /* Ensure page takes at least full screen height */
+            padding: 20px; /* Padding around the edges */
         }
 
         .container {
-            max-width: 800px; /* Ana içerik alanı genişliği */
+            max-width: 800px; /* Max width for the main content area */
             width: 100%;
-            background-color: #ffffff; /* Beyaz içerik alanı */
+            background-color: #ffffff; /* White content background */
             padding: 40px;
-            border-radius: 10px; /* Yumuşak köşeler */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-            text-align: center; /* İçerikleri ortala */
+            border-radius: 10px; /* Soft corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Light shadow */
+            text-align: center; /* Center content */
         }
 
         header h1 {
-            color: #0056b3; /* Ana başlık rengi (koyu mavi tonu) */
+            color: #0056b3; /* Main heading color (dark blue tone) */
             margin-bottom: 10px;
-            font-size: 2.5em; /* Daha büyük başlık */
+            font-size: 2.5em; /* Larger heading */
         }
 
         header .subtitle {
-            color: #6c757d; /* Gri alt başlık/açıklama */
+            color: #6c757d; /* Gray subtitle/description */
             margin-bottom: 40px;
             font-size: 1.1em;
         }
 
         .navigation-menu h2 {
             margin-bottom: 25px;
-            color: #495057; /* Biraz daha açık başlık */
+            color: #495057; /* Slightly lighter heading */
             font-size: 1.5em;
-            border-bottom: 1px solid #dee2e6; /* Başlık altına ince çizgi */
+            border-bottom: 1px solid #dee2e6; /* Thin line under heading */
             padding-bottom: 10px;
-            display: inline-block; /* Çizginin sadece yazı kadar olmasını sağlar */
+            display: inline-block; /* Makes the line only as wide as the text */
         }
 
         .navigation-menu ul {
-            list-style: none; /* Liste işaretlerini kaldır */
+            list-style: none; /* Remove list bullets */
             padding: 0;
-            display: flex; /* Butonları yan yana getirmek için flexbox */
-            flex-wrap: wrap; /* Sığmazsa alt satıra at */
-            justify-content: center; /* Butonları ortala */
-            gap: 15px; /* Butonlar arası boşluk */
+            display: flex; /* Use flexbox to align buttons */
+            flex-wrap: wrap; /* Wrap to next line if needed */
+            justify-content: center; /* Center the buttons */
+            gap: 15px; /* Space between buttons */
         }
 
-        .navigation-menu ul li {
-            /* Flexbox kullanıldığı için ekstra li stiline gerek yok */
-        }
+        /* No extra li style needed with flexbox */
+        .navigation-menu ul li {}
 
         .nav-button {
-            display: inline-block; /* Buton gibi davranması için */
-            background-color: #007bff; /* Canlı mavi buton */
-            color: #ffffff; /* Beyaz yazı */
-            padding: 12px 25px; /* İç boşluk */
-            text-decoration: none; /* Alt çizgiyi kaldır */
-            border-radius: 5px; /* Yuvarlak köşeler */
+            display: inline-block; /* Behave like a button */
+            background-color: #007bff; /* Bright blue button */
+            color: #ffffff; /* White text */
+            padding: 12px 25px; /* Inner padding */
+            text-decoration: none; /* Remove underline */
+            border-radius: 5px; /* Rounded corners */
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Yumuşak geçiş efekti */
-            border: none; /* Kenarlık olmasın */
-            cursor: pointer; /* Fare imlecini el yap */
-            min-width: 180px; /* Butonların minimum genişliği */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transition effect */
+            border: none; /* No border */
+            cursor: pointer; /* Hand cursor */
+            min-width: 180px; /* Minimum width for buttons */
         }
 
         .nav-button:hover,
-        .nav-button:focus { /* Üzerine gelince veya odaklanınca */
-            background-color: #0056b3; /* Daha koyu mavi */
+        .nav-button:focus { /* On hover or focus */
+            background-color: #0056b3; /* Darker blue */
             color: #ffffff;
-            transform: translateY(-3px); /* Hafif yukarı kalkma efekti */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Daha belirgin gölge */
-            outline: none; /* Odaklanma çerçevesini kaldır (opsiyonel) */
+            transform: translateY(-3px); /* Slight lift effect */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+            outline: none; /* Remove focus outline (optional) */
         }
 
         footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #e9ecef; /* Footer üstüne ince çizgi */
+            border-top: 1px solid #e9ecef; /* Thin line above footer */
             font-size: 0.9em;
-            color: #6c757d; /* Gri footer yazısı */
+            color: #6c757d; /* Gray footer text */
         }
 
-        /* Mobil Cihazlar İçin Ekran Küçüldüğünde Ayarlamalar (Responsive Tasarım) */
+        /* Responsive Adjustments for Mobile Devices */
         @media (max-width: 768px) {
             .container {
                 padding: 30px;
@@ -116,15 +115,15 @@
             }
 
             .navigation-menu ul {
-                flex-direction: column; /* Butonları alt alta diz */
-                align-items: center; /* Ortala */
-                gap: 12px; /* Dikey boşluk */
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: center; /* Center them */
+                gap: 12px; /* Vertical gap */
             }
 
             .nav-button {
-                width: 90%; /* Buton genişliğini artır */
-                padding: 12px 20px; /* İç boşluğu ayarla */
-                min-width: unset; /* Minimum genişliği kaldır */
+                width: 90%; /* Increase button width */
+                padding: 12px 20px; /* Adjust padding */
+                min-width: unset; /* Remove minimum width */
             }
         }
 
@@ -142,7 +141,7 @@
                 font-size: 1.3em;
             }
             .nav-button {
-                width: 100%; /* Tam genişlik kapla */
+                width: 100%; /* Full width */
                 padding: 10px 15px;
             }
         }
@@ -150,6 +149,7 @@
 </head>
 <body>
 
+    <!-- Your provided HTML structure starts here -->
     <div class="container">
         <header>
             <h1>Welcome</h1>
@@ -160,19 +160,25 @@
             <nav class="navigation-menu">
                 <h2>Pages</h2>
                 <ul>
-                    <!-- ÖNEMLİ: Buradaki href değerlerini ve link yazılarını kendi dosya adlarınız ve açıklamalarınızla değiştirin -->
+                    <!-- Ensure 'mbcjr.html' is the correct path/filename -->
                     <li><a href="mbcjr.html" class="nav-button">M-BCJR</a></li>
+                    <!-- Add more list items here if needed -->
+                    <!-- Example: <li><a href="another-page.html" class="nav-button">Another Page</a></li> -->
                 </ul>
             </nav>
         </main>
 
         <footer>
+            <!-- Note: The JS will update the content of the span#currentYear -->
             <p>© 2025 - <span id="currentYear"></span></p>
         </footer>
     </div>
+    <!-- Your provided HTML structure ends here -->
+
 
     <script>
-        // Küçük bir Javascript ile otomatik yıl güncelleme
+        // Simple Javascript to automatically update the year in the footer
+        // It targets the span with id="currentYear"
         document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
 
