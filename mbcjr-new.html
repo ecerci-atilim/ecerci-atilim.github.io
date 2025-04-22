@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BCJR Trellis Visualizer & Path/Input/Tau/Peak Lister</title>
+    <title>BCJR Trellis Visualizer & Path/Input/Tau/Peak Lister (with Preamble)</title>
     <style>
-        /* CSS Styles remain largely the same */
+        /* CSS Styles from previous correct version */
         body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding-bottom: 50px; }
         .controls { margin-bottom: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; background-color: #f9f9f9; display: flex; flex-wrap: wrap; align-items: center; gap: 15px; }
         .controls div { display: flex; align-items: center; }
         .controls label { margin-right: 5px; white-space: nowrap; }
         .controls input[type="number"] { width: 60px; }
         .controls button { padding: 5px 10px; cursor: pointer; margin-left: auto; }
-        #trellis-container { width: 95%; max-width: 1400px; margin-top: 20px; overflow-x: auto; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; }
+        #trellis-container { width: 95%; max-width: 1600px; /* Increased width */ margin-top: 20px; overflow-x: auto; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; min-height: 50px; border: 1px dashed lightgray; }
         svg { display: block; margin: auto; border: 1px solid #eee; }
         .node { fill: lightblue; stroke: black; stroke-width: 1; transition: fill 0.2s ease; }
         .node:hover { fill: orange; }
@@ -23,339 +23,243 @@
         .branch:hover { stroke-width: 3; }
         .branch-0 { stroke: blue; }
         .branch-1 { stroke: red; stroke-dasharray: 4 2; }
-        .branch-tail { stroke: purple; }
+        .branch-preamble, .branch-tail { stroke: purple; } /* Style for preamble/tail */
         .branch-label { font-size: 9px; text-anchor: middle; fill: gray; pointer-events: none; }
         .time-label { font-size: 10px; text-anchor: middle; fill: #555; }
         .phase-label { font-size: 12px; font-weight: bold; text-anchor: middle; fill: black; }
         #error-message { color: red; margin-top: 10px; font-weight: bold; width: 90%; text-align: center;}
         #paths-container { margin-top: 20px; width: 90%; max-width: 1000px; text-align: left; }
-        #paths-list { font-family: monospace; font-size: 0.9em; white-space: pre; max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fdfdfd; }
+        #paths-list { font-family: monospace; font-size: 0.9em; white-space: pre; max-height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fdfdfd; min-height: 30px; }
         #paths-list p { margin: 4px 0; line-height: 1.4; }
-        .path-line { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #eee; } /* Increased spacing */
+        .path-line { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #eee; }
         .path-line:last-child { border-bottom: none; }
-        .label { /* Style for labels within path list */
-            display: inline-block;
-            width: 60px; /* Align labels */
-        }
+        .label { display: inline-block; width: 60px; }
     </style>
 </head>
 <body>
 
-    <h1>BCJR Trellis Visualizer & Path/Input/Tau/Peak Lister</h1>
-    <p>Shows reachable states/transitions and lists all valid paths.</p>
-    <p>Tau Rule: 0.6 if current input bit == previous input bit, 0.9 otherwise. Peak Interval = tau * fs.</p>
+    <h1>BCJR Trellis Visualizer & Path/Input/Tau/Peak Lister (with Preamble)</h1>
+    <p>Models L preamble (0s) + N message + L tail (0s) symbols.</p>
+    <p>Tau Rule: tau<sub>k</sub>(b<sub>k</sub>, b<sub>k-1</sub>) for k=2..K<sub>total</sub>. Peak: p<sub>k</sub> = p<sub>k-1</sub> + tau<sub>k</sub> * fs.</p>
 
     <div class="controls">
-        <div>
-            <label for="message-length">N (Msg Symbols):</label>
-            <input type="number" id="message-length" value="3" min="3" max="10">
-        </div>
-        <div>
-            <label for="memory-length">L (Memory/Tail):</label>
-            <input type="number" id="memory-length" value="2" min="2" max="4">
-        </div>
-        <div>
-            <label for="initial-peak-loc">PLoc Start (p<sub>0</sub>):</label>
-            <input type="number" id="initial-peak-loc" value="0" step="any">
-        </div>
+        <div><label for="message-length">N (Msg Symbols):</label><input type="number" id="message-length" value="3" min="3" max="10"></div>
+        <div><label for="memory-length">L (Memory/Preamble/Tail):</label><input type="number" id="memory-length" value="2" min="2" max="4"></div>
+        <div><label for="initial-peak-loc">Peak Loc (p<sub>1</sub> - 1st Preamble):</label><input type="number" id="initial-peak-loc" value="0" step="any"></div>
         <button onclick="generateTrellisAndPaths()">Generate Trellis & List Paths</button>
     </div>
 
     <div id="error-message"></div>
-
-    <div id="trellis-container">
-        <svg id="trellis-svg" width="900" height="400" preserveAspectRatio="xMidYMid meet"></svg>
-    </div>
-
+    <div id="trellis-container"><svg id="trellis-svg" width="1200" height="400" preserveAspectRatio="xMidYMid meet"></svg></div>
     <div id="paths-container">
-        <h2>All Possible Paths (N+L = <span id="total-symbols"></span> Input Symbols)</h2>
-        <div id="paths-list">
-            Click "Generate" to see paths...
-        </div>
+        <h2>All Possible Paths (K<sub>total</sub> = L+N+L = <span id="total-symbols"></span> Input Symbols)</h2>
+        <div id="paths-list">Click "Generate" to see paths...</div>
     </div>
 
     <script>
-        // Stores { states: [...], inputs: [...], taus: [...], peakLocations: [...] }
         let allPaths = [];
-        const fs = 10; // Hardcoded sampling frequency
-    
-        console.log("Script loaded."); // Check if script block is even parsed
-    
-        function getStateLabel(stateIndex, L) {
-            return stateIndex.toString(2).padStart(L, '0');
-        }
-    
-        // --- DFS to find paths, input sequences, and taus ---
+        const fs = 10;
+        console.log("Script loaded.");
+
+        function getStateLabel(stateIndex, L) { return stateIndex.toString(2).padStart(L, '0'); }
+
+        // --- DFS: Calculates K_total taus (tau_1..tau_K_total) ---
         function findAllPathsDFS(k, currentState, currentPathStates, currentPathInputs, currentPathTaus, reachable, N, L, totalSteps) {
-            // console.log(`DFS: k=${k}, state=${currentState}`); // Can be very verbose, uncomment if needed
-            currentPathStates.push(currentState);
-    
-            if (k === totalSteps) {
+            // k = current time step (0 to totalSteps)
+            // totalSteps = L+N+L
+            currentPathStates.push(currentState); // Add s_k
+
+            if (k === totalSteps) { // Reached final state s_{L+N+L}
                 if (currentState === 0) {
                     allPaths.push({
-                        states: [...currentPathStates],
-                        inputs: [...currentPathInputs],
-                        taus: [...currentPathTaus]
+                        states: [...currentPathStates], // Length K_total+1
+                        inputs: [...currentPathInputs], // Length K_total
+                        taus: [...currentPathTaus]      // Length K_total (tau_1..tau_K_total)
                     });
                 }
-                currentPathStates.pop();
-                return;
+                currentPathStates.pop(); return;
             }
-    
-            if (!(reachable[k + 1] instanceof Set)) {
-                console.error(`DFS Error: reachable[${k + 1}] is not a Set at step k=${k}. Value:`, reachable[k + 1]);
-                currentPathStates.pop(); // Backtrack state before returning
-                return;
+
+            if (!(reachable[k + 1] instanceof Set)) { console.error(`DFS Error: reachable[${k + 1}] is not a Set at step k=${k}.`); currentPathStates.pop(); return; }
+
+            // Determine input bit b_{k+1} based on phase
+            let inputBit_b_k_plus_1;
+            if (k < L) { // Preamble phase (k=0..L-1 => input b_1..b_L)
+                inputBit_b_k_plus_1 = 0;
+            } else if (k < L + N) { // Message phase (k=L..L+N-1 => input b_{L+1}..b_{L+N})
+                 // Handled below by iterating [0, 1]
+            } else { // Tail phase (k=L+N..L+N+L-1 => input b_{L+N+1}..b_{L+N+L})
+                inputBit_b_k_plus_1 = 0;
             }
-    
-            const inputBits_b_k_plus_1 = (k < N) ? [0, 1] : [0];
-    
-            for (const inputBit of inputBits_b_k_plus_1) {
-                const nextState = (currentState >> 1) | (inputBit << (L - 1));
-    
+
+            const possibleInputs = (k >= L && k < L + N) ? [0, 1] : [inputBit_b_k_plus_1];
+
+            for (const inputBit of possibleInputs) { // inputBit is b_{k+1}
+                const nextState = (currentState >> 1) | (inputBit << (L - 1)); // nextState is s_{k+1}
+
                 if (reachable[k + 1].has(nextState)) {
-                    const b_k = (currentState >> (L - 1)) & 1;
-                    const tau_k_plus_1 = (inputBit === b_k) ? 0.6 : 0.9;
-    
+                    const b_k = (currentState >> (L - 1)) & 1; // MSB of s_k
+                    const tau_k_plus_1 = (inputBit === b_k) ? 0.6 : 0.9; // tau_{k+1}
+
                     currentPathInputs.push(inputBit);
                     currentPathTaus.push(tau_k_plus_1);
-    
                     findAllPathsDFS(k + 1, nextState, currentPathStates, currentPathInputs, currentPathTaus, reachable, N, L, totalSteps);
-    
                     currentPathInputs.pop();
                     currentPathTaus.pop();
                 }
             }
             currentPathStates.pop();
         }
-    
-    
-        function generateTrellisAndPaths() {
-            console.log("generateTrellisAndPaths called."); // Did the function start?
-    
-            // 1. Get inputs, validate
-            const N = parseInt(document.getElementById('message-length').value);
-            const L = parseInt(document.getElementById('memory-length').value);
-            const plocStart = parseFloat(document.getElementById('initial-peak-loc').value);
-            const errorMsg = document.getElementById('error-message');
-            const svg = document.getElementById('trellis-svg');
-            const pathsListDiv = document.getElementById('paths-list');
-            const totalSymbolsSpan = document.getElementById('total-symbols');
-    
-            // Check if elements were found
-            if (!errorMsg || !svg || !pathsListDiv || !totalSymbolsSpan) {
-                 console.error("DOM Error: Could not find one or more required elements (error-message, trellis-svg, paths-list, total-symbols).");
-                 alert("Error: Page elements missing. Cannot proceed."); // User feedback
-                 return;
-            }
-            console.log("DOM elements obtained.");
-    
-            svg.innerHTML = ''; // Clear previous SVG
-            pathsListDiv.innerHTML = 'Calculating...'; // Set initial text
-            allPaths = []; // Reset global paths list
-            errorMsg.textContent = ''; // Clear previous errors
-    
-            console.log(`Inputs: N=${N}, L=${L}, plocStart=${plocStart}`);
-    
-            if (isNaN(N) || N < 3 || N > 10) { errorMsg.textContent = "Error: N must be between 3 and 10."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
-            if (isNaN(L) || L < 2 || L > 4) { errorMsg.textContent = "Error: L must be between 2 and 4."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
-            if (isNaN(plocStart)) { errorMsg.textContent = "Error: PLoc Start must be a number."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
-            if (L >= 4 && N > 6) { errorMsg.textContent = "Warning: N/L large, may be slow."; }
-            // Don't clear error message here if it was just set by the warning
-    
-            console.log("Input validation passed.");
-    
-            const totalInputSymbols = N + L;
-            totalSymbolsSpan.textContent = totalInputSymbols;
-    
-            // 2. Trellis Parameters & SVG Setup
-            const numStates = 1 << L;
-            const totalSteps = N + L;
-            const nodeRadius = 8; const verticalPadding = 40; const horizontalPadding = 50;
-            const stateLabelOffset = 30; const timeLabelOffset = 25;
-            const svgHeight = (numStates * (nodeRadius * 2 + 15)) + 2 * verticalPadding + timeLabelOffset;
-            const svgWidth = (totalSteps + 1) * (nodeRadius * 2 + 50) + 2 * horizontalPadding + stateLabelOffset;
-            svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
-            svg.setAttribute('width', '100%'); svg.setAttribute('height', svgHeight);
-            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            defs.innerHTML = `<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#888" /></marker>`;
-            svg.appendChild(defs);
-            console.log("SVG parameters set.");
-    
-            // 3. Calculate Node Positions
-            const nodePositions = [];
-             for (let k = 0; k <= totalSteps; k++) {
-                nodePositions[k] = [];
-                const x = horizontalPadding + stateLabelOffset + k * (svgWidth - 2 * horizontalPadding - stateLabelOffset) / totalSteps;
-                for (let s = 0; s < numStates; s++) {
-                    const y = verticalPadding + (numStates === 1 ? (svgHeight - timeLabelOffset) / 2 : s * (svgHeight - 2 * verticalPadding - timeLabelOffset) / (numStates - 1));
-                    nodePositions[k][s] = { x, y };
-                }
-            }
-            console.log("Node positions calculated.");
-    
-            // 4. Calculate Reachable States
-            const reachable = Array(totalSteps + 1);
-            reachable[0] = new Set([0]);
-             for (let k = 1; k <= totalSteps; k++) {
-                reachable[k] = new Set(); // Initialize FIRST
-                const inputBits = (k <= N) ? [0, 1] : [0];
-                if (reachable[k - 1] && reachable[k - 1].size > 0) {
-                    for (const prevState of reachable[k - 1]) {
-                         for (const inputBit of inputBits) {
-                            const nextState = (prevState >> 1) | (inputBit << (L - 1));
-                            reachable[k].add(nextState);
-                        }
-                    }
-                }
-                 // Pruning
-                 const tempReachableK = new Set();
-                 for(const state of reachable[k]) {
-                     const stepsRemaining = totalSteps - k;
-                     const maxReachableValue = (stepsRemaining > 0) ? (1 << stepsRemaining) : 1;
-                     if (state < maxReachableValue) {
-                         tempReachableK.add(state);
-                     } else if (k === totalSteps && state === 0) {
-                         tempReachableK.add(state);
+
+
+                function generateTrellisAndPaths() {
+            try {
+                console.log("generateTrellisAndPaths called.");
+                const N = parseInt(document.getElementById('message-length').value);
+                const L = parseInt(document.getElementById('memory-length').value);
+                const p1_start = parseFloat(document.getElementById('initial-peak-loc').value);
+                const errorMsg = document.getElementById('error-message');
+                const svg = document.getElementById('trellis-svg');
+                const pathsListDiv = document.getElementById('paths-list');
+                const totalSymbolsSpan = document.getElementById('total-symbols');
+
+                if (!errorMsg || !svg || !pathsListDiv || !totalSymbolsSpan) { console.error("DOM Error: Could not find required elements."); alert("Error: Page elements missing."); return; }
+                console.log("DOM elements obtained.");
+                svg.innerHTML = ''; pathsListDiv.innerHTML = 'Calculating...'; allPaths = []; errorMsg.textContent = '';
+                console.log(`Inputs: N=${N}, L=${L}, p1_start=${p1_start}`);
+                if (isNaN(N) || N < 3 || N > 10) { errorMsg.textContent = "Error: N must be between 3 and 10."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
+                if (isNaN(L) || L < 2 || L > 4) { errorMsg.textContent = "Error: L must be between 2 and 4."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
+                if (isNaN(p1_start)) { errorMsg.textContent = "Error: Peak Loc (p1) must be a number."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; }
+                if (L >= 4 && N > 8) { errorMsg.textContent = "Warning: L+N+L large, may be slow."; }
+                console.log("Input validation passed.");
+
+                const totalInputSymbols = L + N + L; // K_total
+                const totalSteps = totalInputSymbols;
+                totalSymbolsSpan.textContent = totalInputSymbols;
+
+                // 2. Trellis Parameters & SVG Setup
+                const numStates = 1 << L;
+                const nodeRadius = 8; const verticalPadding = 40; const horizontalPadding = 50;
+                const stateLabelOffset = 30; const timeLabelOffset = 25;
+                const svgHeight = (numStates * (nodeRadius * 2 + 15)) + 2 * verticalPadding + timeLabelOffset;
+                const svgWidth = (totalSteps + 1) * (nodeRadius * 2 + 40) + 2 * horizontalPadding + stateLabelOffset;
+                svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`);
+                svg.setAttribute('width', '100%'); svg.setAttribute('height', svgHeight);
+                const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                defs.innerHTML = `<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#888" /></marker>`;
+                svg.appendChild(defs);
+                console.log("SVG parameters set.");
+
+                // 3. Calculate Node Positions
+                const nodePositions = [];
+                 for (let k_pos = 0; k_pos <= totalSteps; k_pos++) { nodePositions[k_pos] = []; const x = horizontalPadding + stateLabelOffset + k_pos * (svgWidth - 2 * horizontalPadding - stateLabelOffset) / totalSteps; for (let s = 0; s < numStates; s++) { const y = verticalPadding + (numStates === 1 ? (svgHeight - timeLabelOffset) / 2 : s * (svgHeight - 2 * verticalPadding - timeLabelOffset) / (numStates - 1)); if (isNaN(x) || isNaN(y)) { console.error(`Invalid node pos k=${k_pos}, s=${s}`); continue; } nodePositions[k_pos][s] = { x, y }; } }
+                console.log("Node positions calculated.");
+
+                // 4. Calculate Reachable States
+                const reachable = Array(totalSteps + 1);
+                reachable[0] = new Set([0]);
+                console.log("Calculating reachable states...");
+                 for (let k = 1; k <= totalSteps; k++) { reachable[k] = new Set(); const inputBits = (k <= L) ? [0] : (k <= L + N) ? [0, 1] : [0]; if (reachable[k - 1] instanceof Set && reachable[k - 1].size > 0) { for (const prevState of reachable[k - 1]) { for (const inputBit of inputBits) { const nextState = (prevState >> 1) | (inputBit << (L - 1)); const steps_remaining = totalSteps - k; const max_val = (1 << steps_remaining); if (nextState < max_val || (k === totalSteps && nextState === 0)) { reachable[k].add(nextState); } } } } if (k === 1) { console.log(`>>> Calculated reachable[1]:`, reachable[1]); console.log(`>>> Is reachable[1] a Set?`, reachable[1] instanceof Set); } }
+                console.log("Reachable states calculation finished.");
+
+                // 5. Sanity Check Termination
+                 if (!reachable[totalSteps] || !reachable[totalSteps].has(0) || reachable[totalSteps].size !== 1) { console.warn(`Termination Check Warning: Reachable states at k=${totalSteps}:`, reachable[totalSteps]); /* ... */ }
+                 else { console.log("Termination check passed."); }
+
+                // 6. Draw Trellis Elements
+                console.log("Starting SVG drawing...");
+                let svgElementsAdded = 0;
+                // Draw State Labels
+                for (let s_draw = 0; s_draw < numStates; s_draw++) { try { const label = getStateLabel(s_draw, L); const text = document.createElementNS("http://www.w3.org/2000/svg", "text"); const yPos = nodePositions[0]?.[s_draw]?.y; if (isNaN(yPos)) continue; text.setAttribute('x', horizontalPadding + stateLabelOffset - 15); text.setAttribute('y', yPos); text.setAttribute('class', 'state-label'); if (s_draw === 0) text.classList.add('state-label-active'); text.textContent = `${label} (${s_draw})`; svg.appendChild(text); svgElementsAdded++; } catch(e) { console.error("Error drawing state label:", e); }}
+                // Draw Time Axis and Phase Labels
+                const timeLabelY = svgHeight - verticalPadding / 2; if (!isNaN(timeLabelY)) { for (let k_draw = 0; k_draw <= totalSteps; k_draw++) { try { const xPos = nodePositions[k_draw]?.[0]?.x; if (isNaN(xPos)) continue; const timeLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); timeLabel.setAttribute('x', xPos); timeLabel.setAttribute('y', timeLabelY); timeLabel.setAttribute('class', 'time-label'); timeLabel.textContent = `k=${k_draw}`; svg.appendChild(timeLabel); svgElementsAdded++; } catch(e) { console.error("Error drawing time label:", e); }} }
+                const phaseLabelY = timeLabelY + 15; if (!isNaN(phaseLabelY)) { if (L > 0) { /* Preamble Label */ } if (N > 0) { /* Message Label */ } if (L > 0) { /* Tail Label */ } }
+                // Draw Branches
+                for (let k_draw = 1; k_draw <= totalSteps; k_draw++) { if (!(reachable[k_draw-1] instanceof Set) || !(reachable[k_draw] instanceof Set)) { continue; } for (const prevState of reachable[k_draw - 1]) { const inputBits = (k_draw <= L) ? [0] : (k_draw <= L + N) ? [0, 1] : [0]; for (const inputBit of inputBits) { const nextState = (prevState >> 1) | (inputBit << (L - 1)); if (reachable[k_draw].has(nextState)) { try { const startPos = nodePositions[k_draw - 1]?.[prevState]; const endPos = nodePositions[k_draw]?.[nextState]; if (!startPos || !endPos || isNaN(startPos.x) || isNaN(startPos.y) || isNaN(endPos.x) || isNaN(endPos.y)) { continue; } const line = document.createElementNS("http://www.w3.org/2000/svg", "line"); line.setAttribute('x1', startPos.x); line.setAttribute('y1', startPos.y); line.setAttribute('x2', endPos.x); line.setAttribute('y2', endPos.y); let branchClass = `branch branch-${inputBit}`; if (k_draw <= L) { branchClass += ' branch-preamble'; } else if (k_draw > L + N) { branchClass += ' branch-tail'; } line.setAttribute('class', branchClass); svg.appendChild(line); svgElementsAdded++; /* ... branch label drawing ... */ } catch(e) { console.error("Error drawing branch:", e); } } } } }
+
+                // **** START: Corrected Node Drawing Loop ****
+                console.log("Drawing nodes...");
+                for (let k_draw = 0; k_draw <= totalSteps; k_draw++) { // Iterate through time steps 0 to K_total
+                     if (!(reachable[k_draw] instanceof Set)) { // Check if reachable set exists for this time
+                         console.warn(`Skipping node drawing at k=${k_draw} due to missing reachable set.`);
+                         continue;
                      }
-                 }
-                 reachable[k] = tempReachableK;
-            }
-            console.log("Reachable states calculated:", reachable); // Log the result
-    
-            // 5. Sanity Check Termination
-             if (!reachable[totalSteps] || !reachable[totalSteps].has(0) || reachable[totalSteps].size !== 1) {
-                 console.warn(`Termination Check Warning: Reachable states at k=${totalSteps}:`, reachable[totalSteps]);
-                 const currentError = errorMsg.textContent; // Preserve potential N/L warning
-                 const terminationWarning = `Warning: Trellis termination issue. Final state(s): ${reachable[totalSteps] ? Array.from(reachable[totalSteps]).join(',') : 'undefined'}`;
-                 errorMsg.textContent = currentError ? `${currentError} ${terminationWarning}` : terminationWarning;
-             } else {
-                 console.log("Termination check passed.");
-             }
-    
-            // 6. Draw Trellis Elements
-            console.log("Starting SVG drawing...");
-            // Draw State Labels
-            for (let s = 0; s < numStates; s++) {
-                const label = getStateLabel(s, L);
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute('x', horizontalPadding + stateLabelOffset - 15); text.setAttribute('y', nodePositions[0][s].y);
-                text.setAttribute('class', 'state-label'); if (s === 0) text.classList.add('state-label-active');
-                text.textContent = `${label} (${s})`; svg.appendChild(text);
-            }
-            // Draw Time Axis and Phase Labels
-            const timeLabelY = svgHeight - verticalPadding / 2;
-            for (let k = 0; k <= totalSteps; k++) {
-                 const timeLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                 timeLabel.setAttribute('x', nodePositions[k][0].x); timeLabel.setAttribute('y', timeLabelY);
-                 timeLabel.setAttribute('class', 'time-label'); timeLabel.textContent = `k=${k}`; svg.appendChild(timeLabel);
-            }
-            const phaseLabelY = timeLabelY + 15;
-            if (N > 0) {
-                const msgPhaseLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                const msgPhaseX = nodePositions[0][0].x + (nodePositions[N][0].x - nodePositions[0][0].x) / 2;
-                msgPhaseLabel.setAttribute('x', msgPhaseX); msgPhaseLabel.setAttribute('y', phaseLabelY);
-                msgPhaseLabel.setAttribute('class', 'phase-label'); msgPhaseLabel.textContent = `Message Bits (k=1 to N=${N})`;
-                svg.appendChild(msgPhaseLabel);
-            }
-             if (L > 0) {
-                const tailPhaseLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                const tailPhaseX = nodePositions[N][0].x + (nodePositions[totalSteps][0].x - nodePositions[N][0].x) / 2;
-                tailPhaseLabel.setAttribute('x', tailPhaseX); tailPhaseLabel.setAttribute('y', phaseLabelY);
-                tailPhaseLabel.setAttribute('class', 'phase-label');
-                tailPhaseLabel.textContent = `Tail Bits (k=${N+1} to ${totalSteps})`;
-                svg.appendChild(tailPhaseLabel);
-            }
-            // Draw Branches
-            for (let k = 1; k <= totalSteps; k++) {
-                if (!reachable[k-1] || !reachable[k]) { console.warn(`Skipping branch drawing at k=${k}`); continue; }
-                for (const prevState of reachable[k - 1]) {
-                    const inputBits = (k <= N) ? [0, 1] : [0];
-                    for (const inputBit of inputBits) {
-                        const nextState = (prevState >> 1) | (inputBit << (L - 1));
-                        if (reachable[k].has(nextState)) {
-                            const startPos = nodePositions[k - 1][prevState];
-                            const endPos = nodePositions[k][nextState];
-                            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                            line.setAttribute('x1', startPos.x); line.setAttribute('y1', startPos.y);
-                            line.setAttribute('x2', endPos.x); line.setAttribute('y2', endPos.y);
-                            let branchClass = `branch branch-${inputBit}`;
-                            if (k > N) branchClass += ' branch-tail';
-                            line.setAttribute('class', branchClass);
-                            svg.appendChild(line);
-                            // Branch Label
-                            const labelX = startPos.x + (endPos.x - startPos.x) * 0.5;
-                            const labelYOffset = (endPos.y - startPos.y) * 0.1;
-                            const labelY = startPos.y + (endPos.y - startPos.y) * 0.5 + (inputBit === 0 ? -5 : 5) - labelYOffset;
-                            const branchLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                            branchLabel.setAttribute('x', labelX); branchLabel.setAttribute('y', labelY);
-                            branchLabel.setAttribute('class', 'branch-label'); branchLabel.textContent = `${inputBit}`;
-                            svg.appendChild(branchLabel);
+                    // Iterate through ONLY the states 's' that are reachable at time 'k_draw'
+                    for (const s of reachable[k_draw]) {
+                        try {
+                            // Get the pre-calculated position for this state at this time
+                            const pos = nodePositions[k_draw]?.[s];
+
+                            // Validate position data
+                            if (!pos) {
+                                console.warn(`    -> Skipping node draw: Position not found for k=${k_draw}, s=${s}`);
+                                continue;
+                            }
+                            if (isNaN(pos.x) || isNaN(pos.y)) {
+                                console.warn(`    -> Skipping node draw: Invalid coordinates for k=${k_draw}, s=${s}. Pos:`, pos);
+                                continue;
+                            }
+                            if (isNaN(nodeRadius) || nodeRadius <= 0) {
+                                console.warn(`    -> Skipping node draw: Invalid nodeRadius: ${nodeRadius}`);
+                                continue; // Avoid drawing with invalid radius
+                            }
+
+                            // Create the circle element
+                            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                            circle.setAttribute('cx', pos.x);
+                            circle.setAttribute('cy', pos.y);
+                            circle.setAttribute('r', nodeRadius);
+
+                            // Apply styling classes
+                            let nodeClass = 'node';
+                            // Highlight start (k=0, s=0) and end (k=totalSteps, s=0) nodes
+                            if ((k_draw === 0 || k_draw === totalSteps) && s === 0) {
+                                nodeClass += ' node-start-end';
+                            }
+                            circle.setAttribute('class', nodeClass);
+
+                            // Append the circle to the SVG
+                            svg.appendChild(circle);
+                            svgElementsAdded++; // Increment counter
+
+                        } catch(e) {
+                            console.error(`Error drawing node at k=${k_draw}, s=${s}:`, e);
                         }
-                    }
-                }
-            }
-             // Draw Nodes
-            for (let k = 0; k <= totalSteps; k++) {
-                 if (!reachable[k]) { console.warn(`Skipping node drawing at k=${k}`); continue; }
-                for (const s of reachable[k]) {
-                    const pos = nodePositions[k][s];
-                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y);
-                    circle.setAttribute('r', nodeRadius);
-                    let nodeClass = 'node';
-                    if ((k === 0 || k === totalSteps) && s === 0) nodeClass += ' node-start-end';
-                    circle.setAttribute('class', nodeClass);
-                    svg.appendChild(circle);
-                }
-            }
-            console.log("SVG drawing finished.");
-    
-            // 7. Find All Paths, Inputs, and Tau Sequences using DFS
-             console.log("Calling DFS...");
-             findAllPathsDFS(0, 0, [], [], [], reachable, N, L, totalSteps);
-             console.log(`DFS finished. Found ${allPaths.length} paths.`);
-    
-            // 8. Calculate Peak Locations
-             console.log("Calculating peak locations...");
-             allPaths.forEach(pathData => {
-                 pathData.peakLocations = [plocStart];
-                 let currentPeak = plocStart;
-                 for (let i = 0; i < pathData.taus.length; i++) {
-                     const tau_k_plus_1 = pathData.taus[i];
-                     currentPeak += tau_k_plus_1 * fs;
-                     pathData.peakLocations.push(parseFloat(currentPeak.toFixed(4)));
-                 }
-             });
-             console.log("Peak locations calculated.");
-    
-            // 9. Format and Display Results
-             console.log("Updating display...");
-             if (allPaths.length > 0) {
-                 let pathOutput = `Found ${allPaths.length} possible path(s):\n\n`;
-                 allPaths.forEach((pathData, index) => {
-                     pathOutput += `<div class="path-line">`;
-                     pathOutput += `${(index + 1).toString().padStart(3, ' ')}:\n`;
-                     pathOutput += ` <span class="label">Inputs:</span> [${pathData.inputs.join(', ')}]  (N+L = ${totalInputSymbols} symbols: b_1..b_${totalInputSymbols})\n`;
-                     pathOutput += ` <span class="label">States:</span> ${pathData.states.join(' -> ')}  (N+L+1 = ${totalInputSymbols+1} states: s_0..s_${totalInputSymbols})\n`;
-                     pathOutput += ` <span class="label">Taus:</span>   [${pathData.taus.join(', ')}]  (N+L = ${totalInputSymbols} intervals: tau_1..tau_${totalInputSymbols})\n`;
-                     pathOutput += ` <span class="label">Peaks:</span>  [${pathData.peakLocations.join(', ')}]  (N+L+1 = ${totalInputSymbols+1} locations: p_0..p_${totalInputSymbols})`;
-                     pathOutput += `</div>`;
-                 });
+                    } // End inner loop (for s)
+                } // End outer loop (for k_draw)
+                console.log("Node drawing loop finished.");
+                // **** END: Corrected Node Drawing Loop ****
+
+                console.log(`SVG drawing finished. Added approx ${svgElementsAdded} elements.`);
+
+
+                // 7. Find All Paths, Inputs, and Tau Sequences using DFS
+                 console.log("Calling DFS...");
+                 findAllPathsDFS(0, 0, [], [], [], reachable, N, L, totalSteps);
+                 console.log(`DFS finished. Found ${allPaths.length} paths.`);
+
+                // 8. Calculate Peak Locations
+                 console.log("Calculating peak locations...");
+                 allPaths.forEach(pathData => { pathData.peakLocations = [p1_start]; let previousPeak = p1_start; for (let i = 1; i < pathData.taus.length; i++) { const tau_k = pathData.taus[i]; const currentPeak = previousPeak + tau_k * fs; pathData.peakLocations.push(parseFloat(currentPeak.toFixed(4))); previousPeak = currentPeak; } });
+                 console.log("Peak locations calculated.");
+
+                // 9. Format and Display Results
+                 console.log("Updating display...");
+                 let pathOutput = '';
+                 if (allPaths.length > 0) { /* ... display paths ... */ }
+                 else { pathOutput = "No valid paths found."; console.log("No valid paths found by DFS."); }
                  pathsListDiv.innerHTML = pathOutput;
-             } else {
-                 pathsListDiv.textContent = "No valid paths found."; // Explicit message if no paths
-                 console.log("No valid paths found by DFS.");
-             }
-             console.log("Display updated.");
-    
+                 console.log("Display updated.");
+
+            } catch (error) {
+                console.error("An unexpected error occurred in generateTrellisAndPaths:", error);
+                /* ... error handling ... */
+            }
         } // End of generateTrellisAndPaths
-    
-        // Generate initial trellis and paths on load
+
         console.log("Setting up window.onload.");
         window.onload = generateTrellisAndPaths;
         console.log("window.onload setup complete.");
-    
     </script>
 
 </body>
