@@ -1,135 +1,186 @@
-/* Genel Sıfırlamalar ve Temel Ayarlar */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Sayfa - [Web Sitenizin Adı Buraya]</title>
+    <meta name="description" content="[Web sitenizin kısa bir açıklaması buraya]">
+    <!-- İsteğe bağlı: Google Fonts gibi özel fontlar ekleyebilirsiniz -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
-body {
-    font-family: 'Roboto', sans-serif; /* Google Font veya varsayılan sans-serif */
-    line-height: 1.6;
-    background-color: #f8f9fa; /* Çok açık gri arka plan */
-    color: #343a40; /* Koyu gri metin */
-    display: flex; /* İçeriği dikeyde ortalamak için */
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Sayfanın en az ekran yüksekliğinde olmasını sağla */
-    padding: 20px; /* Kenarlardan boşluk */
-}
+    <style>
+        /* Genel Sıfırlamalar ve Temel Ayarlar */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-.container {
-    max-width: 800px; /* Ana içerik alanı genişliği */
-    width: 100%;
-    background-color: #ffffff; /* Beyaz içerik alanı */
-    padding: 40px;
-    border-radius: 10px; /* Yumuşak köşeler */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Hafif gölge */
-    text-align: center; /* İçerikleri ortala */
-}
+        body {
+            font-family: 'Roboto', sans-serif; /* Google Font veya varsayılan sans-serif */
+            line-height: 1.6;
+            background-color: #f8f9fa; /* Çok açık gri arka plan */
+            color: #343a40; /* Koyu gri metin */
+            display: flex; /* İçeriği dikeyde ortalamak için */
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* Sayfanın en az ekran yüksekliğinde olmasını sağla */
+            padding: 20px; /* Kenarlardan boşluk */
+        }
 
-header h1 {
-    color: #0056b3; /* Ana başlık rengi (koyu mavi tonu) */
-    margin-bottom: 10px;
-    font-size: 2.5em; /* Daha büyük başlık */
-}
+        .container {
+            max-width: 800px; /* Ana içerik alanı genişliği */
+            width: 100%;
+            background-color: #ffffff; /* Beyaz içerik alanı */
+            padding: 40px;
+            border-radius: 10px; /* Yumuşak köşeler */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+            text-align: center; /* İçerikleri ortala */
+        }
 
-header .subtitle {
-    color: #6c757d; /* Gri alt başlık/açıklama */
-    margin-bottom: 40px;
-    font-size: 1.1em;
-}
+        header h1 {
+            color: #0056b3; /* Ana başlık rengi (koyu mavi tonu) */
+            margin-bottom: 10px;
+            font-size: 2.5em; /* Daha büyük başlık */
+        }
 
-.navigation-menu h2 {
-    margin-bottom: 25px;
-    color: #495057; /* Biraz daha açık başlık */
-    font-size: 1.5em;
-    border-bottom: 1px solid #dee2e6; /* Başlık altına ince çizgi */
-    padding-bottom: 10px;
-    display: inline-block; /* Çizginin sadece yazı kadar olmasını sağlar */
-}
+        header .subtitle {
+            color: #6c757d; /* Gri alt başlık/açıklama */
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
 
-.navigation-menu ul {
-    list-style: none; /* Liste işaretlerini kaldır */
-    padding: 0;
-    display: flex; /* Butonları yan yana getirmek için flexbox */
-    flex-wrap: wrap; /* Sığmazsa alt satıra at */
-    justify-content: center; /* Butonları ortala */
-    gap: 15px; /* Butonlar arası boşluk */
-}
+        .navigation-menu h2 {
+            margin-bottom: 25px;
+            color: #495057; /* Biraz daha açık başlık */
+            font-size: 1.5em;
+            border-bottom: 1px solid #dee2e6; /* Başlık altına ince çizgi */
+            padding-bottom: 10px;
+            display: inline-block; /* Çizginin sadece yazı kadar olmasını sağlar */
+        }
 
-.navigation-menu ul li {
-    /* Flexbox kullanıldığı için ekstra li stiline gerek yok */
-}
+        .navigation-menu ul {
+            list-style: none; /* Liste işaretlerini kaldır */
+            padding: 0;
+            display: flex; /* Butonları yan yana getirmek için flexbox */
+            flex-wrap: wrap; /* Sığmazsa alt satıra at */
+            justify-content: center; /* Butonları ortala */
+            gap: 15px; /* Butonlar arası boşluk */
+        }
 
-.nav-button {
-    display: inline-block; /* Buton gibi davranması için */
-    background-color: #007bff; /* Canlı mavi buton */
-    color: #ffffff; /* Beyaz yazı */
-    padding: 12px 25px; /* İç boşluk */
-    text-decoration: none; /* Alt çizgiyi kaldır */
-    border-radius: 5px; /* Yuvarlak köşeler */
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Yumuşak geçiş efekti */
-    border: none; /* Kenarlık olmasın */
-    cursor: pointer; /* Fare imlecini el yap */
-    min-width: 180px; /* Butonların minimum genişliği */
-}
+        .navigation-menu ul li {
+            /* Flexbox kullanıldığı için ekstra li stiline gerek yok */
+        }
 
-.nav-button:hover,
-.nav-button:focus { /* Üzerine gelince veya odaklanınca */
-    background-color: #0056b3; /* Daha koyu mavi */
-    color: #ffffff;
-    transform: translateY(-3px); /* Hafif yukarı kalkma efekti */
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Daha belirgin gölge */
-    outline: none; /* Odaklanma çerçevesini kaldır (opsiyonel) */
-}
+        .nav-button {
+            display: inline-block; /* Buton gibi davranması için */
+            background-color: #007bff; /* Canlı mavi buton */
+            color: #ffffff; /* Beyaz yazı */
+            padding: 12px 25px; /* İç boşluk */
+            text-decoration: none; /* Alt çizgiyi kaldır */
+            border-radius: 5px; /* Yuvarlak köşeler */
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Yumuşak geçiş efekti */
+            border: none; /* Kenarlık olmasın */
+            cursor: pointer; /* Fare imlecini el yap */
+            min-width: 180px; /* Butonların minimum genişliği */
+        }
 
-footer {
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #e9ecef; /* Footer üstüne ince çizgi */
-    font-size: 0.9em;
-    color: #6c757d; /* Gri footer yazısı */
-}
+        .nav-button:hover,
+        .nav-button:focus { /* Üzerine gelince veya odaklanınca */
+            background-color: #0056b3; /* Daha koyu mavi */
+            color: #ffffff;
+            transform: translateY(-3px); /* Hafif yukarı kalkma efekti */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Daha belirgin gölge */
+            outline: none; /* Odaklanma çerçevesini kaldır (opsiyonel) */
+        }
 
-/* Mobil Cihazlar İçin Ekran Küçüldüğünde Ayarlamalar (Responsive Tasarım) */
-@media (max-width: 768px) {
-    .container {
-        padding: 30px;
-    }
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef; /* Footer üstüne ince çizgi */
+            font-size: 0.9em;
+            color: #6c757d; /* Gri footer yazısı */
+        }
 
-    header h1 {
-        font-size: 2em;
-    }
+        /* Mobil Cihazlar İçin Ekran Küçüldüğünde Ayarlamalar (Responsive Tasarım) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
 
-    .navigation-menu ul {
-        flex-direction: column; /* Butonları alt alta diz */
-        align-items: center; /* Ortala */
-        gap: 12px; /* Dikey boşluk */
-    }
+            header h1 {
+                font-size: 2em;
+            }
 
-    .nav-button {
-        width: 90%; /* Buton genişliğini artır */
-        padding: 12px 20px; /* İç boşluğu ayarla */
-        min-width: unset; /* Minimum genişliği kaldır */
-    }
-}
+            .navigation-menu ul {
+                flex-direction: column; /* Butonları alt alta diz */
+                align-items: center; /* Ortala */
+                gap: 12px; /* Dikey boşluk */
+            }
 
-@media (max-width: 480px) {
-    .container {
-        padding: 20px;
-    }
-    header h1 {
-        font-size: 1.8em;
-    }
-     header .subtitle {
-        font-size: 1em;
-     }
-    .navigation-menu h2 {
-        font-size: 1.3em;
-    }
-    .nav-button {
-        width: 100%; /* Tam genişlik kapla */
-        padding: 10px 15px;
-    }
-}
+            .nav-button {
+                width: 90%; /* Buton genişliğini artır */
+                padding: 12px 20px; /* İç boşluğu ayarla */
+                min-width: unset; /* Minimum genişliği kaldır */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            header h1 {
+                font-size: 1.8em;
+            }
+             header .subtitle {
+                font-size: 1em;
+             }
+            .navigation-menu h2 {
+                font-size: 1.3em;
+            }
+            .nav-button {
+                width: 100%; /* Tam genişlik kapla */
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Web Siteme Hoş Geldiniz!</h1>
+            <p class="subtitle">Aradığınız tüm fonksiyonlar ve bilgilere buradan ulaşabilirsiniz.</p>
+        </header>
+
+        <main>
+            <nav class="navigation-menu">
+                <h2>Hızlı Erişim / Bölümler</h2>
+                <ul>
+                    <!-- ÖNEMLİ: Buradaki href değerlerini ve link yazılarını kendi dosya adlarınız ve açıklamalarınızla değiştirin -->
+                    <li><a href="fonksiyon1.html" class="nav-button">Özellik 1 (Örn: Hesap Makinesi)</a></li>
+                    <li><a href="fonksiyon2.html" class="nav-button">Özellik 2 (Örn: Galeri)</a></li>
+                    <li><a href="hakkimizda.html" class="nav-button">Hakkımızda</a></li>
+                    <li><a href="iletisim.html" class="nav-button">İletişim</a></li>
+                    <li><a href="blog.html" class="nav-button">Blog Yazıları</a></li>
+                    <li><a href="sitemap.xml" class="nav-button" target="_blank">Site Haritası (XML)</a></li>
+                    <!-- İhtiyacınıza göre daha fazla buton ekleyebilirsiniz -->
+                </ul>
+            </nav>
+        </main>
+
+        <footer>
+            <p>© 2023 - <span id="currentYear"></span> [Web Sitenizin Adı]. Tüm hakları saklıdır.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Küçük bir Javascript ile otomatik yıl güncelleme
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+
+</body>
+</html>
