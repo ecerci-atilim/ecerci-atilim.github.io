@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me - [Your Name or Website Name]</title>
+    <meta name="description" content="Information about [Your Name or Website Purpose]">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align container to top */
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 30px; /* Add some space from the top */
+            margin-bottom: 30px; /* Add some space at the bottom */
+        }
+
+        h1 {
+            color: #0056b3;
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #495057;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            border-bottom: 1px dashed #ced4da;
+            padding-bottom: 8px;
+        }
+
+        p, ul {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            color: #495057;
+        }
+
+        ul {
+            list-style: disc; /* Use standard bullets */
+            padding-left: 40px; /* Indent list items */
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        a.back-link {
+             display: inline-block;
+             margin-top: 30px;
+             padding: 10px 20px;
+             background-color: #007bff; /* Gray color for back link */
+             color: #ffffff;
+             text-decoration: none;
+             border-radius: 5px;
+             font-weight: bold;
+             transition: background-color 0.3s ease;
+             font-size: 0.95em;
+        }
+
+        a.back-link:hover {
+            background-color: #0056b3;
+        }
+
+        .center-link {
+            text-align: center;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            font-size: 0.9em;
+            color: #0056b3;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 30px; margin-top: 20px; margin-bottom: 20px; }
+            h1 { font-size: 1.9em; }
+            h2 { font-size: 1.3em; }
+            p, ul { font-size: 1em; }
+            ul { padding-left: 30px; }
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 20px; }
+            h1 { font-size: 1.7em; }
+            h2 { font-size: 1.2em; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>About Me</h1>
+        </header>
+
+        <main>
+            <section class="personal-info">
+                <h2>Introduction</h2>
+                <p>
+                    Hello! My name is Emre Çerçi. I am a research assistant in Atilim University.
+                    This website serves as a central hub for necessary tools and links that I share.
+                </p>
+
+                <h2>Skills & Expertise</h2>
+                 <p>
+                    Here are some of the areas I have experience in:
+                 </p>
+                <ul>
+                    <li><strong>Programming Languages:</strong> C, C++, C#, Java, MATLAB, Verilog HDL, VHDL, SPICE, ASM, LaTeX</li>
+                    <li><strong>Web Technologies:</strong> HTML, React, Node.js, Django</li>
+                    <li><strong>Databases:</strong> SQL</li>
+                    <li><strong>Tools & Platforms:</strong> Simulink, Git, Docker, Linux, PetaLinux, Ansys HFSS</li>
+                    <li><strong>Other Skills:</strong> Wireless Telecommunications, FPGA, ECC, NETCONF, OAI 5G, VLSI, Altera Tools, AMD Vivado</li>
+                </ul>
+
+                <h2>Contact Information</h2>
+                <p>
+                    You can reach out to me through the following channels:
+                </p>
+                 <ul>
+                    <li><strong>Email:</strong> <a href="mailto:emre.cerci@atilim.edu.tr/" target="_blank" rel="noopener noreferrer">emre.cerci@atilim.edu.tr</a></li>
+                    <li><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" target="_blank" rel="noopener noreferrer">Emre Çerçi</a></li>
+                    <li><strong>GitHub:</strong> <a href="https://github.com/ecerci-atilim" target="_blank" rel="noopener noreferrer">ecerci-atilim</a></li>
+                </ul>
+                <p>
+                    Feel free to connect or ask any questions!
+                </p>
+
+            </section>
+
+            <div class="center-link">
+                <a href="index.html" class="back-link">Back to Homepage</a>
+            </div>
+        </main>
+
+        <footer>
+             <p><span id="currentYear"></span></p>
+         </footer>
+
+    </div>
+
+    <script>
+        if (document.getElementById('currentYear')) {
+           document.getElementById('currentYear').textContent = new Date().getFullYear();
+        }
+    </script>
+
+</body>
+</html>
