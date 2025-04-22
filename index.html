@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage</title>
-    <meta name="description" content="Description to be added">
-    <!-- Optional: Google Fonts link (Roboto is already included) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <title>Homepage - [Your Website Name Here]</title>
+    <meta name="description" content="[A brief description of your website here]">
 
     <style>
-        /* General Resets and Base Settings */
         * {
             margin: 0;
             padding: 0;
@@ -19,137 +14,164 @@
         }
 
         body {
-            font-family: 'Roboto', sans-serif; /* Google Font or default sans-serif */
+            font-family: 'Times New Roman', Times, serif;
             line-height: 1.6;
-            background-color: #f8f9fa; /* Very light gray background */
-            color: #343a40; /* Dark gray text */
-            display: flex; /* To center content vertically */
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh; /* Ensure page takes at least full screen height */
-            padding: 20px; /* Padding around the edges */
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .container {
-            max-width: 800px; /* Max width for the main content area */
+            max-width: 800px;
             width: 100%;
-            background-color: #ffffff; /* White content background */
+            background-color: #ffffff;
             padding: 40px;
-            border-radius: 10px; /* Soft corners */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Light shadow */
-            text-align: center; /* Center content */
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
         header h1 {
-            color: #0056b3; /* Main heading color (dark blue tone) */
+            color: #0056b3;
             margin-bottom: 10px;
-            font-size: 2.5em; /* Larger heading */
+            font-size: 2.5em;
+            font-weight: bold;
         }
 
         header .subtitle {
-            color: #6c757d; /* Gray subtitle/description */
+            color: #6c757d;
             margin-bottom: 40px;
             font-size: 1.1em;
         }
 
-        .navigation-menu h2 {
+        h2 {
             margin-bottom: 25px;
-            color: #495057; /* Slightly lighter heading */
-            font-size: 1.5em;
-            border-bottom: 1px solid #dee2e6; /* Thin line under heading */
+            color: #495057;
+            font-size: 1.6em;
+            border-bottom: 1px solid #dee2e6;
             padding-bottom: 10px;
-            display: inline-block; /* Makes the line only as wide as the text */
+            display: inline-block;
+            font-weight: bold;
         }
 
         .navigation-menu ul {
-            list-style: none; /* Remove list bullets */
+            list-style: none;
             padding: 0;
-            display: flex; /* Use flexbox to align buttons */
-            flex-wrap: wrap; /* Wrap to next line if needed */
-            justify-content: center; /* Center the buttons */
-            gap: 15px; /* Space between buttons */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
         }
 
-        /* No extra li style needed with flexbox */
-        .navigation-menu ul li {}
-
         .nav-button {
-            display: inline-block; /* Behave like a button */
-            background-color: #007bff; /* Bright blue button */
-            color: #ffffff; /* White text */
-            padding: 12px 25px; /* Inner padding */
-            text-decoration: none; /* Remove underline */
-            border-radius: 5px; /* Rounded corners */
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-family: 'Times New Roman', Times, serif;
             font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transition effect */
-            border: none; /* No border */
-            cursor: pointer; /* Hand cursor */
-            min-width: 180px; /* Minimum width for buttons */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+            min-width: 180px;
+            font-size: 1em;
         }
 
         .nav-button:hover,
-        .nav-button:focus { /* On hover or focus */
-            background-color: #0056b3; /* Darker blue */
+        .nav-button:focus {
+            background-color: #0056b3;
             color: #ffffff;
-            transform: translateY(-3px); /* Slight lift effect */
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
-            outline: none; /* Remove focus outline (optional) */
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            outline: none;
+        }
+
+        .useful-links {
+            margin-top: 30px;
+            text-align: left;
+            padding: 20px;
+            background-color: #f1f3f5;
+            border-radius: 8px;
+        }
+
+        .useful-links h2 {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: block;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+
+        .useful-links ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .useful-links li {
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .useful-links a {
+            color: #0056b3;
+            text-decoration: none;
+            transition: color 0.2s ease, text-decoration 0.2s ease;
+            word-break: break-all;
+        }
+
+        .useful-links a:hover,
+        .useful-links a:focus {
+            color: #007bff;
+            text-decoration: underline;
+            outline: none;
+        }
+
+        .useful-links a i {
+            margin-right: 8px;
+            color: #6c757d;
         }
 
         footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid #e9ecef; /* Thin line above footer */
+            border-top: 1px solid #e9ecef;
             font-size: 0.9em;
-            color: #6c757d; /* Gray footer text */
+            color: #6c757d;
         }
 
-        /* Responsive Adjustments for Mobile Devices */
         @media (max-width: 768px) {
-            .container {
-                padding: 30px;
-            }
-
-            header h1 {
-                font-size: 2em;
-            }
-
-            .navigation-menu ul {
-                flex-direction: column; /* Stack buttons vertically */
-                align-items: center; /* Center them */
-                gap: 12px; /* Vertical gap */
-            }
-
-            .nav-button {
-                width: 90%; /* Increase button width */
-                padding: 12px 20px; /* Adjust padding */
-                min-width: unset; /* Remove minimum width */
-            }
+            .container { padding: 30px; }
+            header h1 { font-size: 2.2em; }
+            h2 { font-size: 1.5em; }
+            .navigation-menu ul { flex-direction: column; align-items: center; gap: 12px; }
+            .nav-button { width: 90%; padding: 12px 20px; min-width: unset; }
+            .useful-links { padding: 15px; }
+            .useful-links h2 { font-size: 1.4em; }
+            .useful-links li { font-size: 1.05em; }
         }
 
         @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-            header h1 {
-                font-size: 1.8em;
-            }
-             header .subtitle {
-                font-size: 1em;
-             }
-            .navigation-menu h2 {
-                font-size: 1.3em;
-            }
-            .nav-button {
-                width: 100%; /* Full width */
-                padding: 10px 15px;
-            }
+            .container { padding: 20px; }
+            header h1 { font-size: 2em; }
+            header .subtitle { font-size: 1.1em; }
+            h2 { font-size: 1.4em; }
+            .nav-button { width: 100%; padding: 10px 15px; }
+            .useful-links { padding: 10px; text-align: center; }
+            .useful-links h2 { font-size: 1.3em; }
+            .useful-links li { font-size: 1em; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Your provided HTML structure starts here -->
     <div class="container">
         <header>
             <h1>Welcome</h1>
@@ -160,26 +182,25 @@
             <nav class="navigation-menu">
                 <h2>Pages</h2>
                 <ul>
-                    <!-- Ensure 'mbcjr.html' is the correct path/filename -->
                     <li><a href="mbcjr.html" class="nav-button">M-BCJR</a></li>
                     <li><a href="seating-plan.html" class="nav-button">Seating Plan</a></li>
-                    <!-- Add more list items here if needed -->
-                    <!-- Example: <li><a href="another-page.html" class="nav-button">Another Page</a></li> -->
                 </ul>
             </nav>
+
+            <section class="useful-links">
+                <h2>Useful Links</h2>
+                <ul>
+                    <li><a href="https://github.com/ecerci-atilim?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Repositories</a></li>
+                </ul>
+            </section>
         </main>
 
         <footer>
-            <!-- Note: The JS will update the content of the span#currentYear -->
             <p>© 2025 - <span id="currentYear"></span></p>
         </footer>
     </div>
-    <!-- Your provided HTML structure ends here -->
-
 
     <script>
-        // Simple Javascript to automatically update the year in the footer
-        // It targets the span with id="currentYear"
         document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
 
