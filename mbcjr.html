@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M-BCJR Trellis Diagram & Detector Simulation</title>
+    <style>
+        /* --- CSS Styles --- */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f8f9fa; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; background-color: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative; }
+        h1, h2, h3, h4 { color: #343a40; margin-top: 1em; margin-bottom: 0.5em; }
+        h1 { text-align: center; }
+        .controls { margin: 20px 0; padding: 15px; border-radius: 6px; background-color: #f8f9fa; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 15px; }
+        .control-group { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 10px; }
+        label { font-weight: 600; color: #495057; margin-right: 5px; }
+        input[type=number], input[type=text] { padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; width: 60px; }
+        input[type=text] { width: 150px; }
+        button { padding: 8px 16px; background-color: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; }
+        button:hover { background-color: #0b5ed7; }
+        .checkbox-container { display: flex; align-items: center; cursor: pointer; }
+        .checkbox-container input { cursor: pointer; margin-right: 6px; width: 16px; height: 16px; }
+        .checkbox-label { font-weight: 600; color: #343a40; font-size: 14px; user-select: none; }
+        .diagram-container { overflow-x: auto; margin-top: 20px; border: 1px solid #e9ecef; border-radius: 6px; position: relative; width: 100%; min-height: 500px; }
+        svg { display: block; margin: 0 auto; background-color: white; max-width: none; }
+        .grid-line { stroke: #e9ecef; stroke-width: 1px; }
+        .stage-separator { stroke: #dee2e6; stroke-width: 1px; stroke-dasharray: 5,3; }
+        .state-circle { fill: white; stroke: #495057; stroke-width: 2px; cursor: pointer; filter: drop-shadow(0px 1px 1px rgba(0,0,0,0.1)); transition: fill 0.15s ease-in-out, stroke-width 0.15s ease-in-out; }
+        .state-circle:hover { fill: #f0f0f0; }
+        .state-text { text-anchor: middle; dominant-baseline: central; font-size: 14px; font-weight: 500; pointer-events: none; user-select: none; }
+        .path-count { text-anchor: middle; font-size: 11px; font-weight: bold; fill: #007bff; pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; dominant-baseline: auto; }
+        .path-count.active { opacity: 1; }
+        /* Removed .sampling-time */
+        .transition { stroke-width: 1.5px; fill: none; transition: stroke 0.2s ease-in-out, stroke-width 0.2s ease-in-out, stroke-opacity 0.2s ease-in-out; }
+        .transition-minus { stroke: #dc3545; }
+        .transition-plus { stroke: #0d6efd; }
+        .transition.inactive { stroke: #e9ecef; stroke-width: 1px; stroke-opacity: 0.6; }
+        .transition.highlight-path { stroke-width: 3px; stroke-opacity: 1; }
+        .tau-label { text-anchor: middle; font-size: 11px; pointer-events: none; font-style: italic; font-weight: 500; opacity: 0; fill: #343a40; transition: opacity 0.2s ease-in-out; }
+         .tau-label-bg { pointer-events: none; opacity: 0; transition: opacity 0.2s ease-in-out; fill: rgba(255, 255, 255, 0.7); }
+        .tau-label.active, .tau-label-bg.active { opacity: 1; }
+        .highlighted-state { fill: #e9ecef; stroke-width: 3px; stroke: #0d6efd; }
+        .stage-label { text-anchor: middle; font-size: 13px; fill: #495057; font-weight: 500; }
+        .stage-number-label { text-anchor: middle; font-size: 11px; fill: #6c757d; font-weight: normal; }
+        .stage-time-label { text-anchor: middle; font-size: 10px; fill: #007bff; font-style: italic; }
+        .results-section { margin-top: 30px; padding: 15px 20px; border: 1px solid #e9ecef; border-radius: 8px; background-color: #f8f9fa; }
+        #llr-output pre, #all-paths-list pre { background-color: #fff; border: 1px solid #ddd; padding: 10px; border-radius: 4px; font-family: Consolas, Monaco, monospace; font-size: 12px; white-space: pre-wrap; word-wrap: break-word; max-height: 250px; overflow-y: auto; }
+        #plot-area { min-height: 300px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; align-items: flex-start; border: none; color: initial; margin-top: 15px; }
+        .plot-container { flex: 1; min-width: 300px; }
+        .plot-container h4 { text-align: center; margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #343a40; font-weight: 600; }
+        #plot-area canvas { max-width: 100%; background-color: white; border: 1px solid #ddd; border-radius: 4px; max-height: 300px; }
+        #formula-area { font-size: 14px; line-height: 1.6; margin-top: 15px; padding: 15px; background-color: #fff; border: 1px solid #ddd; border-radius: 4px; }
+        .path-popup { position: absolute; background-color: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; width: 350px; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; display: none; font-size: 13px; } .path-popup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; } .path-popup-title { font-weight: bold; font-size: 15px; color: #343a40; } .path-popup-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #666; padding: 0 5px; } .path-popup-close:hover { color: #000; } .path-list { list-style: none; padding: 0; margin: 0; } .path-item { border-bottom: 1px solid #eee; padding: 8px 0; line-height: 1.4; } .path-item:last-child { border-bottom: none; } .path-info { font-size: 13px; color: #333; margin-bottom: 5px; } .path-transition { margin: 3px 0; padding-left: 15px; font-size: 12px; } .path-transition-minus { color: #dc3545; } .path-transition-plus { color: #0d6efd; }
+        @media (max-width: 768px) { .container { padding: 10px; } .controls { flex-direction: column; align-items: stretch; } .control-group { width: 100%; justify-content: flex-start; margin-bottom: 10px; } .control-group label { min-width: 140px; text-align: right; margin-right: 10px; } input[type=number], input[type=text] { width: calc(100% - 160px); min-width: 60px; } .state-circle { r: 20; } .state-text { font-size: 12px; } .path-popup { width: 90%; max-width: 350px; font-size: 12px; } .path-popup-title { font-size: 14px; } .path-info { font-size: 12px; } .path-transition { font-size: 11px; } .results-section h2 { font-size: 18px; } #llr-output pre, #all-paths-list pre { font-size: 11px; max-height: 200px;} .plot-container { min-width: 95%; } }
+    </style>
+    <!-- Include MathJax & Chart.js -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>BCJR Trellis & Detector Simulation</h1>
+        <!-- Controls, Trellis, Results, Formulas, All Paths sections -->
+         <div class="controls"> <div class="control-group"> <label for="message-length">N:</label> <input type="number" id="message-length" min="1" max="10" value="3" title="Message Length"> </div> <div class="control-group"> <label for="memory-length">L:</label> <input type="number" id="memory-length" min="2" max="4" value="3" title="Memory Length"> </div> <div class="control-group" style="flex-grow: 1; justify-content: center;"> <label for="binary-message" style="min-width: auto;">Message:</label> <input type="text" id="binary-message" placeholder="e.g., 011" title="Message Bits (0 or 1)"> <button id="random-message-button" type="button" title="Generate Random Message">Random</button> </div> <div class="checkbox-container"> <input type="checkbox" id="extend-path" name="extend-path" checked> <label for="extend-path" class="checkbox-label">Show Full Paths</label> </div> <button id="generate-button">Generate & Simulate</button> </div>
+         <div class="diagram-container"> <svg id="trellis-diagram"></svg> <div id="path-popup" class="path-popup"> <div class="path-popup-header"> <div class="path-popup-title">Path Information</div> <button id="close-popup" class="path-popup-close">×</button> </div> <div id="path-popup-content"></div> </div> </div>
+         <div class="results-section"> <h2>Simulation Results (Noise-Free)</h2> <div id="llr-output"> <h3>Calculated LLRs:</h3> <pre>Run simulation...</pre> </div> <div id="plot-area"> <div class="plot-container"> <h4>Rx Signal & True Samples</h4> <canvas id="rxSignalChart"></canvas> </div> <div class="plot-container"> <h4>Overall Channel Pulse Response (v = h * h)</h4> <canvas id="pulseChart"></canvas> </div> </div> </div>
+         <div class="results-section"> <h2>Key Formulas</h2> <div id="formula-area"> Loading formulas... </div> </div>
+         <div class="results-section"> <h2>All Valid Trellis Paths</h2> <div id="all-paths-list"> <pre>Run simulation...</pre> </div> </div>
+    </div>
+
+    <!-- **** START OF JAVASCRIPT **** -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- Get UI Elements ---
+            const generateButton = document.getElementById('generate-button');
+            const extendPathCheckbox = document.getElementById('extend-path');
+            const messageLengthInput = document.getElementById('message-length');
+            const memoryLengthInput = document.getElementById('memory-length');
+            const binaryMessageInput = document.getElementById('binary-message');
+            const randomMessageButton = document.getElementById('random-message-button');
+            const svg = document.getElementById('trellis-diagram');
+            const diagramContainer = document.querySelector('.diagram-container');
+            const popup = document.getElementById('path-popup');
+            const popupContent = document.getElementById('path-popup-content');
+            const closePopup = document.getElementById('close-popup');
+            const llrOutputPre = document.querySelector('#llr-output pre');
+            const plotArea = document.getElementById('plot-area');
+            const formulaArea = document.getElementById('formula-area');
+            const allPathsListPre = document.querySelector('#all-paths-list pre');
+            let rxSignalCanvas = null; let pulseCanvas = null;
+
+            // --- Global Variables & Config ---
+            let stateElements = {}; let transitionElements = []; let tauLabelElements = [];
+            let pathCountElements = {}; let pathTracker = {}; let transitionData = {};
+            let samplingTimes = {}; // **** For VISUALIZATION relative increments ****
+            let rxChartInstance = null; let pulseChartInstance = null;
+            const RRC_ALPHA = 0.3; const RRC_GDELAY = 4; const RRC_SPS = 10;
+            let h_rrc = []; let v_channel = [];
+            let reachableStates = []; let calculatedPathCounts = [];
+
+            const LOG_ZERO = -1e100;
+            const COMPARE_TOLERANCE = 1e-5; // Tolerance for strict gamma match
+
+            // --- Event Listeners ---
+            generateButton.addEventListener('click', runFullSimulation);
+            extendPathCheckbox.addEventListener('change', handleExtendPathChange);
+            randomMessageButton.addEventListener('click', generateRandomMessage);
+            messageLengthInput.addEventListener('input', updatePlaceholder);
+            memoryLengthInput.addEventListener('change', runFullSimulation);
+            window.addEventListener('resize', adjustSvgSize);
+            closePopup.addEventListener('click', () => popup.style.display = 'none');
+            document.addEventListener('click', (event) => { if (!popup.contains(event.target) && !event.target.closest('.state-circle')) { popup.style.display = 'none'; resetHighlights(); } });
+
+            function updatePlaceholder() { const N = parseInt(messageLengthInput.value) || 0; binaryMessageInput.placeholder = `Enter ${N} bits (0 or 1)`; }
+
+            // --- Main Simulation Function ---
+            function runFullSimulation() {
+                console.log("--- Starting Full Simulation ---");
+                // Update UI placeholders
+                llrOutputPre.textContent = "Running simulation...";
+                allPathsListPre.textContent = "Calculating paths...";
+                if (rxChartInstance) { rxChartInstance.destroy(); rxChartInstance = null; }
+                if (pulseChartInstance) { pulseChartInstance.destroy(); pulseChartInstance = null; }
+                plotArea.innerHTML = ` <div class="plot-container"> <h4>Rx Signal & True Samples</h4> <canvas id="rxSignalChart"></canvas> </div> <div class="plot-container"> <h4>Overall Channel Pulse Response (v = h * h)</h4> <canvas id="pulseChart"></canvas> </div>`;
+                rxSignalCanvas = document.getElementById('rxSignalChart'); pulseCanvas = document.getElementById('pulseChart');
+                if (!rxSignalCanvas || !pulseCanvas) { return cleanupUI("Canvas setup error."); }
+
+                // --- Config & Setup ---
+                const N = parseInt(messageLengthInput.value);
+                const L = parseInt(memoryLengthInput.value);
+                const config = { N, L, stateCount: 2 ** L, totalStages: L + N + L + 1, samplingRate: RRC_SPS };
+                if (isNaN(N) || N < 1 || isNaN(L) || L < 2 || L > 4) { return cleanupUI("Invalid N (>=1) or L (2-4)."); }
+
+                const trellisParams = generateTrellis(config); // Generate visualization (includes visual samplingTimes)
+                if (!trellisParams) { return cleanupUI("Error generating trellis."); }
+                const { totalStages: numStages } = trellisParams;
+
+                const { binarySequence, modulatedSequence, tauSequence } = prepareTxSequence(config.N, config.L);
+                if (!binarySequence) { return cleanupUI("Invalid binary message."); }
+                console.log(`L=${L}, N=${N}, Input Binary: ${binarySequence.join('')}`);
+
+                // --- Channel Simulation ---
+                if (h_rrc.length === 0) { h_rrc = rcosdesign_js(RRC_ALPHA, 2 * RRC_GDELAY, RRC_SPS, 'sqrt'); }
+                if (h_rrc.length === 0) { return cleanupUI("RRC Filter Error."); }
+                v_channel = calculateDiscreteChannel(h_rrc); // v = h*h (Used for lij calc)
+
+                // Generate Tx Signal s(t) and Rx Signal r(t)
+                const upsampled = upsample(modulatedSequence, RRC_SPS);
+                const txSignal = convolve(upsampled, h_rrc); // s(t)
+                const rxSignal = convolve(txSignal, h_rrc); // r(t) = s(t) * h(t)
+                console.log("Tx/Rx Signals generated.");
+
+                // Generate True Sample Points/Times from r(t) based on transmitter's tauSequence
+                // These are the "oracle" samples the BCJR will use.
+                 const { trueSamplingInstants, trueSampledValuesYk, firstPulseCenterIndex } = calculatePhysicalSamples(rxSignal, tauSequence, L, N);
+                 if (trueSampledValuesYk.some(isNaN) || trueSampledValuesYk.length !== L + N + L) { return cleanupUI("Physical sample error."); }
+                 console.log(`First pulse theoretical center index: ${firstPulseCenterIndex}`);
+
+                // Extract samples y_1...y_{L+N} needed for BCJR
+                const bcjrSamples = trueSampledValuesYk.slice(0, L+N);
+                console.log(`BCJR Samples used (y_1..y_{L+N}, count=${bcjrSamples.length}): ${bcjrSamples.map(y=>y.toFixed(4))}`);
+                if (bcjrSamples.length !== L + N) { return cleanupUI("BCJR sample count error."); }
+
+
+                // --- BCJR Calculations ---
+                const logGammaMatrices = calculateAllLogGamma(bcjrSamples, v_channel, trellisParams, config.N);
+                const logAlpha = runForwardRecursion(logGammaMatrices, trellisParams, config.N);
+                const logBeta = runBackwardRecursion(logGammaMatrices, trellisParams, config.N);
+                const llrs = calculateLLRs(logAlpha, logBeta, logGammaMatrices, trellisParams, config.N);
+
+                // --- Display Results ---
+                displayLLRs(llrs, binarySequence, config.N);
+                plotSignalsAndSamples(rxSignalCanvas, rxSignal, trueSamplingInstants, trueSampledValuesYk, L, N);
+                plotPulse(pulseCanvas, v_channel);
+                displayAllPaths(trellisParams, config);
+                displayFormulas();
+
+                console.log("--- Full Simulation flow finished ---");
+            } // End runFullSimulation
+
+            // --- UI Cleanup Helper ---
+            function cleanupUI(message = "Error occurred.") {
+                 llrOutputPre.textContent = message;
+                 plotArea.innerHTML = ''; // Clear plots
+                 allPathsListPre.textContent = '';
+                 return null;
+            }
+
+                        // --- Function to display all found paths ---
+                        function displayAllPaths(trellisParams, config) {
+                 const { N, L, totalStages } = config;
+                 const allPathsListPre = document.querySelector('#all-paths-list pre'); // Find the output element again
+                 if (!allPathsListPre) return; // Exit if element not found
+
+                 console.log("Finding all valid paths...");
+                 const finalStageIndex = totalStages - 1;
+                 const endStateId = `s0_${finalStageIndex}`; // Target state: s0 at the last stage
+                 // Pass trellisParams which contains reachableStates etc needed by the function
+                 const allPaths = findAllPathsToEnd('s0_0', endStateId, trellisParams);
+                 console.log(`Found ${allPaths.length} paths.`);
+
+                 if (allPaths.length > 0) {
+                      let pathsText = `Found ${allPaths.length} valid paths from s0_0 to ${endStateId}:\n`;
+                      const maxPathsToShow = 100; // Limit display if too many paths
+                      allPaths.slice(0, maxPathsToShow).forEach((path, i) => {
+                           // Format path for readability: s0(0) -> s0(1) -> ...
+                           const pathString = path.map(s => {
+                                const parts = s.split('_');
+                                return `${parts[0]}(${parts[1]})`;
+                           }).join(' → ');
+                           pathsText += `${i+1}: ${pathString}\n`;
+                      });
+                      if (allPaths.length > maxPathsToShow) {
+                           pathsText += `\n... (truncated - ${allPaths.length - maxPathsToShow} more paths exist)`;
+                      }
+                       allPathsListPre.textContent = pathsText;
+                  } else {
+                       allPathsListPre.textContent = "No valid paths found from start to end.";
+                  }
+            } // End displayAllPaths
+
+            // --- Trellis Generation (generateTrellis) ---
+             // ****** Includes calculation of VISUAL samplingTimes ******
+             function generateTrellis(config) {
+                const { N, L, stateCount, totalStages, samplingRate } = config;
+                console.log(`Generating trellis viz (N=${N}, L=${L})...`);
+                svg.innerHTML = ''; popup.style.display = 'none'; stateElements = {}; transitionElements = []; tauLabelElements = [];
+                pathCountElements = {}; pathTracker = {}; transitionData = {};
+                samplingTimes = {}; // Reset VISUAL times map
+                const stageWidth = 120; const stateHeight = stateCount > 8 ? 60 : 70; const svgWidth = totalStages * stageWidth; const svgHeight = stateCount * stateHeight + 100;
+                svg.setAttribute('width', svgWidth); svg.setAttribute('height', svgHeight); diagramContainer.style.minHeight = `${svgHeight + 20}px`;
+                reachableStates = Array(totalStages).fill(null).map(() => new Set()); reachableStates[0].add(0);
+                samplingTimes[`s0_0`] = [0];
+
+                for (let stage = 0; stage < totalStages - 1; stage++) {
+                    if (reachableStates[stage].size === 0) continue;
+                    const nextStageTimesTemp = {};
+                    for (const stateIdx of reachableStates[stage]) {
+                        const currentStateId = `s${stateIdx}_${stage}`;
+                        const currentVisTimesArray = samplingTimes[currentStateId];
+                        if (currentVisTimesArray === undefined || currentVisTimesArray.length === 0) continue;
+                        let possibleInputs = [];
+                        if (stage < L) possibleInputs = [-1]; else if (stage >= L && stage < L + N) possibleInputs = [-1, 1]; else possibleInputs = [-1];
+                        const preFinalStateIdx = 2**(L - 1);
+                        if (stage === totalStages - 2) { if (stateIdx !== 0 && stateIdx !== preFinalStateIdx) possibleInputs = []; else possibleInputs = [-1]; }
+                        for (const input of possibleInputs) {
+                            let nextStateIdx;
+                            if (stage === totalStages - 2 && (stateIdx === 0 || stateIdx === preFinalStateIdx)) { nextStateIdx = 0; } else { const inputBit = (input + 1) / 2; nextStateIdx = ((stateIdx * 2) + inputBit) % stateCount; }
+                             reachableStates[stage + 1].add(nextStateIdx);
+                            const fromParity = stateIdx % 2; const toParity = nextStateIdx % 2;
+                            const tau = (fromParity === toParity) ? 0.6 : 0.9;
+                            const tauFactor = tau * samplingRate;
+                            const nextStateId = `s${nextStateIdx}_${stage + 1}`;
+                            const nextVisTimeIncrements = currentVisTimesArray.map(ct => ct + tauFactor);
+                             if (!nextStageTimesTemp[nextStateId]) { nextStageTimesTemp[nextStateId] = []; }
+                             nextStageTimesTemp[nextStateId].push(...nextVisTimeIncrements);
+                              const fromStateId = `s${stateIdx}_${stage}`;
+                              const transitionKey = `${fromStateId}__${nextStateId}__${input}`;
+                              transitionData[transitionKey] = { from: fromStateId, to: nextStateId, input: input, tau: tau };
+                              if (!pathTracker[nextStateId]) pathTracker[nextStateId] = [];
+                              pathTracker[nextStateId].push({ from: fromStateId, input: input, tau: tau, key: transitionKey });
+                         }
+                     }
+                     for(const stateId in nextStageTimesTemp) {
+                          const uniqueSortedTimes = [...new Set(nextStageTimesTemp[stateId])].sort((a, b) => a - b);
+                           samplingTimes[stateId] = uniqueSortedTimes;
+                     }
+                 }
+
+                calculatedPathCounts = Array(totalStages).fill(null).map(() => new Map()); calculatedPathCounts[0].set(0, 1);
+                for (let k = 1; k < totalStages; k++) { if (!reachableStates[k] || reachableStates[k].size === 0) continue; for (const currentStateIdx of reachableStates[k]) { const currentStateId = `s${currentStateIdx}_${k}`; let currentCount = 0; const predecessors = pathTracker[currentStateId]; if (predecessors) { for (const prevInfo of predecessors) { const prevStateId = prevInfo.from; const [_, __, prevStageStr] = prevStateId.split('_'); const [___, prevStateIdxStr] = _.split('s'); const prevStateIdxNum = parseInt(prevStateIdxStr); const prevStageNum = parseInt(prevStageStr); const prevCount = calculatedPathCounts[prevStageNum]?.get(prevStateIdxNum) || 0; currentCount += prevCount; } } if (currentCount > 0) { calculatedPathCounts[k].set(currentStateIdx, currentCount); } } }
+                console.log("Path counts calculated.");
+
+                drawGridAndSeparators(svg, svgWidth, svgHeight, stateCount, stateHeight, totalStages, stageWidth);
+                drawStates(svg, totalStages, reachableStates, stateHeight, stageWidth, calculatedPathCounts);
+                drawTransitions(svg, totalStages, reachableStates, stateHeight, stageWidth, N, L, stateCount);
+                drawStageLabels(svg, totalStages, stageWidth, svgHeight, N, L, reachableStates, samplingTimes); // Pass samplingTimes
+                adjustSvgSize(); console.log("Trellis visualization generated.");
+                return { totalStages, stateCount, memoryLength: L, reachableStates, pathTracker, transitionData };
+             }
+
+            // --- Input & Sequence Prep ---
+            function generateRandomMessage() { /* ... */ const N = parseInt(messageLengthInput.value) || 0; if (N < 1) { binaryMessageInput.value = ''; return; } let randomBits = ''; for (let i = 0; i < N; i++) { randomBits += Math.round(Math.random()); } binaryMessageInput.value = randomBits; }
+            function prepareTxSequence(N, L) { /* ... */ const binaryInput = binaryMessageInput.value.trim(); if (!/^[01]+$/.test(binaryInput) || binaryInput.length !== N) { alert(`Please enter exactly ${N} binary digits (0 or 1) for the message.`); return {}; } const messageBits = binaryInput.split('').map(Number); const padding = Array(L).fill(-1); const modulatedMessage = messageBits.map(bit => (bit === 0 ? 1 : -1)); const modulatedSequence = [...padding, ...modulatedMessage, ...padding]; const binaryPadding = Array(L).fill(1); const paddedSequence = [...binaryPadding, ...messageBits, ...binaryPadding]; const tauSequence = []; for (let i = 0; i < modulatedSequence.length - 1; i++) { if (modulatedSequence[i] * modulatedSequence[i+1] > 0) { tauSequence.push(0.6); } else { tauSequence.push(0.9); } } return { binarySequence: messageBits, paddedSequence, modulatedSequence, tauSequence }; }
+
+            // --- Signal Processing ---
+            function rcosdesign_js(alpha, span, sps, shape) { /* ... */ console.log(`rcosdesign_js: alpha=${alpha}, span=${span}, sps=${sps}, shape=${shape}`); const t = Array.from({ length: span * sps + 1 }, (_, i) => (i - span * sps / 2) / sps); const h = t.map(ti => { if (ti === 0) { return (1 / Math.sqrt(sps)) * (1 - alpha + 4 * alpha / Math.PI); } const term1Denom = Math.PI * ti * Math.sqrt(sps); const term2Denom = (4 * alpha * ti) ** 2 - 1; if (Math.abs(term2Denom) < 1e-8) { const val_at_singularity = (alpha / (Math.sqrt(2*sps))) * ((1 + 2 / Math.PI) * Math.sin(Math.PI / (4 * alpha)) + (1 - 2 / Math.PI) * Math.cos(Math.PI / (4 * alpha))); return val_at_singularity; } const term1 = Math.sin(Math.PI * ti * (1 - alpha)) / term1Denom; const term2 = (4 * alpha * ti / term1Denom) * Math.cos(Math.PI * ti * (1 + alpha)); return term1 + term2; }); if (shape === 'sqrt') { const energy = h.reduce((sum, val) => sum + val * val, 0); const normFactor = Math.sqrt(energy); if (normFactor > 1e-6) { return h.map(val => val / normFactor); } } return h; }
+            function upsample(x, L) { /* ... */ const y = []; x.forEach(val => { y.push(val); for (let i = 1; i < L; i++) { y.push(0); } }); return y; }
+            function convolve(x, h) { /* ... */ const N = x.length; const M = h.length; const yLen = N + M - 1; const y = new Array(yLen).fill(0); for (let n = 0; n < yLen; n++) { for (let k = 0; k < M; k++) { if (n - k >= 0 && n - k < N) { y[n] += h[k] * x[n - k]; } } } return y; }
+            function calculateDiscreteChannel(h) { /* ... */ console.log("Calculating discrete channel v = h * h..."); v_channel = convolve(h, h); const peak = Math.max(...v_channel.map(Math.abs)); console.log(`Discrete channel 'v' calculated, length: ${v_channel.length}, peak: ${peak}`); return v_channel; }
+             // Function to get true samples at physical time instants for PLOTTING
+             function calculatePhysicalSamples(rxSignal, tauSequence, L, N) { /* ... */ const samplingInstants = []; const sampledValuesYk = []; const peakOffset = RRC_GDELAY * 2 * RRC_SPS; let currentTimeIndex = peakOffset; const totalSymbolsToSampleAfter = L + N + L; for (let k = 0; k < totalSymbolsToSampleAfter; k++) { if (k >= tauSequence.length) { const lastTau = tauSequence.length > 0 ? tauSequence[tauSequence.length - 1] : 0.6; currentTimeIndex += lastTau * RRC_SPS; } else { currentTimeIndex += tauSequence[k] * RRC_SPS; } samplingInstants.push(Math.round(currentTimeIndex)); } samplingInstants.forEach(idx => { if (idx >= 0 && idx < rxSignal.length) { sampledValuesYk.push(rxSignal[idx]); } else { console.warn(`Sampling index ${idx} out of bounds.`); sampledValuesYk.push(NaN); } }); return { trueSamplingInstants: samplingInstants, trueSampledValuesYk: sampledValuesYk, firstPulseCenterIndex: peakOffset }; }
+
+            // --- BCJR Core ---
+            function calculateExpectedSample(prevStateIdx, input_ak, v, L, stateCount) { /* ... */ const currentSymbol = input_ak; const prevSymbols = []; let tempState = prevStateIdx; for (let i = 0; i < L; i++) { const bit = tempState % 2; prevSymbols.push(bit === 0 ? 1 : -1); tempState = Math.floor(tempState / 2); } const symbolSequence = [...prevSymbols.reverse(), currentSymbol]; let expectedValue = 0; const vLen = v.length; const symLen = symbolSequence.length; for (let i = 0; i <= L; i++) { const symbolIndexInSequence = L - i; if (symbolIndexInSequence >= 0 && symbolIndexInSequence < symLen && i >= 0 && i < vLen) { expectedValue += symbolSequence[symbolIndexInSequence] * v[i]; } } return expectedValue; }
+            function logSumExp(log_terms) { /* ... */ const filtered_terms = log_terms.filter(lt => lt > LOG_ZERO); if (filtered_terms.length === 0) return LOG_ZERO; const maxLog = Math.max(...filtered_terms); let sumExp = 0; for (const lt of filtered_terms) { sumExp += Math.exp(lt - maxLog); } return maxLog + Math.log(sumExp); }
+            // ****** Restored Strict Comparison Gamma Calculation ******
+            function calculateLogGammaMatrix(yk_n, stage_k, v, trellisParams, N_msg) {
+                const { stateCount, memoryLength: L, reachableStates } = trellisParams;
+                const logGamma_k = new Map();
+                const prevStageReachable = reachableStates[stage_k - 1];
+                if (!prevStageReachable || typeof yk_n !== 'number' || isNaN(yk_n)) { return logGamma_k; }
+
+                for (const prevStateIdx of prevStageReachable) {
+                    if (!logGamma_k.has(prevStateIdx)) logGamma_k.set(prevStateIdx, new Map());
+                    let possibleInputs = [-1, 1];
+                    if ((stage_k - 1) < L || (stage_k - 1) >= L + N_msg) { possibleInputs = [-1]; }
+
+                    for (const input_ak of possibleInputs) {
+                        const inputBit = (input_ak + 1) / 2;
+                        const nextStateIdx = ((prevStateIdx * 2) + inputBit) % stateCount;
+
+                        if (reachableStates[stage_k]?.has(nextStateIdx)) {
+                            const lij = calculateExpectedSample(prevStateIdx, input_ak, v, L, stateCount);
+                            const diff = Math.abs(yk_n - lij);
+                            let logLikelihood;
+
+                            // **** STRICT COMPARISON ****
+                            if (diff < COMPARE_TOLERANCE) {
+                                logLikelihood = 0; // Log(1)
+                            } else {
+                                logLikelihood = LOG_ZERO; // Log(0)
+                            }
+                            // *************************
+
+                            const logGammaValue = logLikelihood; // Ignoring P(a')
+
+                            if (logGammaValue > LOG_ZERO) { // Only store non-zero probability transitions
+                                logGamma_k.get(prevStateIdx).set(nextStateIdx, logGammaValue);
+                            }
+                        }
+                    }
+                }
+                return logGamma_k;
+            }
+             // Helper function to calculate all Gamma matrices
+             function calculateAllLogGamma(bcjrSamples, v, trellisParams, N_msg) {
+                 const { memoryLength: L } = trellisParams;
+                 console.log("Calculating LogGamma matrices...");
+                 const logGammaMatrices = [null]; // Index 0 unused
+                 for (let k = 1; k <= L + N_msg; k++) {
+                      logGammaMatrices.push(calculateLogGammaMatrix(bcjrSamples[k-1], k, v, trellisParams, N_msg));
+                 }
+                 console.log("LogGamma calculation complete.");
+                 return logGammaMatrices;
+            }
+            function runForwardRecursion(logGammaMatrices, trellisParams, N_msg) { /* ... */ const { totalStages, stateCount, memoryLength: L } = trellisParams; const logAlpha = Array(totalStages).fill(null).map(() => new Map()); logAlpha[0].set(0, 0); for (let k = 1; k <= L + N_msg; k++) { const logGamma_k = logGammaMatrices[k]; if (!logGamma_k || logGamma_k.size === 0) continue; for (let currentStateIdx = 0; currentStateIdx < stateCount; currentStateIdx++) { const incomingTerms = []; for (const [prevStateIdx, nextStatesMap] of logGamma_k.entries()) { if (nextStatesMap.has(currentStateIdx)) { const logAlphaPrev = logAlpha[k - 1].get(prevStateIdx); if (logAlphaPrev !== undefined && logAlphaPrev > LOG_ZERO) { const logGammaVal = nextStatesMap.get(currentStateIdx); if (logGammaVal > LOG_ZERO || logGammaVal === 0) { incomingTerms.push(logAlphaPrev + logGammaVal); } } } } if (incomingTerms.length > 0) { const logAlpha_k_s = logSumExp(incomingTerms); if (logAlpha_k_s > LOG_ZERO) { logAlpha[k].set(currentStateIdx, logAlpha_k_s); } } } } console.log("Forward recursion (LogAlpha) complete."); return logAlpha; }
+            function runBackwardRecursion(logGammaMatrices, trellisParams, N_msg) { /* ... */ const { totalStages, stateCount, memoryLength: L } = trellisParams; const logBeta = Array(totalStages).fill(null).map(() => new Map()); const finalStageIndex = L + N_msg; logBeta[finalStageIndex].set(0, 0); for (let k = finalStageIndex - 1; k >= 0; k--) { const logGamma_k_plus_1 = logGammaMatrices[k + 1]; if (!logGamma_k_plus_1 || logGamma_k_plus_1.size === 0) continue; for (let currentStateIdx = 0; currentStateIdx < stateCount; currentStateIdx++) { const outgoingTerms = []; if (logGamma_k_plus_1.has(currentStateIdx)) { const nextStatesMap = logGamma_k_plus_1.get(currentStateIdx); for (const [nextStateIdx, logGammaVal] of nextStatesMap.entries()) { if (logGammaVal > LOG_ZERO || logGammaVal === 0) { const logBetaNext = logBeta[k + 1].get(nextStateIdx); if (logBetaNext !== undefined && logBetaNext > LOG_ZERO) { outgoingTerms.push(logBetaNext + logGammaVal); } } } } if (outgoingTerms.length > 0) { const logBeta_k_s = logSumExp(outgoingTerms); if (logBeta_k_s > LOG_ZERO) { logBeta[k].set(currentStateIdx, logBeta_k_s); } } } } console.log("Backward recursion (LogBeta) complete."); return logBeta; }
+            function calculateLLRs(logAlpha, logBeta, logGammaMatrices, trellisParams, N_msg) { /* ... */ const { stateCount, memoryLength: L } = trellisParams; const llrs = []; for (let k = L; k < L + N_msg; k++) { const logGamma_k_plus_1 = logGammaMatrices[k + 1]; let numeratorTerms = []; let denominatorTerms = []; if (!logGamma_k_plus_1) { console.warn(`Missing LogGamma for LLR calculation at stage ${k+1}`); llrs.push(0); continue; } for (const [prevStateIdx, nextStatesMap] of logGamma_k_plus_1.entries()) { const logAlphaPrev = logAlpha[k]?.get(prevStateIdx); if (logAlphaPrev === undefined || logAlphaPrev <= LOG_ZERO) continue; for (const [nextStateIdx, logGammaVal] of nextStatesMap.entries()) { if (logGammaVal <= LOG_ZERO && logGammaVal !== 0) continue; const logBetaNext = logBeta[k + 1]?.get(nextStateIdx); if (logBetaNext === undefined || logBetaNext <= LOG_ZERO) continue; const term = logAlphaPrev + logGammaVal + logBetaNext; const inputBit0_nextState = (prevStateIdx * 2 + 0) % stateCount; const inputBit1_nextState = (prevStateIdx * 2 + 1) % stateCount; if (nextStateIdx === inputBit0_nextState) { numeratorTerms.push(term); } if (nextStateIdx === inputBit1_nextState) { denominatorTerms.push(term); } } } const logNumerator = logSumExp(numeratorTerms); const logDenominator = logSumExp(denominatorTerms); let llr = 0; if (logNumerator > LOG_ZERO && logDenominator > LOG_ZERO) { llr = logNumerator - logDenominator; } else if (logNumerator > LOG_ZERO) { llr = 100; } else if (logDenominator > LOG_ZERO) { llr = -100; } else { console.warn(`LLR calculation failed at stage k=${k} (transition k -> k+1): Both sums are zero. Num=${logNumerator.toFixed(1)}, Den=${logDenominator.toFixed(1)}`); } llrs.push(llr); } console.log("LLR calculation complete."); return llrs; }
+
+             // --- LLR Display ---
+             function displayLLRs(llrs, binarySequence, N) { /* ... Unchanged ... */ let llrText = `Calculated LLRs for Message Bits (Indices 0 to ${N-1}):\n`; let errors = 0; llrs.forEach((llr, index) => { const detectedBit = llr > 0 ? 0 : 1; const originalBit = binarySequence[index]; const isCorrect = detectedBit === originalBit; llrText += `Bit ${index}: LLR = ${llr.toFixed(4)} (Detect: ${detectedBit}, Orig: ${originalBit}) -> ${isCorrect ? "Correct" : "WRONG"}\n`; if (!isCorrect) errors++; }); llrText += `\nTotal Message Bit Errors: ${errors}`; llrOutputPre.textContent = llrText; }
+
+            // --- Plotting ---
+             function plotSignalsAndSamples(canvasElement, rxSignal, trueSamplingInstants, trueSampledValuesYk, L, N) { /* ... Unchanged ... */ console.log("Plotting Rx signal and true samples..."); if (!canvasElement) { console.error("Rx Canvas element not provided."); return; } const ctx = canvasElement.getContext('2d'); if (!ctx) { console.error("Failed to get Rx canvas context."); return; } const plotLength = rxSignal.length; const timeIndices = Array.from({ length: plotLength }, (_, i) => i); const rxSignalToPlot = rxSignal.slice(0, plotLength); const preambleSampleData = []; const messageSampleData = []; trueSamplingInstants.forEach((inst, k) => { const sampleNum = k + 1; if (inst < plotLength) { const dataPoint = { x: inst, y: trueSampledValuesYk[k] }; if (sampleNum > L && sampleNum <= L + N) { messageSampleData.push(dataPoint); } else { preambleSampleData.push(dataPoint); } } }); if (rxChartInstance) { rxChartInstance.destroy(); } rxChartInstance = new Chart(ctx, { type: 'line', data: { labels: timeIndices, datasets: [ { label: 'Rx Signal r(t)', data: rxSignalToPlot, borderColor: 'rgba(75, 192, 192, 0.8)', tension: 0.1, pointRadius: 0, borderWidth: 1.5 }, { label: 'Preamble Samples', data: preambleSampleData, type: 'scatter', backgroundColor: 'rgba(54, 162, 235, 1)', pointRadius: 4, pointHoverRadius: 6, showLine: false }, { label: 'Message Samples', data: messageSampleData, type: 'scatter', backgroundColor: 'rgba(255, 99, 132, 1)', pointRadius: 4, pointHoverRadius: 6, showLine: false } ] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false, }, plugins: { title: { display: true, text: 'Received Signal r(t) & True Sample Points y_k' }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { if (context.dataset.type === 'scatter') { label += `(Index: ${context.parsed.x}, Value: ${context.parsed.y.toFixed(4)})`; } else { label += `Value: ${context.parsed.y.toFixed(4)}`; } } return label; } } } }, scales: { x: { title: { display: true, text: 'Sample Index (Time)' }, beginAtZero: true }, y: { title: { display: true, text: 'Amplitude' } } } } }); console.log("Rx Signal Chart created."); }
+            function plotPulse(canvasElement, v) { /* ... Unchanged ... */ console.log("Plotting pulse response v = h*h..."); if (!canvasElement) { console.error("Pulse Canvas element not provided."); return; } const ctx = canvasElement.getContext('2d'); if (!ctx) { console.error("Failed to get Pulse canvas context."); return; } const indices = Array.from({ length: v.length }, (_, i) => i); let peakValue = -Infinity; let peakIndex = -1; v.forEach((val, idx) => { if (Math.abs(val) > peakValue) { peakValue = Math.abs(val); peakIndex = idx; } }); const peakData = [{ x: peakIndex, y: v[peakIndex] }]; if (pulseChartInstance) { pulseChartInstance.destroy(); } pulseChartInstance = new Chart(ctx, { type: 'line', data: { labels: indices, datasets: [ { label: 'Pulse Response v(k)', data: v, borderColor: 'rgb(153, 102, 255)', tension: 0.1, pointRadius: 1, borderWidth: 1.5 }, { label: 'Peak', data: peakData, type: 'scatter', backgroundColor: 'rgb(255, 0, 0)', pointRadius: 5, pointHoverRadius: 7, showLine: false } ] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { title: { display: true, text: 'Overall Channel Pulse Response (v = h*h)' }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += `(Index: ${context.parsed.x}, Value: ${context.parsed.y.toFixed(4)})`; } return label; } } } }, scales: { x: { title: { display: true, text: 'Tap Index (k)' }, beginAtZero: true }, y: { title: { display: true, text: 'Amplitude' } } } } }); console.log("Pulse Chart created."); }
+
+            // --- Formula Display ---
+            function displayFormulas() { /* ... Unchanged ... */ formulaArea.innerHTML = `<h4>Signal Model (Discrete Equivalent):</h4> \\( y_k = \\sum_{i=0}^{L} a_{k-i} v_i \\) (Noise-free symbol-rate samples) <br> \\( v_k = (h * h)(k) \\) (Discrete channel from SRRC pulse \\(h\\)) <h4>Branch Metric (Log Domain, Noise-Free Approx.):</h4> \\( \\log \\gamma_k(s', s) \\propto -(y_k - l_{s',s})^2 \\) <br> where \\( l_{s',s} = \\sum_{i=0}^{L} a'_{k-i} v_i \\) is the expected sample for hypothesized transition \\( s' \\to s \\) (with input \\(a'_k\\)). <h4>Forward Recursion (Log Domain):</h4> \\( \\log \\alpha_k(s) = \\underset{s'}{\\mathrm{logsumexp}} (\\log \\alpha_{k-1}(s') + \\log \\gamma_k(s', s)) \\) <h4>Backward Recursion (Log Domain):</h4> \\( \\log \\beta_k(s) = \\underset{s''}{\\mathrm{logsumexp}} (\\log \\beta_{k+1}(s'') + \\log \\gamma_{k+1}(s, s'')) \\) <h4>LLR Calculation:</h4> \\( LLR(a_k) = \\log \\frac{P(a_k=+1 | \\mathbf{y})}{P(a_k=-1 | \\mathbf{y})} \\) <br> \\( = \\log \\frac{\\sum_{(s',s): a_k=+1} \\exp(\\log \\alpha_{k-1}(s') + \\log \\gamma_k(s', s) + \\log \\beta_k(s))}{\\sum_{(s',s): a_k=-1} \\exp(\\log \\alpha_{k-1}(s') + \\log \\gamma_k(s', s) + \\log \\beta_k(s))} \\) `; if (window.MathJax && window.MathJax.typeset) { window.MathJax.typeset([formulaArea]); } }
+
+            // --- Drawing/Interaction Helpers ---
+            function drawGridAndSeparators(svg, svgWidth, svgHeight, stateCount, stateHeight, totalStages, stageWidth) { /* ... */ const drawingAreaHeight = svgHeight - 60; for (let i = 0; i <= stateCount; i++) { const y = i * stateHeight + 10; createLine(svg, 0, y, svgWidth, y, 'grid-line'); } for (let i = 0; i <= totalStages; i++) { const x = i * stageWidth; createLine(svg, x, 0, x, drawingAreaHeight, 'stage-separator'); } }
+            function drawStates(svg, totalStages, reachableStates_local, stateHeight, stageWidth, pathCounts_local) { /* ... No timeText */ for (let stage = 0; stage < totalStages; stage++) { for (const stateIdx of reachableStates_local[stage]) { const x = 60 + stage * stageWidth; const y = 40 + stateIdx * stateHeight; const stateId = `s${stateIdx}_${stage}`; const stateCircle = createCircle(svg, x, y, 25, 'state-circle'); stateCircle.setAttribute('data-state-id', stateId); stateElements[stateId] = stateCircle; createText(svg, x, y, `s${stateIdx}`, 'state-text'); const pathCountY = y - 30; const pathCountText = createText(svg, x, pathCountY, '', 'path-count'); pathCountText.setAttribute('data-state-id', stateId); const count = pathCounts_local[stage]?.get(stateIdx); if (count !== undefined && count > 0) { pathCountText.textContent = `${count}`; } /* else { pathCountText.textContent = '0'; } */ pathCountElements[stateId] = pathCountText; stateCircle.addEventListener('mouseover', () => highlightConnections(stateId, extendPathCheckbox.checked)); stateCircle.addEventListener('mouseout', resetHighlights); stateCircle.addEventListener('click', (event) => { showPathPopup(stateId, event); event.stopPropagation(); }); } } }
+            function formatTimeValue(timeValues) { /* ... */ if (Array.isArray(timeValues)) return `[${timeValues.map(t=>t.toFixed(0)).join(',')}]`; else return `${timeValues.toFixed(0)}`; }
+            function drawTransitions(svg, totalStages, reachableStates_local, stateHeight, stageWidth, messageLength, memoryLength, stateCount) { /* ... No time args */ for (let stage = 0; stage < totalStages - 1; stage++) { if (!reachableStates_local[stage] || reachableStates_local[stage].size === 0) continue; for (const stateIdx of reachableStates_local[stage]) { const x1 = 60 + stage * stageWidth; const y1 = 40 + stateIdx * stateHeight; const fromStateId = `s${stateIdx}_${stage}`; let possibleInputs = []; if (stage < memoryLength) possibleInputs = [-1]; else if (stage >= memoryLength && stage < messageLength + memoryLength) possibleInputs = [-1, 1]; else possibleInputs = [-1]; const preFinalStateIdx = 2**(memoryLength - 1); if (stage === totalStages - 2) { if (stateIdx !== 0 && stateIdx !== preFinalStateIdx) possibleInputs = []; else possibleInputs = [-1]; } for (const input of possibleInputs) { let nextStateIdx; if (stage === totalStages - 2 && (stateIdx === 0 || stateIdx === preFinalStateIdx)) { nextStateIdx = 0; } else { const inputBit = (input + 1) / 2; nextStateIdx = ((stateIdx * 2) + inputBit) % stateCount; } if (!reachableStates_local[stage + 1] || !reachableStates_local[stage + 1].has(nextStateIdx)) continue; const toStateId = `s${nextStateIdx}_${stage + 1}`; const x2 = 60 + (stage + 1) * stageWidth; const y2 = 40 + nextStateIdx * stateHeight; const fromParity = stateIdx % 2; const toParity = nextStateIdx % 2; const tau = (fromParity === toParity) ? 0.6 : 0.9; const transitionKey = `${fromStateId}__${toStateId}__${input}`; transitionData[transitionKey] = { from: fromStateId, to: toStateId, input: input, tau: tau }; if (!pathTracker[toStateId]) pathTracker[toStateId] = []; pathTracker[toStateId].push({ from: fromStateId, input: input, tau: tau, key: transitionKey }); const path = createPath(svg, `M ${x1 + 25} ${y1} L ${x2 - 25} ${y2}`); path.setAttribute('class', input === -1 ? 'transition transition-minus' : 'transition transition-plus'); path.setAttribute('data-from', fromStateId); path.setAttribute('data-to', toStateId); path.setAttribute('data-input', input); transitionElements.push(path); const midX = (x1 + x2) / 2; const midY = (y1 + y2) / 2; const tauYOffset = 10; const tauTextContent = `τ=${tau}`; const tauLabel = createText(svg, midX, midY + tauYOffset, tauTextContent, 'tau-label'); tauLabel.setAttribute('data-from', fromStateId); tauLabel.setAttribute('data-to', toStateId); const textMetrics = estimateTextBBox(tauTextContent, 14); const labelWidth = textMetrics.width + 10; const labelHeight = textMetrics.height + 4; const bgRect = createRect(svg, midX - labelWidth / 2, midY + tauYOffset - labelHeight / 2 - 2, labelWidth, labelHeight, 4); bgRect.setAttribute('fill', 'rgba(255, 255, 255, 0.85)'); bgRect.setAttribute('class', 'tau-label-bg'); bgRect.setAttribute('data-from', fromStateId); bgRect.setAttribute('data-to', toStateId); svg.insertBefore(bgRect, tauLabel); tauLabelElements.push({ bg: bgRect, text: tauLabel }); } } } }
+            function estimateTextBBox(text, fontSize) { /* ... */ const avgCharWidth = fontSize * 0.6; const height = fontSize * 1.2; return { width: text.length * avgCharWidth, height: height }; }
+             // ****** drawStageLabels - Corrected visual time display ******
+             function drawStageLabels(svg, totalStages, stageWidth, svgHeight, messageLength, memoryLength, reachableStates_local, samplingTimes_local) {
+                const labelY = svgHeight - 45; const discreteTimeY = labelY + 16; const visualTimesY = discreteTimeY + 14;
+                for (let stage = 0; stage < totalStages -1 ; stage++) {
+                    const labelX = 60 + stage * stageWidth + stageWidth / 2;
+                    let labelContent = '';
+                    const discreteTimeIndex = stage + 1;
+                    if (stage < memoryLength) labelContent = `Init ${stage + 1}`;
+                    else if (stage < messageLength + memoryLength) labelContent = `Msg ${stage - memoryLength + 1}`;
+                    else if (stage < totalStages - 1) labelContent = `End ${stage - (messageLength + memoryLength) + 1}`;
+
+                    if (labelContent) {
+                       createText(svg, labelX, labelY, labelContent, 'stage-label');
+                       createText(svg, labelX, discreteTimeY, `k=${discreteTimeIndex}`, 'stage-number-label');
+
+                       // --- Calculate and Draw Visual Sampling Times for NEXT Stage ---
+                       const nextStage = stage + 1; // Look at states at the END of the interval
+                       const uniqueTimes = new Set();
+                       if (reachableStates_local && reachableStates_local[nextStage]) {
+                           for (const nextStateIdx of reachableStates_local[nextStage]) {
+                               const stateId = `s${nextStateIdx}_${nextStage}`;
+                               const times = samplingTimes_local[stateId]; // Use passed map
+                               if (times !== undefined) {
+                                   if (Array.isArray(times)) { times.forEach(t => uniqueTimes.add(t)); }
+                                   else { uniqueTimes.add(times); }
+                               }
+                           }
+                       }
+                       if (uniqueTimes.size > 0) {
+                           const sortedTimes = Array.from(uniqueTimes).sort((a, b) => a - b);
+                           let timesString = sortedTimes.map(t => t.toFixed(0)).join(',');
+                           const timeLabel = createText(svg, labelX, visualTimesY, `t:{${timesString}}`, 'stage-time-label');
+                           if (timesString.length > 20 && sortedTimes.length > 2) { timeLabel.textContent = `t:{${sortedTimes.slice(0,2).map(t => t.toFixed(0)).join(',')}...}`; }
+                       }
+                       // ---------------------------------------------------------------
+                    }
+                 }
+             } // End drawStageLabels
+            function createSvgElement(tag, attributes = {}, textContent = '') { /* ... */ const el = document.createElementNS('http://www.w3.org/2000/svg', tag); for (const key in attributes) { el.setAttribute(key, attributes[key]); } if (textContent) { el.textContent = textContent; } return el; }
+            function createLine(svg, x1, y1, x2, y2, className) { /* ... */ const line = createSvgElement('line', { x1, y1, x2, y2, class: className }); svg.appendChild(line); return line; }
+            function createCircle(svg, cx, cy, r, className) { /* ... */ const circle = createSvgElement('circle', { cx, cy, r, class: className }); svg.appendChild(circle); return circle; }
+            function createText(svg, x, y, text, className) { /* ... */ const textEl = createSvgElement('text', { x, y, class: className }, text); svg.appendChild(textEl); return textEl; }
+            function createPath(svg, d) { /* ... */ const path = createSvgElement('path', { d }); svg.appendChild(path); return path; }
+            function createRect(svg, x, y, width, height, rx) { /* ... */ const rect = createSvgElement('rect', { x, y, width, height, rx }); svg.appendChild(rect); return rect; }
+            function handleExtendPathChange() { /* ... */ const highlighted = document.querySelector('.state-circle.highlighted-state'); if (highlighted) { const stateId = highlighted.getAttribute('data-state-id'); highlightConnections(stateId, this.checked); } else { resetHighlights(); } }
+             // ****** UPDATED highlightConnections - REMOVED sampling time activation ******
+             function highlightConnections(stateId, extendPath) {
+                 resetHighlights(); transitionElements.forEach(el => el.classList.add('inactive')); if (!stateElements[stateId]) return; stateElements[stateId].classList.add('highlighted-state');
+                 // REMOVED activateElement(samplingTimeElements...);
+                 if (extendPath) { const paths = findPathsToStart(stateId); const pathStates = new Set(); const pathTransitions = new Set(); if (paths.length > 0) { activateElement(pathCountElements[stateId]); /* Use existing text */ paths.forEach(path => { pathStates.add(path.states[0]); for (let i = 0; i < path.transitions.length; i++) { const trans = path.transitions[i]; const from = trans.from; pathStates.add(from); pathTransitions.add(trans.key || `${from}__${trans.to}__${trans.input}`); } }); pathStates.forEach(sId => { if (stateElements[sId]) stateElements[sId].classList.add('highlighted-state'); /* REMOVED sampling time */ activateElement(pathCountElements[sId]); /* Use existing text */ }); transitionElements.forEach(transEl => { const from = transEl.getAttribute('data-from'); const to = transEl.getAttribute('data-to'); const input = transEl.getAttribute('data-input'); const key = `${from}__${to}__${input}`; if (pathTransitions.has(key)) { transEl.classList.remove('inactive'); transEl.classList.add('highlight-path'); activateElement(tauLabelElements.find(t => t.text.getAttribute('data-from') === from && t.text.getAttribute('data-to') === to)); } }); } else { activateElement(pathCountElements[stateId], "0"); } } else { activateElement(pathCountElements[stateId]); /* Use existing text */ if (pathTracker[stateId]) { pathTracker[stateId].forEach(prev => { const fromId = prev.from; const input = prev.input; if (stateElements[fromId]) stateElements[fromId].classList.add('highlighted-state'); activateElement(pathCountElements[fromId]); const transEl = transitionElements.find(t => t.getAttribute('data-from') === fromId && t.getAttribute('data-to') === stateId && t.getAttribute('data-input') == input); if (transEl) transEl.classList.remove('inactive'); activateElement(tauLabelElements.find(t => t.text.getAttribute('data-from') === fromId && t.text.getAttribute('data-to') === stateId)); }); } transitionElements.forEach(transEl => { if (transEl.getAttribute('data-from') === stateId) { transEl.classList.remove('inactive'); const toId = transEl.getAttribute('data-to'); const input = transEl.getAttribute('data-input'); if (stateElements[toId]) stateElements[toId].classList.add('highlighted-state'); activateElement(pathCountElements[toId]); activateElement(tauLabelElements.find(t => t.text.getAttribute('data-from') === stateId && t.text.getAttribute('data-to') === toId)); } }); }
+             }
+            function activateElement(element, textContent = null) { /* ... */ if (!element) return; if (element.bg && element.text && element.bg.classList && element.text.classList) { element.bg.classList.add('active'); element.text.classList.add('active'); } else if (element.classList) { element.classList.add('active'); if (textContent !== null && element.textContent !== undefined) { element.textContent = textContent; } } else { /* console.warn("Attempted to activate an invalid element:", element); */ } }
+            // ****** UPDATED resetHighlights - REMOVED sampling time reset ******
+             function resetHighlights() {
+                 Object.values(stateElements).forEach(el => el.classList.remove('highlighted-state')); transitionElements.forEach(el => { el.classList.remove('inactive'); el.classList.remove('highlight-path'); }); tauLabelElements.forEach(el => { if (el.bg && el.text) { el.bg.classList.remove('active'); el.text.classList.remove('active'); } });
+                 // REMOVED samplingTimeElements.forEach(el => el.classList.remove('active'));
+                 Object.values(pathCountElements).forEach(el => { if (el) { el.classList.remove('active'); /* Keep text content */ } });
+             }
+            // ****** Find All Paths Forward ******
+             function findAllPathsToEnd(startStateId, endStateId, trellisParams) {
+                  const { totalStages, stateCount, memoryLength: L, reachableStates } = trellisParams;
+                  const N = parseInt(messageLengthInput.value);
+                  const allPathsFound = [];
+                  const maxPaths = 1000;
+
+                  function findPathsRecursive(currentPath) {
+                      if (allPathsFound.length >= maxPaths) return;
+                      const lastStateId = currentPath[currentPath.length - 1];
+                      const [_, stateIdxStr, stageStr] = lastStateId.split('_');
+                      const stateIdx = parseInt(stateIdxStr);
+                      const stage = parseInt(stageStr);
+
+                      if (lastStateId === endStateId) { allPathsFound.push([...currentPath]); return; }
+                      if (stage >= totalStages - 1) { return; }
+
+                       let possibleInputs = [];
+                       if (stage < L) possibleInputs = [-1];
+                       else if (stage >= L && stage < L + N) possibleInputs = [-1, 1];
+                       else possibleInputs = [-1];
+                       const preFinalStateIdx = 2**(L - 1);
+                       if (stage === totalStages - 2) { if (stateIdx === 0 || stateIdx === preFinalStateIdx) { possibleInputs = [-1]; } else { possibleInputs = []; } }
+
+                       for (const input of possibleInputs) {
+                           let nextStateIdx;
+                           if (stage === totalStages - 2 && (stateIdx === 0 || stateIdx === preFinalStateIdx)) { nextStateIdx = 0; }
+                           else { const inputBit = (input + 1) / 2; nextStateIdx = ((stateIdx * 2) + inputBit) % stateCount; }
+
+                           if (reachableStates[stage + 1]?.has(nextStateIdx)) {
+                                const nextStateId = `s${nextStateIdx}_${stage + 1}`;
+                                currentPath.push(nextStateId);
+                                findPathsRecursive(currentPath);
+                                currentPath.pop(); // Backtrack
+                            }
+                       }
+                  }
+                  findPathsRecursive([startStateId]);
+                  return allPathsFound;
+             }
+            function findPathsToStart(endStateId) { /* ... REMOVED samplingTimes ... */ const foundPaths = []; const maxDepth = 50; function traversePath(currentId, currentPathStates, currentPathTransitions, depth) { if (depth > maxDepth) return; if (currentId === 's0_0') { const finalPathStates = [currentId, ...currentPathStates]; const finalTransitions = currentPathTransitions.slice().reverse(); foundPaths.push({ states: finalPathStates, transitions: finalTransitions }); return; } const incoming = pathTracker[currentId]; if (incoming) { for (const prev of incoming) { const fromId = prev.from; const transInfo = { from: fromId, to: currentId, input: prev.input, tau: prev.tau, key: prev.key }; traversePath(fromId, [currentId, ...currentPathStates], [transInfo, ...currentPathTransitions], depth + 1); } } } traversePath(endStateId, [], [], 0); return foundPaths; }
+             // ****** UPDATED showPathPopup - REMOVED sampling time display ******
+            function showPathPopup(stateId, event) {
+                const paths = findPathsToStart(stateId); const stateCoords = stateId.split('_'); const stateName = stateCoords[0]; const stageNum = stateCoords[1]; popupContent.innerHTML = ''; if (paths.length === 0) { popupContent.innerHTML = `<div>No paths found from state ${stateName} (Stage ${stageNum}) back to the start (s0 Stage 0).</div>`; } else { let html = `<div style="margin-bottom: 10px;">Found <strong>${paths.length}</strong> path${paths.length > 1 ? 's' : ''} from state <strong>${stateName} (Stage ${stageNum})</strong> to the start:</div><ul class="path-list">`; paths.forEach((path, index) => { const stateSequence = path.states.map(s => { const parts = s.split('_'); return `${parts[0]}(${parts[1]})`; }).join(' → '); html += `<li class="path-item"><div class="path-info"><strong>Path ${index + 1}</strong>: ${stateSequence}</div><!-- REMOVED Sampling Times --> <div style="margin-top: 5px; padding-left: 15px; font-size: 12px; color: #555;"><strong>Transitions:</strong></div>`; path.transitions.forEach((trans, tIndex) => { const inputClass = trans.input === -1 ? 'path-transition-minus' : 'path-transition-plus'; const fromState = path.states[tIndex].split('_')[0]; const toState = path.states[tIndex+1].split('_')[0]; html += `<div class="path-transition ${inputClass}">${fromState}(${tIndex}) → ${toState}(${tIndex+1}) (In: ${trans.input === 1 ? '+1' : '-1'}, τ=${trans.tau})</div>`; }); html += '</li>'; }); html += '</ul>'; popupContent.innerHTML = html; } const clickRect = event.target.getBoundingClientRect(); const containerRect = diagramContainer.getBoundingClientRect(); const popupWidth = popup.offsetWidth; const popupHeight = popup.offsetHeight; const viewportWidth = window.innerWidth; const viewportHeight = window.innerHeight; const scrollX = diagramContainer.scrollLeft; const scrollY = window.scrollY; let left = (clickRect.right - containerRect.left + scrollX) + 15; let top = (clickRect.top - containerRect.top + scrollY) + 5; if (left + popupWidth > viewportWidth + scrollX - 20) left = (clickRect.left - containerRect.left + scrollX) - popupWidth - 15; if (left < scrollX + 10) left = scrollX + 10; if (top + popupHeight > viewportHeight + scrollY - 20) top = (clickRect.bottom - containerRect.top + scrollY) - popupHeight - 15; if (top < scrollY + 10) top = scrollY + 10; popup.style.left = `${left}px`; popup.style.top = `${top}px`; popup.style.display = 'block';
+             }
+            function adjustSvgSize() { /* ... */ svg.style.transform = 'none'; svg.style.transformOrigin = '0 0'; diagramContainer.style.height = 'auto'; const svgHeight = parseFloat(svg.getAttribute('height')); }
+
+            // --- Initial Setup ---
+            generateRandomMessage();
+            runFullSimulation();
+
+        }); // End DOMContentLoaded
+    </script>
+    <!-- **** END OF JAVASCRIPT **** -->
+
+</body>
+</html>
