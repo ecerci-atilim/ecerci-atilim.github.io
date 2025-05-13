@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Countdown Timer</title>
+    <style>
+        /* --- Reset & Basic Styles --- */
+        :root {
+            --font-family: 'Roboto', 'Arial', sans-serif;
+            
+            /* Light Theme (Default) */
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+            --accent-color: #007bff;
+            --accent-text-color: #fff;
+            --secondary-bg-color: #ffffff;
+            --border-color: #dde1e3;
+            --input-bg-color: #f8f9fa;
+            --input-border-color: #ced4da;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --no-leave-bg: #fff3cd;
+            --no-leave-text: #856404;
+            --time-up-bg: #ffdddd;
+            --time-up-text: #d8000c;
+            --panel-header-bg: #e9ecef;
+            --button-secondary-bg: #6c757d;
+        }
+
+        .dark-theme {
+            --bg-color: #2c3e50;
+            --text-color: #ecf0f1;
+            --accent-color: #3498db;
+            --accent-text-color: #2c3e50;
+            --secondary-bg-color: #34495e;
+            --border-color: #4a627a;
+            --input-bg-color: #2c3e50;
+            --input-border-color: #4a627a;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --no-leave-bg: #4a3b00;
+            --no-leave-text: #ffd700;
+            --time-up-bg: #5c0000;
+            --time-up-text: #ffaaaa;
+            --panel-header-bg: #2c3e50;
+            --button-secondary-bg: #5a6268;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- Back to Index Button --- */
+        .back-to-index-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            width: 45px;
+            height: 45px;
+            background-color: var(--button-secondary-bg);
+            color: var(--accent-text-color);
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 1002; /* Above settings toggle */
+            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .back-to-index-btn:hover {
+            background-color: color-mix(in srgb, var(--button-secondary-bg) 85%, black);
+        }
+        .back-to-index-btn:active {
+            transform: scale(0.95);
+        }
+
+
+        /* --- Main Content Area --- */
+        .container {
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .real-time-clock {
+            position: absolute;
+            /* Initial position set by JS from settings */
+            font-size: 1.2em; /* Default, overridden by settings */
+            color: var(--text-color);
+            background-color: var(--secondary-bg-color);
+            padding: 8px 12px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            z-index: 998;
+            cursor: grab; 
+            user-select: none; 
+            transition: font-size 0.3s; 
+        }
+        .real-time-clock.dragging {
+            cursor: grabbing;
+            box-shadow: 0 5px 15px var(--shadow-color); 
+        }
+
+
+        #countdownDisplay {
+            font-weight: bold;
+            margin: 20px 0;
+            color: var(--accent-color);
+            line-height: 1;
+            transition: font-size 0.3s;
+            display: flex; 
+            justify-content: center;
+            align-items: baseline; 
+            width: 100%; 
+        }
+        #mainTime { 
+            font-size: 12vw; /* Default, overridden by settings */
+        }
+        #countdownDisplay.time-up #mainTime { 
+            color: var(--time-up-text);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        .subseconds-display {
+            font-size: 0.3em; 
+            opacity: 0.8;
+            margin-left: 0.1em; 
+            min-width: 2.5em; 
+            display: inline-block; 
+        }
+
+        #noLeaveMessage {
+            background-color: var(--no-leave-bg);
+            color: var(--no-leave-text);
+            padding: 12px 22px;
+            border-radius: 8px;
+            margin: 20px auto;
+            font-size: 1.3em;
+            display: none;
+            max-width: 85%;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        #examTimingsDisplay {
+            margin-top: 15px;
+            font-size: 1.1em;
+            color: var(--text-color);
+            opacity: 0.85;
+            display: none; 
+            line-height: 1.5;
+        }
+        #examTimingsDisplay span {
+            margin: 0 8px;
+            font-weight: 500;
+        }
+        #examTimingsDisplay .label {
+            font-weight: normal;
+            opacity: 0.9;
+        }
+
+
+        /* --- Controls --- */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .controls button {
+            background-color: var(--accent-color);
+            color: var(--accent-text-color);
+            border: none;
+            padding: 12px 28px;
+            font-size: 1.15em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 3px 6px var(--shadow-color);
+            font-weight: 500;
+            min-width: 120px; 
+        }
+        .controls button:hover {
+            opacity: 0.9;
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .controls button:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        .controls button:disabled {
+            background-color: #ccc;
+            color: #666;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+        .controls button#stopBtn { background-color: #dc3545;}
+        .controls button#stopBtn:hover { background-color: #c82333;}
+        .controls button#addTimeBtn { background-color: #28a745;}
+        .controls button#addTimeBtn:hover { 
+            background-color: #218838;
+            cursor: ns-resize; 
+        }
+
+        /* --- Settings Panel --- */
+        .settings-toggle-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background-color: var(--accent-color);
+            color: var(--accent-text-color);
+            border: none;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            font-size: 2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px var(--shadow-color);
+            z-index: 1001;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+        .settings-toggle-btn:hover {
+            transform: scale(1.1);
+            background-color: color-mix(in srgb, var(--accent-color) 90%, black);
+        }
+
+        #settingsPanel {
+            position: fixed;
+            top: 0;
+            right: -380px; 
+            width: 360px; 
+            height: 100%;
+            background-color: var(--secondary-bg-color);
+            color: var(--text-color);
+            box-shadow: -6px 0 20px var(--shadow-color);
+            transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            z-index: 1000;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        #settingsPanel.visible {
+            right: 0;
+        }
+
+        .settings-panel-header {
+            padding: 18px 22px;
+            background-color: var(--panel-header-bg); 
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; 
+            top: 0;
+            z-index: 1; 
+        }
+        .settings-panel-header h2 {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.6em;
+        }
+
+        .settings-panel-content {
+            padding: 22px;
+            flex-grow: 1; 
+        }
+
+        .settings-panel .setting-item {
+            margin-bottom: 22px;
+            padding: 15px;
+            background-color: var(--bg-color); 
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .settings-panel .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-panel label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95em;
+            color: color-mix(in srgb, var(--text-color) 85%, black);
+        }
+        .settings-panel input[type="number"],
+        .settings-panel input[type="range"],
+        .settings-panel select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--input-border-color);
+            border-radius: 5px;
+            background-color: var(--input-bg-color);
+            color: var(--text-color);
+            font-size: 1em;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .settings-panel input[type="number"]:focus,
+        .settings-panel input[type="range"]:focus,
+        .settings-panel select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent-color) 25%, transparent);
+        }
+        .settings-panel input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.3);
+            vertical-align: middle;
+        }
+        .settings-panel .checkbox-label { 
+             display: flex;
+             align-items: center;
+        }
+        .settings-panel button {
+            background-color: var(--accent-color);
+            color: var(--accent-text-color);
+            border: none;
+            padding: 12px 18px;
+            font-size: 1.05em;
+            font-weight: 500;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+            width: 100%;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        .settings-panel button:hover {
+            opacity: 0.9;
+            box-shadow: 0 3px 6px var(--shadow-color);
+        }
+        #saveSettingsBtn {
+            background-color: var(--button-secondary-bg); 
+        }
+        #fontSizeValue, #realTimeFontSizeValue {
+            display: inline-block; 
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        #fontSizeControlArea:hover { 
+            cursor: ns-resize; 
+        }
+
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .real-time-clock { font-size: 1em !important; padding: 6px 10px;}
+            .controls button { padding: 10px 20px; font-size: 1em; }
+            #settingsPanel { width: 320px; right: -340px; } 
+        }
+        @media (max-width: 480px) {
+            #mainTime { font-size: 20vw !important; } 
+            .controls { gap: 10px; }
+            .controls button { width: calc(50% - 5px); margin-bottom: 10px; font-size: 0.9em; padding: 10px 12px; min-width: auto;}
+            #settingsPanel { width: 100%; right: -100%; }
+            .settings-panel-header h2 { font-size: 1.4em; }
+            .settings-panel .setting-item { padding: 12px;}
+            #examTimingsDisplay { font-size: 0.9em; }
+            .back-to-index-btn { width: 40px; height: 40px; font-size: 1.5em; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-to-index-btn" aria-label="Go to Index">
+        <span>←</span> <!-- Left arrow HTML entity -->
+    </a>
+
+    <div class="real-time-clock" id="realTimeClock">00:00:00</div>
+
+    <div class="container">
+        <div id="countdownDisplay">
+            <span id="mainTime">00:00</span><span class="subseconds-display" id="subseconds">.00</span>
+        </div>
+        <div id="noLeaveMessage">Students may not leave the room yet.</div>
+        
+        <div id="examTimingsDisplay">
+            <span class="label">Starts:</span><span id="examStartTime">--:--:--</span>
+            <span class="label">Ends:</span><span id="examEndTime">--:--:--</span>
+        </div>
+
+        <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="pauseBtn" disabled>Pause</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="addTimeBtn">Add 5 Min</button>
+        </div>
+    </div>
+
+    <button class="settings-toggle-btn" id="settingsToggleBtn" aria-label="Toggle Settings Panel">⚙</button> 
+
+    <div id="settingsPanel">
+        <div class="settings-panel-header">
+            <h2>Settings</h2>
+        </div>
+        <div class="settings-panel-content">
+            <div class="setting-item">
+                <label for="examDuration">Exam Duration (minutes):</label>
+                <input type="number" id="examDuration" value="60" min="1">
+            </div>
+
+            <div class="setting-item">
+                <label for="noLeaveDuration">"No Leave" Period (minutes, 0 to disable):</label>
+                <input type="number" id="noLeaveDuration" value="30" min="0">
+            </div>
+
+            <div class="setting-item">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showSubseconds"> Show Centiseconds
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showExamTimings"> Show Exam Start/End Times
+                </label>
+            </div>
+
+            <div class="setting-item">
+                <label for="themeSelector">Theme:</label>
+                <select id="themeSelector">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+
+            <div class="setting-item" id="fontSizeControlArea">
+                <label for="fontSize">Countdown Font Size (vw):</label>
+                <input type="range" id="fontSize" min="5" max="30" value="12" step="0.5"> 
+                <span id="fontSizeValue">12vw</span>
+            </div>
+
+            <div class="setting-item">
+                <label for="realTimeFontSize">Real Time Clock Font Size (em):</label>
+                <input type="range" id="realTimeFontSize" min="0.8" max="2.5" value="1.2" step="0.1">
+                <span id="realTimeFontSizeValue">1.2em</span>
+            </div>
+            
+            <!-- Real Time Clock Location Select REMOVED -->
+            
+            <button id="applySettingsBtn">Apply & Restart Timer</button>
+            <button id="saveSettingsBtn">Save Current Settings</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const realTimeClockDisplay = document.getElementById('realTimeClock');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const mainTimeDisplay = document.getElementById('mainTime');
+        const subsecondsDisplay = document.getElementById('subseconds');
+        const noLeaveMessage = document.getElementById('noLeaveMessage');
+        const examTimingsDisplay = document.getElementById('examTimingsDisplay');
+        const examStartTimeDisplay = document.getElementById('examStartTime');
+        const examEndTimeDisplay = document.getElementById('examEndTime');
+
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const addTimeBtn = document.getElementById('addTimeBtn');
+
+        const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+        const settingsPanel = document.getElementById('settingsPanel');
+        
+        const examDurationInput = document.getElementById('examDuration');
+        const noLeaveDurationInput = document.getElementById('noLeaveDuration');
+        const showSubsecondsCheckbox = document.getElementById('showSubseconds');
+        const showExamTimingsCheckbox = document.getElementById('showExamTimings');
+        const themeSelector = document.getElementById('themeSelector');
+        const fontSizeInput = document.getElementById('fontSize');
+        const fontSizeValueDisplay = document.getElementById('fontSizeValue');
+        const fontSizeControlArea = document.getElementById('fontSizeControlArea');
+        const realTimeFontSizeInput = document.getElementById('realTimeFontSize');
+        const realTimeFontSizeValueDisplay = document.getElementById('realTimeFontSizeValue');
+        const applySettingsBtn = document.getElementById('applySettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        // --- Timer State ---
+        let timerInterval = null;
+        let endTime = 0;
+        let pausedTimeRemaining = 0;
+        let isPaused = false;
+        let noLeaveEndTime = 0;
+        let initialDurationSeconds = 0;
+        let actualExamStartTime = null;
+        let calculatedExamEndTime = null;
+        let timeAdjustmentAmount = 5; 
+
+        // --- Real Time Clock Drag State ---
+        let isDraggingClock = false;
+        let clockOffsetX, clockOffsetY;
+
+        // --- Settings State (with defaults) ---
+        let settings = {
+            examDurationMinutes: 60,
+            noLeaveDurationMinutes: 30,
+            showSubseconds: false,
+            showExamTimings: false,
+            theme: 'light',
+            fontSizeVW: 12,
+            realTimeFontSizeEM: 1.2,
+            realTimeClockTop: '20px', // Default position in pixels or %
+            realTimeClockLeft: null,  // Use null for right, and string value for left
+            realTimeClockRight: '20px' // If left is null, right is used.
+        };
+
+        // --- Utility Functions ---
+        function formatTime(ms, includeSubseconds) {
+            if (ms < 0) ms = 0;
+            const totalSeconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            mainTimeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            if (includeSubseconds) {
+                const centiseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
+                subsecondsDisplay.textContent = `.${centiseconds}`;
+                subsecondsDisplay.style.display = 'inline-block';
+            } else {
+                subsecondsDisplay.style.display = 'none';
+            }
+        }
+
+        function formatDateTime(dateObj) {
+            if (!dateObj) return '--:--:--';
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            const seconds = String(dateObj.getSeconds()).padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+
+        function updateRealTimeClock() {
+            realTimeClockDisplay.textContent = formatDateTime(new Date());
+        }
+
+        function updateExamTimingsDisplay() {
+            if (settings.showExamTimings && actualExamStartTime) {
+                examStartTimeDisplay.textContent = formatDateTime(actualExamStartTime);
+                examEndTimeDisplay.textContent = formatDateTime(calculatedExamEndTime);
+                examTimingsDisplay.style.display = 'block';
+            } else {
+                examTimingsDisplay.style.display = 'none';
+                 examStartTimeDisplay.textContent = '--:--:--';
+                 examEndTimeDisplay.textContent = '--:--:--';
+            }
+        }
+
+        // --- Timer Logic ---
+        function updateCountdown() {
+            const now = Date.now();
+            let remainingTime = endTime - now;
+
+            if (isPaused) {
+                remainingTime = pausedTimeRemaining;
+            }
+            
+            formatTime(remainingTime, settings.showSubseconds);
+
+            if (settings.noLeaveDurationMinutes > 0 && now < noLeaveEndTime && remainingTime > 0) {
+                noLeaveMessage.style.display = 'block';
+            } else {
+                noLeaveMessage.style.display = 'none';
+            }
+
+            if (!isPaused && remainingTime <= 0) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                formatTime(0, settings.showSubseconds);
+                countdownDisplay.classList.add('time-up');
+                noLeaveMessage.style.display = 'none';
+                disableTimerControls(true, false); 
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+            } else {
+                 countdownDisplay.classList.remove('time-up');
+            }
+        }
+
+        function startTimer() {
+            countdownDisplay.classList.remove('time-up');
+            if (timerInterval) clearInterval(timerInterval);
+            
+            initialDurationSeconds = settings.examDurationMinutes * 60;
+            const durationMs = initialDurationSeconds * 1000;
+
+            endTime = Date.now() + durationMs;
+            pausedTimeRemaining = durationMs; 
+
+            actualExamStartTime = new Date();
+            calculatedExamEndTime = new Date(actualExamStartTime.getTime() + durationMs);
+            updateExamTimingsDisplay();
+
+
+            if (settings.noLeaveDurationMinutes > 0) {
+                noLeaveEndTime = Date.now() + (settings.noLeaveDurationMinutes * 60 * 1000);
+            } else {
+                noLeaveEndTime = 0;
+            }
+            
+            isPaused = false;
+            updateCountdown(); 
+            timerInterval = setInterval(updateCountdown, settings.showSubseconds ? 41 : 1000); 
+
+            disableTimerControls(false, true);
+        }
+
+        function pauseTimer() {
+            if (!timerInterval || isPaused) return;
+            isPaused = true;
+            pausedTimeRemaining = endTime - Date.now(); 
+            clearInterval(timerInterval);
+            timerInterval = null; 
+            updateCountdown(); 
+
+            startBtn.textContent = 'Resume';
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        function resumeTimer() {
+            if (!isPaused) return;
+            isPaused = false;
+            endTime = Date.now() + pausedTimeRemaining; 
+            updateExamTimingsDisplay();
+            
+            updateCountdown();
+            timerInterval = setInterval(updateCountdown, settings.showSubseconds ? 41 : 1000);
+
+            startBtn.textContent = 'Start'; 
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+        }
+
+        function stopTimer(resetExamTimes = true) {
+            countdownDisplay.classList.remove('time-up');
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isPaused = false;
+            pausedTimeRemaining = 0;
+            formatTime(settings.examDurationMinutes * 60 * 1000, settings.showSubseconds); 
+            noLeaveMessage.style.display = 'none';
+            
+            if (resetExamTimes) {
+                actualExamStartTime = null;
+                calculatedExamEndTime = null;
+            }
+            updateExamTimingsDisplay();
+            disableTimerControls(true, false);
+        }
+
+        function addTime(minutesToAdd) {
+            const timeToAddMs = minutesToAdd * 60 * 1000;
+            if (isPaused) {
+                pausedTimeRemaining += timeToAddMs;
+                if (pausedTimeRemaining < 0) pausedTimeRemaining = 0; 
+                if(calculatedExamEndTime) calculatedExamEndTime = new Date(calculatedExamEndTime.getTime() + timeToAddMs);
+                updateCountdown(); 
+            } else if (timerInterval) { 
+                endTime += timeToAddMs;
+                if (endTime < Date.now()) endTime = Date.now(); 
+                if(calculatedExamEndTime) calculatedExamEndTime = new Date(calculatedExamEndTime.getTime() + timeToAddMs);
+                updateCountdown(); 
+            } else { 
+                settings.examDurationMinutes = parseInt(settings.examDurationMinutes) + minutesToAdd;
+                if (settings.examDurationMinutes <=0) settings.examDurationMinutes = 1; 
+                examDurationInput.value = settings.examDurationMinutes;
+                formatTime(settings.examDurationMinutes * 60 * 1000, settings.showSubseconds);
+                actualExamStartTime = null;
+                calculatedExamEndTime = null;
+            }
+            updateExamTimingsDisplay();
+            countdownDisplay.classList.remove('time-up'); 
+        }
+
+
+        function disableTimerControls(isStoppedOrNotStarted, isRunning) {
+            startBtn.disabled = isRunning;
+            startBtn.textContent = 'Start';
+            pauseBtn.disabled = isStoppedOrNotStarted || !isRunning;
+            stopBtn.disabled = isStoppedOrNotStarted || !isRunning;
+            addTimeBtn.disabled = false; 
+        }
+
+        function updateAddTimeButtonText() {
+            if (timeAdjustmentAmount > 0) {
+                addTimeBtn.textContent = `+${timeAdjustmentAmount} Min`;
+            } else if (timeAdjustmentAmount < 0) {
+                addTimeBtn.textContent = `${timeAdjustmentAmount} Min`;
+            } else {
+                addTimeBtn.textContent = `0 Min`;
+            }
+        }
+
+
+        // --- Settings Logic ---
+        function updateSettingsFromUI() {
+            settings.examDurationMinutes = parseInt(examDurationInput.value) || 60;
+            if(settings.examDurationMinutes <= 0) settings.examDurationMinutes = 1;
+            examDurationInput.value = settings.examDurationMinutes;
+
+            settings.noLeaveDurationMinutes = parseInt(noLeaveDurationInput.value) || 0;
+            if(settings.noLeaveDurationMinutes < 0) settings.noLeaveDurationMinutes = 0;
+            noLeaveDurationInput.value = settings.noLeaveDurationMinutes;
+
+            settings.showSubseconds = showSubsecondsCheckbox.checked;
+            settings.showExamTimings = showExamTimingsCheckbox.checked;
+            settings.theme = themeSelector.value;
+            settings.fontSizeVW = parseFloat(fontSizeInput.value) || 12;
+            settings.realTimeFontSizeEM = parseFloat(realTimeFontSizeInput.value) || 1.2;
+            // Real time clock position is updated by drag, not from a UI element here directly
+            // but will be saved.
+        }
+
+        function applyCurrentSettingsToApp() {
+            document.body.classList.toggle('dark-theme', settings.theme === 'dark');
+            
+            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`;
+            fontSizeValueDisplay.textContent = `${settings.fontSizeVW}vw`;
+
+            realTimeClockDisplay.style.fontSize = `${settings.realTimeFontSizeEM}em`;
+            realTimeFontSizeValueDisplay.textContent = `${settings.realTimeFontSizeEM}em`;
+            
+            // Apply Draggable Clock Position
+            realTimeClockDisplay.style.top = settings.realTimeClockTop;
+            if (settings.realTimeClockLeft !== null) {
+                realTimeClockDisplay.style.left = settings.realTimeClockLeft;
+                realTimeClockDisplay.style.right = 'auto';
+            } else {
+                realTimeClockDisplay.style.right = settings.realTimeClockRight;
+                realTimeClockDisplay.style.left = 'auto';
+            }
+            
+            updateExamTimingsDisplay(); 
+
+            if (!timerInterval && !isPaused) { 
+                 formatTime(settings.examDurationMinutes * 60 * 1000, settings.showSubseconds);
+            } else { 
+                updateCountdown();
+            }
+            if (timerInterval && !isPaused) {
+                clearInterval(timerInterval);
+                timerInterval = setInterval(updateCountdown, settings.showSubseconds ? 41 : 1000);
+            }
+        }
+
+
+        function saveSettingsToLocalStorage() {
+            updateSettingsFromUI(); // Get latest non-positional settings
+            // Positional settings (realTimeClockTop, Left, Right) are updated during drag end
+            localStorage.setItem('examTimerSettings', JSON.stringify(settings));
+            alert('Settings saved!');
+        }
+
+        function loadSettingsFromLocalStorage() {
+            const savedSettings = localStorage.getItem('examTimerSettings');
+            if (savedSettings) {
+                const loaded = JSON.parse(savedSettings);
+                settings = { ...settings, ...loaded }; 
+            }
+            examDurationInput.value = settings.examDurationMinutes;
+            noLeaveDurationInput.value = settings.noLeaveDurationMinutes;
+            showSubsecondsCheckbox.checked = settings.showSubseconds;
+            showExamTimingsCheckbox.checked = settings.showExamTimings;
+            themeSelector.value = settings.theme;
+            fontSizeInput.value = settings.fontSizeVW;
+            realTimeFontSizeInput.value = settings.realTimeFontSizeEM;
+            
+            applyCurrentSettingsToApp(); 
+        }
+        
+        // --- Real Time Clock Drag Logic ---
+        function onClockMouseDown(e) {
+            // Prevent dragging if it's a right-click or not primary button
+            if (e.button !== 0) return;
+            
+            isDraggingClock = true;
+            realTimeClockDisplay.classList.add('dragging');
+            
+            // Calculate offset from mouse pointer to top-left of the clock
+            clockOffsetX = e.clientX - realTimeClockDisplay.offsetLeft;
+            clockOffsetY = e.clientY - realTimeClockDisplay.offsetTop;
+            
+            document.addEventListener('mousemove', onClockMouseMove);
+            document.addEventListener('mouseup', onClockMouseUp);
+            
+            e.preventDefault(); // Prevent text selection
+        }
+
+        function onClockMouseMove(e) {
+            if (!isDraggingClock) return;
+            
+            let newLeft = e.clientX - clockOffsetX;
+            let newTop = e.clientY - clockOffsetY;
+
+            // Constrain to viewport
+            const clockRect = realTimeClockDisplay.getBoundingClientRect();
+            const bodyRect = document.body.getBoundingClientRect();
+
+            if (newLeft < 0) newLeft = 0;
+            if (newTop < 0) newTop = 0;
+            if (newLeft + clockRect.width > bodyRect.width) newLeft = bodyRect.width - clockRect.width;
+            if (newTop + clockRect.height > bodyRect.height) newTop = bodyRect.height - clockRect.height;
+
+            realTimeClockDisplay.style.left = `${newLeft}px`;
+            realTimeClockDisplay.style.top = `${newTop}px`;
+            realTimeClockDisplay.style.right = 'auto'; // Ensure right is not used when left is set
+        }
+
+        function onClockMouseUp() {
+            if (!isDraggingClock) return;
+            
+            isDraggingClock = false;
+            realTimeClockDisplay.classList.remove('dragging');
+            
+            document.removeEventListener('mousemove', onClockMouseMove);
+            document.removeEventListener('mouseup', onClockMouseUp);
+
+            // Save the new position to settings
+            settings.realTimeClockLeft = realTimeClockDisplay.style.left;
+            settings.realTimeClockTop = realTimeClockDisplay.style.top;
+            settings.realTimeClockRight = null; // Since we are using left for dragged position
+        }
+
+
+        // --- Event Listeners ---
+        startBtn.addEventListener('click', () => {
+            if (isPaused) {
+                resumeTimer();
+            } else {
+                updateSettingsFromUI(); 
+                startTimer();
+            }
+        });
+        pauseBtn.addEventListener('click', pauseTimer);
+        stopBtn.addEventListener('click', () => stopTimer(true)); 
+        
+        addTimeBtn.addEventListener('click', () => addTime(timeAdjustmentAmount)); 
+        addTimeBtn.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            if (event.deltaY < 0) { 
+                timeAdjustmentAmount = Math.min(60, timeAdjustmentAmount + 1); 
+            } else { 
+                timeAdjustmentAmount = Math.max(-60, timeAdjustmentAmount - 1); 
+            }
+            updateAddTimeButtonText();
+        });
+
+        settingsToggleBtn.addEventListener('click', () => {
+            settingsPanel.classList.toggle('visible');
+        });
+
+        applySettingsBtn.addEventListener('click', () => {
+            updateSettingsFromUI();
+            applyCurrentSettingsToApp();
+            if (!timerInterval && !isPaused) {
+                stopTimer(true); 
+            }
+        });
+        saveSettingsBtn.addEventListener('click', saveSettingsToLocalStorage);
+
+        // Live updates for visual settings
+        fontSizeInput.addEventListener('input', () => {
+            settings.fontSizeVW = parseFloat(fontSizeInput.value);
+            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`;
+            fontSizeValueDisplay.textContent = `${settings.fontSizeVW}vw`;
+        });
+        fontSizeControlArea.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const currentValue = parseFloat(fontSizeInput.value);
+            const step = parseFloat(fontSizeInput.step) || 0.5;
+            let newValue;
+            if (event.deltaY < 0) { 
+                newValue = Math.min(parseFloat(fontSizeInput.max), currentValue + step);
+            } else { 
+                newValue = Math.max(parseFloat(fontSizeInput.min), currentValue - step);
+            }
+            fontSizeInput.value = newValue.toFixed(1); 
+            fontSizeInput.dispatchEvent(new Event('input'));
+        });
+        
+        themeSelector.addEventListener('change', () => {
+            settings.theme = themeSelector.value;
+            document.body.classList.toggle('dark-theme', settings.theme === 'dark');
+        });
+
+        showSubsecondsCheckbox.addEventListener('change', () => {
+            settings.showSubseconds = showSubsecondsCheckbox.checked;
+            if (timerInterval && !isPaused) { 
+                clearInterval(timerInterval);
+                timerInterval = setInterval(updateCountdown, settings.showSubseconds ? 41 : 1000);
+            }
+            updateCountdown(); 
+        });
+        
+        showExamTimingsCheckbox.addEventListener('change', () => {
+            settings.showExamTimings = showExamTimingsCheckbox.checked;
+            updateExamTimingsDisplay();
+        });
+
+        realTimeFontSizeInput.addEventListener('input', () => {
+            settings.realTimeFontSizeEM = parseFloat(realTimeFontSizeInput.value);
+            realTimeClockDisplay.style.fontSize = `${settings.realTimeFontSizeEM}em`;
+            realTimeFontSizeValueDisplay.textContent = `${settings.realTimeFontSizeEM}em`;
+        });
+
+        // Add event listeners for dragging the real-time clock
+        realTimeClockDisplay.addEventListener('mousedown', onClockMouseDown);
+
+
+        // --- Initialization ---
+        setInterval(updateRealTimeClock, 1000);
+        updateRealTimeClock(); 
+        updateAddTimeButtonText(); 
+        
+        loadSettingsFromLocalStorage(); 
+        
+        formatTime(settings.examDurationMinutes * 60 * 1000, settings.showSubseconds); 
+
+        disableTimerControls(true, false); 
+
+    </script>
+</body>
+</html>

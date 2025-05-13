@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Countdown Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .dark-theme {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .light-theme {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        #timer {
+            font-size: 5rem;
+            margin: 20px;
+        }
+        #real-time {
+            font-size: 1.5rem;
+            margin: 10px;
+        }
+        #settings-panel {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #settings-panel input, #settings-panel select {
+            margin: 5px 0;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #settings-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+    </style>
+</head>
+<body class="light-theme">
+    <div id="real-time"></div>
+    <div id="timer">00:00</div>
+    <button id="start-button">Start</button>
+    <button id="pause-button">Pause</button>
+    <button id="stop-button">Stop</button>
+    <button id="add-time-button">Add 1 Minute</button>
+    <button id="settings-button">⚙ Settings</button>
+
+    <div id="settings-panel">
+        <label>
+            Exam Duration (minutes):
+            <input type="number" id="exam-duration" value="60">
+        </label>
+        <label>
+            Show Milliseconds:
+            <input type="checkbox" id="show-milliseconds">
+        </label>
+        <label>
+            Restrict Leaving (minutes):
+            <input type="number" id="restrict-leaving" value="30">
+        </label>
+        <label>
+            Font Size:
+            <input type="number" id="font-size" value="5">
+        </label>
+        <label>
+            Theme:
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </label>
+        <button id="close-settings">Close</button>
+    </div>
+
+    <script>
+        const timerElement = document.getElementById('timer');
+        const realTimeElement = document.getElementById('real-time');
+        const settingsPanel = document.getElementById('settings-panel');
+        const settingsButton = document.getElementById('settings-button');
+        const closeSettingsButton = document.getElementById('close-settings');
+        const themeSelect = document.getElementById('theme');
+        const fontSizeInput = document.getElementById('font-size');
+        const showMillisecondsCheckbox = document.getElementById('show-milliseconds');
+        const examDurationInput = document.getElementById('exam-duration');
+        const restrictLeavingInput = document.getElementById('restrict-leaving');
+
+        let countdownInterval;
+        let remainingTime = 0;
+        let isPaused = false;
+
+        function updateRealTime() {
+            const now = new Date();
+            realTimeElement.textContent = now.toLocaleTimeString();
+        }
+
+        function startCountdown() {
+            const duration = parseInt(examDurationInput.value) * 60 * 1000;
+            remainingTime = isPaused ? remainingTime : duration;
+            isPaused = false;
+
+            countdownInterval = setInterval(() => {
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    alert('Time is up!');
+                    return;
+                }
+
+                remainingTime -= 10;
+                displayTime();
+            }, 10);
+        }
+
+        function pauseCountdown() {
+            isPaused = true;
+            clearInterval(countdownInterval);
+        }
+
+        function stopCountdown() {
+            clearInterval(countdownInterval);
+            remainingTime = 0;
+            displayTime();
+        }
+
+        function addTime() {
+            remainingTime += 60 * 1000;
+            displayTime();
+        }
+
+        function displayTime() {
+            const minutes = Math.floor(remainingTime / (60 * 1000));
+            const seconds = Math.floor((remainingTime % (60 * 1000)) / 1000);
+            const milliseconds = remainingTime % 1000;
+
+            timerElement.textContent = showMillisecondsCheckbox.checked
+                ? `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}:${String(milliseconds).padStart(3, '0')}`
+                : `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function toggleSettingsPanel() {
+            settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function applySettings() {
+            document.body.className = themeSelect.value + '-theme';
+            timerElement.style.fontSize = fontSizeInput.value + 'rem';
+        }
+
+        settingsButton.addEventListener('click', toggleSettingsPanel);
+        closeSettingsButton.addEventListener('click', toggleSettingsPanel);
+        themeSelect.addEventListener('change', applySettings);
+        fontSizeInput.addEventListener('input', applySettings);
+
+        document.getElementById('start-button').addEventListener('click', startCountdown);
+        document.getElementById('pause-button').addEventListener('click', pauseCountdown);
+        document.getElementById('stop-button').addEventListener('click', stopCountdown);
+        document.getElementById('add-time-button').addEventListener('click', addTime);
+
+        setInterval(updateRealTime, 1000);
+        applySettings();
+        displayTime();
+    </script>
+</body>
+</html></body>
