@@ -82,7 +82,7 @@
             font-size: 1.8em;
             text-decoration: none;
             cursor: pointer;
-            z-index: 1002; /* Above settings toggle */
+            z-index: 1002; 
             box-shadow: 0 2px 5px var(--shadow-color);
             transition: background-color 0.2s, transform 0.1s;
         }
@@ -107,8 +107,7 @@
 
         .real-time-clock {
             position: absolute;
-            /* Initial position set by JS from settings */
-            font-size: 1.2em; /* Default, overridden by settings */
+            font-size: 1.2em; 
             color: var(--text-color);
             background-color: var(--secondary-bg-color);
             padding: 8px 12px;
@@ -124,25 +123,35 @@
             box-shadow: 0 5px 15px var(--shadow-color); 
         }
 
-
+        /* Countdown Display Container */
         #countdownDisplay {
-            font-weight: bold;
+            font-weight: bold; /* Main time will inherit this, subseconds will override */
             margin: 20px 0;
-            color: var(--accent-color);
+            color: var(--accent-color); 
             line-height: 1;
-            transition: font-size 0.3s;
             display: flex; 
             justify-content: center;
-            align-items: baseline; 
+            align-items: baseline; /* Align the whole mainTime block (which now contains subseconds) */
             width: 100%; 
         }
+
+        /* Main Time (e.g., 00:00) */
         #mainTime { 
-            font-size: 12vw; /* Default, overridden by settings */
+            font-size: 12vw; /* Default, overridden by settings.fontSizeVW in JS */
+            transition: font-size 0.3s; 
+            display: inline-flex; /* To allow align-items: baseline for its children */
+            align-items: baseline; /* Align the subseconds with the main time digits */
         }
-        #countdownDisplay.time-up #mainTime { 
+        #countdownDisplay.time-up #mainTime { /* Target #mainTime specifically for time up color */
             color: var(--time-up-text);
             animation: pulse 1s infinite;
         }
+        /* The subseconds span is now INSIDE mainTime, so it won't inherit the time-up red directly unless mainTime's color is inherited */
+        #countdownDisplay.time-up #mainTime .subseconds-display {
+             color: var(--accent-color); /* Keep subseconds their normal color even when main time is red */
+             opacity: 0.7; /* Or slightly reduce opacity */
+        }
+
 
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -150,12 +159,14 @@
             100% { transform: scale(1); }
         }
 
+        /* Subseconds (e.g., .00) - NOW NESTED INSIDE #mainTime */
         .subseconds-display {
-            font-size: 0.3em; 
-            opacity: 0.8;
-            margin-left: 0.1em; 
-            min-width: 2.5em; 
-            display: inline-block; 
+            font-size: 0.4em;  /* This is 65% of #mainTime's font-size */
+            font-weight: 500;   
+            opacity: 0.9;       
+            margin-left: 0.05em; 
+            /* No need for display: inline-block if parent #mainTime uses inline-flex */
+            /* vertical-align: baseline; handled by parent #mainTime align-items:baseline */
         }
 
         #noLeaveMessage {
@@ -384,6 +395,9 @@
         }
         @media (max-width: 480px) {
             #mainTime { font-size: 20vw !important; } 
+            /* .subseconds-display's 'em' will scale with #mainTime, so specific vw might not be needed here unless desired */
+            /* If you want it even larger on small screens: */
+            /* .subseconds-display { font-size: 0.7em; }  */
             .controls { gap: 10px; }
             .controls button { width: calc(50% - 5px); margin-bottom: 10px; font-size: 0.9em; padding: 10px 12px; min-width: auto;}
             #settingsPanel { width: 100%; right: -100%; }
@@ -396,14 +410,15 @@
 </head>
 <body>
     <a href="index.html" class="back-to-index-btn" aria-label="Go to Index">
-        <span>←</span> <!-- Left arrow HTML entity -->
+        <span>←</span>
     </a>
 
     <div class="real-time-clock" id="realTimeClock">00:00:00</div>
 
     <div class="container">
         <div id="countdownDisplay">
-            <span id="mainTime">00:00</span><span class="subseconds-display" id="subseconds">.00</span>
+            <!-- HTML CHANGE: Subseconds are now INSIDE mainTime span -->
+            <span id="mainTime"><span class="subseconds-display" id="subseconds">.00</span></span>
         </div>
         <div id="noLeaveMessage">Students may not leave the room yet.</div>
         
@@ -469,8 +484,6 @@
                 <span id="realTimeFontSizeValue">1.2em</span>
             </div>
             
-            <!-- Real Time Clock Location Select REMOVED -->
-            
             <button id="applySettingsBtn">Apply & Restart Timer</button>
             <button id="saveSettingsBtn">Save Current Settings</button>
         </div>
@@ -479,9 +492,9 @@
     <script>
         // --- DOM Elements ---
         const realTimeClockDisplay = document.getElementById('realTimeClock');
-        const countdownDisplay = document.getElementById('countdownDisplay');
-        const mainTimeDisplay = document.getElementById('mainTime');
-        const subsecondsDisplay = document.getElementById('subseconds');
+        const countdownDisplay = document.getElementById('countdownDisplay'); // Outer container
+        const mainTimeDisplay = document.getElementById('mainTime'); // Span for "00:00" and now holds subseconds
+        const subsecondsDisplay = document.getElementById('subseconds'); // Span for ".00"
         const noLeaveMessage = document.getElementById('noLeaveMessage');
         const examTimingsDisplay = document.getElementById('examTimingsDisplay');
         const examStartTimeDisplay = document.getElementById('examStartTime');
@@ -530,11 +543,11 @@
             showSubseconds: false,
             showExamTimings: false,
             theme: 'light',
-            fontSizeVW: 12,
+            fontSizeVW: 12, // This controls #mainTime's font size
             realTimeFontSizeEM: 1.2,
-            realTimeClockTop: '20px', // Default position in pixels or %
-            realTimeClockLeft: null,  // Use null for right, and string value for left
-            realTimeClockRight: '20px' // If left is null, right is used.
+            realTimeClockTop: '20px', 
+            realTimeClockLeft: null,  
+            realTimeClockRight: '20px' 
         };
 
         // --- Utility Functions ---
@@ -544,12 +557,27 @@
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             
-            mainTimeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            // Update only the text content of mainTime, not its child subsecondsDisplay directly here
+            // Find the first text node of mainTime and update it.
+            // This is a bit more robust if other non-text nodes were ever added to mainTime.
+            let mainTimeTextNode = null;
+            for (let node of mainTimeDisplay.childNodes) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    mainTimeTextNode = node;
+                    break;
+                }
+            }
+            const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            if (mainTimeTextNode) {
+                mainTimeTextNode.nodeValue = timeStr;
+            } else { // Fallback if no text node found (e.g., first run, create it)
+                mainTimeDisplay.insertBefore(document.createTextNode(timeStr), subsecondsDisplay);
+            }
             
             if (includeSubseconds) {
                 const centiseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
                 subsecondsDisplay.textContent = `.${centiseconds}`;
-                subsecondsDisplay.style.display = 'inline-block';
+                subsecondsDisplay.style.display = 'inline'; // Or 'inline-block' if specific styling needs it
             } else {
                 subsecondsDisplay.style.display = 'none';
             }
@@ -742,20 +770,17 @@
             settings.theme = themeSelector.value;
             settings.fontSizeVW = parseFloat(fontSizeInput.value) || 12;
             settings.realTimeFontSizeEM = parseFloat(realTimeFontSizeInput.value) || 1.2;
-            // Real time clock position is updated by drag, not from a UI element here directly
-            // but will be saved.
         }
 
         function applyCurrentSettingsToApp() {
             document.body.classList.toggle('dark-theme', settings.theme === 'dark');
             
-            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`;
+            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`; // This controls the base for subseconds too
             fontSizeValueDisplay.textContent = `${settings.fontSizeVW}vw`;
 
             realTimeClockDisplay.style.fontSize = `${settings.realTimeFontSizeEM}em`;
             realTimeFontSizeValueDisplay.textContent = `${settings.realTimeFontSizeEM}em`;
             
-            // Apply Draggable Clock Position
             realTimeClockDisplay.style.top = settings.realTimeClockTop;
             if (settings.realTimeClockLeft !== null) {
                 realTimeClockDisplay.style.left = settings.realTimeClockLeft;
@@ -780,8 +805,7 @@
 
 
         function saveSettingsToLocalStorage() {
-            updateSettingsFromUI(); // Get latest non-positional settings
-            // Positional settings (realTimeClockTop, Left, Right) are updated during drag end
+            updateSettingsFromUI(); 
             localStorage.setItem('examTimerSettings', JSON.stringify(settings));
             alert('Settings saved!');
         }
@@ -805,20 +829,18 @@
         
         // --- Real Time Clock Drag Logic ---
         function onClockMouseDown(e) {
-            // Prevent dragging if it's a right-click or not primary button
             if (e.button !== 0) return;
             
             isDraggingClock = true;
             realTimeClockDisplay.classList.add('dragging');
             
-            // Calculate offset from mouse pointer to top-left of the clock
             clockOffsetX = e.clientX - realTimeClockDisplay.offsetLeft;
             clockOffsetY = e.clientY - realTimeClockDisplay.offsetTop;
             
             document.addEventListener('mousemove', onClockMouseMove);
             document.addEventListener('mouseup', onClockMouseUp);
             
-            e.preventDefault(); // Prevent text selection
+            e.preventDefault(); 
         }
 
         function onClockMouseMove(e) {
@@ -827,7 +849,6 @@
             let newLeft = e.clientX - clockOffsetX;
             let newTop = e.clientY - clockOffsetY;
 
-            // Constrain to viewport
             const clockRect = realTimeClockDisplay.getBoundingClientRect();
             const bodyRect = document.body.getBoundingClientRect();
 
@@ -838,7 +859,7 @@
 
             realTimeClockDisplay.style.left = `${newLeft}px`;
             realTimeClockDisplay.style.top = `${newTop}px`;
-            realTimeClockDisplay.style.right = 'auto'; // Ensure right is not used when left is set
+            realTimeClockDisplay.style.right = 'auto'; 
         }
 
         function onClockMouseUp() {
@@ -850,10 +871,9 @@
             document.removeEventListener('mousemove', onClockMouseMove);
             document.removeEventListener('mouseup', onClockMouseUp);
 
-            // Save the new position to settings
             settings.realTimeClockLeft = realTimeClockDisplay.style.left;
             settings.realTimeClockTop = realTimeClockDisplay.style.top;
-            settings.realTimeClockRight = null; // Since we are using left for dragged position
+            settings.realTimeClockRight = null; 
         }
 
 
@@ -893,10 +913,11 @@
         });
         saveSettingsBtn.addEventListener('click', saveSettingsToLocalStorage);
 
-        // Live updates for visual settings
+        // JS: When countdown font size changes, it only needs to set #mainTime's font-size.
+        // CSS will handle the subseconds' relative size.
         fontSizeInput.addEventListener('input', () => {
             settings.fontSizeVW = parseFloat(fontSizeInput.value);
-            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`;
+            mainTimeDisplay.style.fontSize = `${settings.fontSizeVW}vw`; 
             fontSizeValueDisplay.textContent = `${settings.fontSizeVW}vw`;
         });
         fontSizeControlArea.addEventListener('wheel', (event) => {
@@ -910,7 +931,7 @@
                 newValue = Math.max(parseFloat(fontSizeInput.min), currentValue - step);
             }
             fontSizeInput.value = newValue.toFixed(1); 
-            fontSizeInput.dispatchEvent(new Event('input'));
+            fontSizeInput.dispatchEvent(new Event('input')); // Triggers the 'input' listener above
         });
         
         themeSelector.addEventListener('change', () => {
@@ -938,11 +959,13 @@
             realTimeFontSizeValueDisplay.textContent = `${settings.realTimeFontSizeEM}em`;
         });
 
-        // Add event listeners for dragging the real-time clock
         realTimeClockDisplay.addEventListener('mousedown', onClockMouseDown);
 
 
         // --- Initialization ---
+        // Ensure initial text node exists in #mainTime for formatTime to update
+        mainTimeDisplay.insertBefore(document.createTextNode("00:00"), subsecondsDisplay);
+
         setInterval(updateRealTimeClock, 1000);
         updateRealTimeClock(); 
         updateAddTimeButtonText(); 
