@@ -5,153 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Schedule</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            line-height: 1.6;
-            background-color: #f8f9fa;
-            color: #343a40;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: #0056b3;
-            margin-bottom: 20px;
-        }
-
-        .current-activity-display {
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            font-size: 1.2em;
-            border-left: 5px solid #007bff;
-        }
-
-        .current-activity-display strong {
-            color: #0056b3;
-        }
-
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: 0.9em;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Times New Roman', Times, serif; line-height: 1.6; background-color: #f8f9fa; color: #343a40; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #0056b3; margin-bottom: 20px; }
+        .current-activity-display { text-align: center; margin: 20px 0; padding: 15px; background-color: #e9ecef; border-radius: 8px; }
+        #current-datetime { font-size: 1.1em; color: #6c757d; margin-bottom: 8px; line-height: 1.4; }
+        #current-status { font-size: 1.2em; font-weight: bold; }
+        .schedule-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em; table-layout: fixed; }
+        
+        /* === DEĞİŞİKLİK BURADA === */
         .schedule-table th, .schedule-table td {
-            border: 1px solid #dee2e6;
+            border: 1px solid #838383; /* Kenarlık rengi siyah olarak değiştirildi */
             padding: 8px;
             text-align: center;
             vertical-align: middle;
         }
-
-        .schedule-table thead th {
-            background-color: #f1f3f5;
-            font-weight: bold;
-        }
-
-        .schedule-table .time-slot {
-            font-weight: bold;
-            background-color: #f8f9fa;
-            width: 10%;
-        }
-
-        .schedule-table .activity-cell {
-            text-align: left;
-            vertical-align: top;
-        }
+        /* === DEĞİŞİKLİK SONU === */
         
-        .schedule-table .activity-cell .activity {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .schedule-table .activity-cell .location {
-            font-style: italic;
-            font-size: 0.9em;
-            color: #6c757d;
-        }
-
-        .current-slot {
-            background-color: #ffc107 !important;
-            border: 2px solid #e0a800;
-        }
-
-        .off-duty {
-            background-color: #e9ecef;
-            color: #6c757d;
-            font-style: italic;
-        }
-
-        .center-link {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        a.back-link {
-             display: inline-block;
-             padding: 10px 20px;
-             background-color: #6c757d;
-             color: #ffffff;
-             text-decoration: none;
-             border-radius: 5px;
-             font-weight: bold;
-             transition: background-color 0.3s ease;
-        }
-
-        a.back-link:hover {
-            background-color: #5a6268;
-        }
-
-        @media (max-width: 992px) {
-            body { font-size: 14px; }
-            .schedule-table { font-size: 0.85em; }
-            .schedule-table th, .schedule-table td { padding: 6px; }
-        }
-        @media (max-width: 768px) {
-            .container { padding: 20px; }
-            .schedule-table { display: block; overflow-x: auto; white-space: nowrap; }
-        }
+        .schedule-table thead th { background-color: #f1f3f5; font-weight: bold; position: sticky; top: 0; }
+        .schedule-table .time-slot { font-weight: bold; background-color: #f8f9fa; width: 12%; }
+        .schedule-table .activity-cell { text-align: left; vertical-align: top; word-wrap: break-word; }
+        .schedule-table .activity-cell .activity { font-weight: bold; display: block; margin-bottom: 4px; }
+        .schedule-table .activity-cell .location { font-style: italic; font-size: 0.9em; color: #6c757d; }
+        .filled-slot { background-color: #f1f3f5; }
+        .leave-day-column { background-color: #e0f7fa; font-style: italic; color: #00796b; }
+        .current-slot { background-color: #fff3cd !important; border: 2px solid #e0a800 !important; box-shadow: 0 0 10px rgba(255, 193, 7, 0.5); position: relative; z-index: 10; }
+        .center-link { text-align: center; margin-top: 30px; }
+        a.back-link { display: inline-block; padding: 10px 20px; background-color: #6c757d; color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; transition: background-color 0.3s ease; }
+        a.back-link:hover { background-color: #5a6268; }
+        @media (max-width: 992px) { body { font-size: 14px; } .schedule-table { font-size: 0.85em; } }
+        @media (max-width: 768px) { .container { padding: 20px; } .schedule-table { display: block; overflow-x: auto; white-space: nowrap; } }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Weekly Schedule</h1>
         
         <div id="current-activity-display" class="current-activity-display">
-            Loading current activity...
+            <div id="current-datetime"></div>
+            <div id="current-status"></div>
         </div>
 
         <table class="schedule-table">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
-                </tr>
+            <thead id="schedule-head">
             </thead>
             <tbody id="schedule-body">
             </tbody>
@@ -162,88 +59,78 @@
         </div>
     </div>
 
+    <script src="schedule-config.js"></script>
     <script>
-        const scheduleData = {
-            monday: {
-                "09:30": { activity: "EE103 Laboratory", location: "B2015" },
-                "10:00": { activity: "EE103 Laboratory", location: "B2015" },
-                "10:30": { activity: "EE103 Laboratory", location: "B2015" },
-                "11:00": { activity: "EE103 Laboratory", location: "B2015" },
-                "14:30": { activity: "EE103 Laboratory", location: "B2015" },
-                "15:00": { activity: "EE103 Laboratory", location: "B2015" },
-                "15:30": { activity: "EE103 Laboratory", location: "B2015" },
-                "16:00": { activity: "EE103 Laboratory", location: "B2015" }
-            },
-            tuesday: {
-            },
-            wednesday: {
-            },
-            thursday: {
-                "13:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "14:00": { activity: "EE209 Laboratory", location: "B2015" },
-                "14:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "15:00": { activity: "EE209 Laboratory", location: "B2015" }
-            },
-            friday: {
-                "09:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "10:00": { activity: "EE209 Laboratory", location: "B2015" },
-                "10:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "11:00": { activity: "EE209 Laboratory", location: "B2015" },
-                "11:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "12:00": { activity: "EE209 Laboratory", location: "B2015" },
-                "12:30": { activity: "EE209 Laboratory", location: "B2015" },
-                "13:00": { activity: "EE209 Laboratory", location: "B2015" }
-            },
-            saturday: {
-            }
-        };
-
+        // JavaScript kısmı tamamen aynı kalıyor, değişiklik yapmaya gerek yok.
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const monthAbbrs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        function getWeekDates() {
+            const now = new Date();
+            const weekDates = {};
+            const dayIndex = now.getDay();
+            const offset = dayIndex === 0 ? -6 : 1 - dayIndex;
+
+            for (let i = 0; i < 6; i++) {
+                const date = new Date(now);
+                date.setDate(now.getDate() + offset + i);
+                const dayName = days[i];
+                const formattedDate = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+                weekDates[dayName] = { dateObj: date, formatted: formattedDate };
+            }
+            return weekDates;
+        }
 
         function generateScheduleTable() {
+            const scheduleHead = document.getElementById('schedule-head');
             const scheduleBody = document.getElementById('schedule-body');
+            const weekDates = getWeekDates();
+
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th>Time</th>';
+            days.forEach(day => {
+                const date = weekDates[day].dateObj;
+                const displayDate = `${monthAbbrs[date.getMonth()]}. ${date.getDate()}`;
+                headerRow.innerHTML += `<th>${day.charAt(0).toUpperCase() + day.slice(1)}<br><small>(${displayDate})</small></th>`;
+            });
+            scheduleHead.appendChild(headerRow);
+
             const startTime = new Date();
             startTime.setHours(8, 30, 0, 0);
-
             const endTime = new Date();
             endTime.setHours(17, 30, 0, 0);
-
             let currentTime = new Date(startTime);
 
             while (currentTime < endTime) {
                 const row = document.createElement('tr');
-                const timeCell = document.createElement('td');
                 const timeSlotStart = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                
                 const nextTime = new Date(currentTime);
                 nextTime.setMinutes(nextTime.getMinutes() + 30);
                 const timeSlotEnd = nextTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
 
-                timeCell.textContent = `${timeSlotStart} - ${timeSlotEnd}`;
-                timeCell.className = 'time-slot';
-                row.appendChild(timeCell);
+                row.innerHTML = `<td class="time-slot">${timeSlotStart} - ${timeSlotEnd}</td>`;
 
                 days.forEach(day => {
                     const cell = document.createElement('td');
                     cell.className = 'activity-cell';
-                    const timeKey = timeSlotStart;
-                    const entry = scheduleData[day] && scheduleData[day][timeKey];
-                    
-                    if (entry) {
-                         const activitySpan = document.createElement('span');
-                         activitySpan.className = 'activity';
-                         activitySpan.textContent = entry.activity;
+                    cell.id = `${day}-${timeSlotStart.replace(':', '')}`;
 
-                         const locationSpan = document.createElement('span');
-                         locationSpan.className = 'location';
-                         locationSpan.textContent = entry.location;
-                         
-                         cell.appendChild(activitySpan);
-                         cell.appendChild(locationSpan);
+                    const isLeaveDay = typeof leaveDays !== 'undefined' && leaveDays.includes(weekDates[day].formatted);
+
+                    if (isLeaveDay) {
+                        cell.classList.add('leave-day-column');
+                        if (timeSlotStart === '08:30') cell.innerHTML = 'On Leave';
+                    } else {
+                        const entry = scheduleData[day] && scheduleData[day][timeSlotStart];
+                        if (entry) {
+                            cell.innerHTML = `<span class="activity">${entry.activity}</span><span class="location">${entry.location}</span>`;
+                            if (entry.color) {
+                                cell.style.backgroundColor = entry.color;
+                            } else {
+                                cell.classList.add('filled-slot');
+                            }
+                        }
                     }
-                    
-                    const cellId = `${day}-${timeKey.replace(':', '')}`;
-                    cell.id = cellId;
                     row.appendChild(cell);
                 });
                 scheduleBody.appendChild(row);
@@ -253,31 +140,41 @@
 
         function updateCurrentActivity() {
             const now = new Date();
-            const dayIndex = now.getDay();
-            const currentHour = now.getHours();
-            const currentMinute = now.getMinutes();
+            const datetimeDisplay = document.getElementById('current-datetime');
+            const statusDisplay = document.getElementById('current-status');
+            
+            const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const fullDate = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const time = now.toLocaleTimeString('en-GB');
+            datetimeDisplay.innerHTML = `${dayOfWeek}<br>${fullDate}<br>${time}`;
+            
+            document.querySelectorAll('.current-slot').forEach(el => el.classList.remove('current-slot'));
 
-            const display = document.getElementById('current-activity-display');
+            const formattedDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            if (typeof leaveDays !== 'undefined' && leaveDays.includes(formattedDate)) {
+                statusDisplay.textContent = 'Current Status: On Leave';
+                return;
+            }
+            
+            const dayIndex = now.getDay();
             const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             const currentDayName = dayMap[dayIndex];
-
-            document.querySelectorAll('.current-slot').forEach(el => el.classList.remove('current-slot'));
             
+            const isSaturdayOff = (currentDayName === 'saturday' && (!scheduleData.saturday || Object.keys(scheduleData.saturday).length === 0));
             const isOffDuty = (
-                currentDayName === 'sunday' ||
-                currentHour < 8 || (currentHour === 8 && currentMinute < 30) ||
-                currentHour > 17 || (currentHour === 17 && currentMinute >= 30)
+                currentDayName === 'sunday' || isSaturdayOff ||
+                now.getHours() < 8 || (now.getHours() === 8 && now.getMinutes() < 30) ||
+                now.getHours() > 17 || (now.getHours() === 17 && now.getMinutes() >= 30)
             );
 
             if (isOffDuty) {
-                display.innerHTML = '<strong>Current Status:</strong> Off-Duty';
+                statusDisplay.textContent = 'Current Status: Off-Duty';
                 return;
             }
 
-            const timeSlotMinute = currentMinute < 30 ? '00' : '30';
-            const timeSlotHour = currentHour.toString().padStart(2, '0');
+            const timeSlotMinute = now.getMinutes() < 30 ? '00' : '30';
+            const timeSlotHour = now.getHours().toString().padStart(2, '0');
             const timeKey = `${timeSlotHour}:${timeSlotMinute}`;
-            
             const cellId = `${currentDayName}-${timeKey.replace(':', '')}`;
             const currentCell = document.getElementById(cellId);
 
@@ -286,18 +183,17 @@
             }
 
             const currentEntry = scheduleData[currentDayName] && scheduleData[currentDayName][timeKey];
-
             if (currentEntry) {
-                display.innerHTML = `<strong>Current Activity:</strong> ${currentEntry.activity} (at ${currentEntry.location})`;
+                statusDisplay.textContent = `Current Activity: ${currentEntry.activity} (at ${currentEntry.location})`;
             } else {
-                display.innerHTML = `<strong>Current Activity:</strong> Free Time / Unscheduled`;
+                statusDisplay.textContent = 'Current Activity: Free Time / Unscheduled';
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             generateScheduleTable();
             updateCurrentActivity();
-            setInterval(updateCurrentActivity, 60000); 
+            setInterval(updateCurrentActivity, 1000);
         });
     </script>
 </body>
