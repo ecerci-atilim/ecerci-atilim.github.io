@@ -1,9 +1,3 @@
-// ===================================================================
-// HAFTALIK PROGRAM VERİLERİ
-// Tüm program değişikliklerini bu dosyadan yapacaksınız.
-// Aktivite birden fazla zaman dilimini kaplıyorsa, her dilim için kopyalayın.
-// Zaman dilimleri "HH:MM" formatında olmalıdır.
-// ===================================================================
 const scheduleData = {
             monday: {
                 "09:30": { activity: "EE103 Laboratory (S2)", location: "B2015", color: "#cfe2ff" },
@@ -57,11 +51,6 @@ const scheduleData = {
             }
         };
 
-// ===================================================================
-// İZİN GÜNLERİ LİSTESİ
-// İzinli olduğun günleri 'YYYY-MM-DD' formatında buraya ekle.
-// Bu tarihlerde program tamamen devre dışı kalır ve "On Leave" gösterilir.
-// ===================================================================
 const leaveDays = [
     "2025-11-14",
     "2024-11-15",
