@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Seating Plan Generator</title>
+
+    <!-- CSS Styles -->
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h2 { margin-top: 30px; }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .input-group, .mode-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        label, .group-label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+        }
+        .classroom-checkbox-container {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            height: 250px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        .checkbox-item { display: block; margin-bottom: 8px; }
+        .checkbox-item label { cursor: pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 8px; }
+        .radio-options label { font-weight: normal; margin-right: 15px; cursor: pointer; }
+        .action-group { display: flex; flex-direction: column; gap: 8px; }
+        input[type="file"] { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .generate-btn {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #27ae60;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .generate-btn:hover { background-color: #229954; }
+        .instructions { background-color: #eaf5ff; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        #message-area { padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; display: none; }
+        #message-area.error { background-color: #fbeaea; color: #c0392b; }
+        #message-area.warning { background-color: #fef5e7; color: #d35400; }
+        #seating-plan-output { margin-top: 30px; }
+        .seating-grid { display: grid; gap: 10px; padding: 20px; background-color: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; overflow-x: auto; }
+        .seat, .grid-gap {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 14px;
+            word-break: break-word;
+            position: relative;
+        }
+        .seat.occupied { background-color: #d1e7dd; border-color: #a3cfbb; }
+        .seat.empty { background-color: #f8f9fa; border-color: #e9ecef; }
+        .grid-gap { background-color: transparent; border: none; }
+        .seat-number { font-size: 11px; color: #888; font-weight: bold; position: absolute; top: 5px; left: 5px; }
+        .student-info { margin: auto; }
+        .student-name { font-weight: 500; }
+        .student-id { font-size: 12px; color: #666; margin-top: 4px; }
+        .empty-text { margin: auto; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>Final Seating Plan Generator</h1>
+        <div class="instructions">
+            <strong>How it Works:</strong>
+            <ul>
+                <li>Students are randomly shuffled once.</li>
+                <li>They fill the front row of the first classroom, then the second row, and so on.</li>
+                <li>Remaining students continue this pattern in the next selected classroom.</li>
+                <li>Seat numbers are displayed column-by-column for easy navigation.</li>
+            </ul>
+        </div>
+        <div id="message-area"></div>
+        <div class="controls-grid">
+            <div class="input-group">
+                <label class="group-label">2. Select Classroom(s)</label>
+                <div id="classroom-checkbox-container" class="classroom-checkbox-container"></div>
+            </div>
+            <div>
+                <div class="mode-group">
+                    <label class="group-label">1. Choose Seating Mode</label>
+                    <div class="radio-options">
+                        <label><input type="radio" name="seatingMode" value="normal" checked> Normal Capacity</label>
+                        <label><input type="radio" name="seatingMode" value="exam"> Exam Capacity</label>
+                    </div>
+                </div>
+                <div class="action-group" style="margin-top: 20px;">
+                    <label for="student-list-upload">3. Upload Student List (.csv)</label>
+                    <input type="file" id="student-list-upload" accept=".csv, .txt">
+                    <button id="generate-btn" class="generate-btn" style="margin-top: 10px;">Generate Plan</button>
+                </div>
+            </div>
+        </div>
+        <div id="seating-plan-output"></div>
+    </div>
+    <script>
+        // --- 1. DATABASE AND DOM REFERENCES ---
+        const classroomsDB = [ { id: '1003', name: 'Room 1003', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1009', name: 'Room 1009', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1015', name: 'Room 1015', capacity: 60, examCapacity: 20, cols: 8, rows: 8 }, { id: '1017', name: 'Room 1017', capacity: 63, examCapacity: 24, cols: 6, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1019', name: 'Room 1019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1023', name: 'Room 1023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1024', name: 'Room 1024', capacity: 132, examCapacity: 44, cols: 4, isIrregular: true, colSeats: [11, 11, 11, 11] }, { id: '1025', name: 'Room 1025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1026II', name: 'Room 1026II', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1027', name: 'Room 1027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1029', name: 'Room 1029', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }, { id: '2003', name: 'Room 2003', capacity: 63, examCapacity: 21, cols: 8, rows: 8 }, { id: '2009', name: 'Room 2009', capacity: 63, examCapacity: 24, cols: 8, rows: 8 }, { id: '2015', name: 'Room 2015', capacity: 70, examCapacity: 28, cols: 9, rows: 8 }, { id: '2017', name: 'Room 2017', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '2019', name: 'Room 2019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2023', name: 'Room 2023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2025', name: 'Room 2025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2027', name: 'Room 2027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2029', name: 'Room 2029', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2031', name: 'Room 2031', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2035', name: 'Room 2035', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2043', name: 'Room 2043', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1003', name: 'Room B1003', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1006', name: 'Room B1006', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1007', name: 'Room B1007', capacity: 48, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1008', name: 'Room B1008', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1010', name: 'Room B1010', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1012', name: 'Room B1012', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1014', name: 'Room B1014', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1015', name: 'Room B1015', capacity: 56, examCapacity: 24, cols: 8, rows: 7 }, { id: 'B1017', name: 'Room B1017', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1019', name: 'Room B1019', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1023', name: 'Room B1023', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1025', name: 'Room B1025', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1027', name: 'Room B1027', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1029', name: 'Room B1029', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1033', name: 'Room B1033', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1037', name: 'Room B1037', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }];
+        const studentListUpload = document.getElementById('student-list-upload');
+        const classroomContainer = document.getElementById('classroom-checkbox-container');
+        const generateBtn = document.getElementById('generate-btn');
+        const seatingPlanOutput = document.getElementById('seating-plan-output');
+        const messageArea = document.getElementById('message-area');
+
+        // --- 2. INITIALIZATION ---
+        window.onload = () => {
+            populateClassroomCheckboxes();
+            generateBtn.addEventListener('click', generatePlan);
+        };
+        function populateClassroomCheckboxes() {
+            classroomsDB.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+            classroomsDB.forEach(room => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'checkbox-item';
+                const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = `room-${room.id}`; checkbox.value = room.id;
+                const label = document.createElement('label'); label.htmlFor = `room-${room.id}`; label.textContent = `${room.name} (Normal: ${room.capacity}, Exam: ${room.examCapacity})`;
+                itemDiv.appendChild(checkbox); itemDiv.appendChild(label); classroomContainer.appendChild(itemDiv);
+            });
+        }
+        
+        // --- 3. CORE LOGIC ---
+        function generatePlan() {
+            hideMessage();
+            seatingPlanOutput.innerHTML = '';
+            const seatingMode = document.querySelector('input[name="seatingMode"]:checked').value;
+            const getRoomCapacity = (room) => (seatingMode === 'exam' ? room.examCapacity : room.capacity);
+
+            const selectedClassrooms = Array.from(document.querySelectorAll('#classroom-checkbox-container input:checked'))
+                .map(cb => classroomsDB.find(room => room.id === cb.value)).filter(Boolean);
+            const file = studentListUpload.files[0];
+
+            if (selectedClassrooms.length === 0) return showMessage("Please select at least one classroom.", "error");
+            if (!file) return showMessage("Please upload a student list file.", "error");
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const students = parseStudentList(e.target.result);
+                if (students.length === 0) return showMessage("Student list is empty or in the wrong format.", "error");
+                
+                const totalCapacity = selectedClassrooms.reduce((sum, room) => sum + getRoomCapacity(room), 0);
+                if (students.length > totalCapacity) {
+                    showMessage(`Warning: ${students.length} students exceeds the total ${seatingMode} capacity of ${totalCapacity}. Not all students will be seated.`, "warning");
+                }
+                
+                const shuffledStudents = shuffleArray(students);
+                const studentDistribution = distributeStudentsSequentially(selectedClassrooms, shuffledStudents, getRoomCapacity);
+                
+                studentDistribution.forEach((studentsForRoom, room) => {
+                    renderSinglePlan(room, studentsForRoom, getRoomCapacity(room));
+                });
+            };
+            reader.readAsText(file);
+        }
+
+        // --- 4. SEQUENTIAL STUDENT DISTRIBUTION ---
+        function distributeStudentsSequentially(classrooms, students, capacityGetter) {
+            const distribution = new Map();
+            let studentStartIndex = 0;
+            for (const room of classrooms) {
+                if (studentStartIndex >= students.length) break;
+                const roomCapacity = capacityGetter(room);
+                const studentsForThisRoom = students.slice(studentStartIndex, studentStartIndex + roomCapacity);
+                distribution.set(room, studentsForThisRoom);
+                studentStartIndex += roomCapacity;
+            }
+            return distribution;
+        }
+
+        // --- 5. PARSING AND UTILITIES ---
+        function parseStudentList(csvString) {
+            const students = [];
+            const lines = csvString.trim().split('\n');
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const parts = lines[i].split(',');
+                    if (parts.length >= 3) students.push({ id: parts[0].trim(), name: parts[1].trim(), surname: parts[2].trim() });
+                }
+            }
+            return students;
+        }
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // --- 6. REVISED RENDERING LOGIC ---
+        function renderSinglePlan(classroom, studentsInRoom, capacityUsed) {
+            const title = document.createElement('h2');
+            title.textContent = `Seating Plan for ${classroom.name}`;
+            const grid = document.createElement('div');
+            grid.className = 'seating-grid';
+            grid.style.gridTemplateColumns = `repeat(${classroom.cols}, 1fr)`;
+
+            const numRows = classroom.isIrregular ? Math.max(...classroom.colSeats) : classroom.rows;
+
+            // --- CREATE DUAL ORDER MAPS ---
+            // 1. Order for filling seats (row-by-row)
+            const fillingOrder = [];
+            for (let r = 0; r < numRows; r++) {
+                for (let c = 0; c < classroom.cols; c++) {
+                    const isSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
+                    if (isSeatValid) fillingOrder.push({ r, c });
+                }
+            }
+            // 2. Order for numbering seats (column-by-column)
+            const numberingOrder = [];
+            for (let c = 0; c < classroom.cols; c++) {
+                for (let r = 0; r < numRows; r++) {
+                    const isSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
+                    if (isSeatValid) numberingOrder.push({ r, c });
+                }
+            }
+            
+            // --- ASSIGN STUDENTS ---
+            // Map students to their physical coordinates using the filling order.
+            const seatAssignments = new Map(); // Key: "r,c", Value: student object
+            studentsInRoom.forEach((student, i) => {
+                if (i < capacityUsed) { // Ensure we don't place more students than the mode allows
+                    const coords = fillingOrder[i];
+                    if (coords) seatAssignments.set(`${coords.r},${coords.c}`, student);
+                }
+            });
+
+            // --- RENDER THE GRID ---
+            // Build the grid visually (row-by-row)
+            for (let r = 0; r < numRows; r++) {
+                for (let c = 0; c < classroom.cols; c++) {
+                    const isVisualSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
+
+                    if (isVisualSeatValid) {
+                        // Get student for this visual coordinate
+                        const student = seatAssignments.get(`${r},${c}`);
+                        
+                        // Get seat number for this visual coordinate
+                        const numberIndex = numberingOrder.findIndex(pos => pos.r === r && pos.c === c);
+                        const seatNumber = numberIndex + 1;
+
+                        const seatDiv = document.createElement('div');
+                        seatDiv.classList.add('seat');
+                        seatDiv.innerHTML = `<span class="seat-number">${seatNumber}</span>`;
+
+                        if (student) {
+                            seatDiv.classList.add('occupied');
+                            seatDiv.innerHTML += `<div class="student-info"><div class="student-name">${student.name} ${student.surname}</div><div class="student-id">${student.id}</div></div>`;
+                        } else {
+                            seatDiv.classList.add('empty');
+                            seatDiv.innerHTML += `<div class="empty-text">Empty</div>`;
+                        }
+                        grid.appendChild(seatDiv);
+                    } else {
+                        // This is a gap in an irregular room.
+                        grid.appendChild(document.createElement('div')).className = 'grid-gap';
+                    }
+                }
+            }
+            seatingPlanOutput.appendChild(title);
+            seatingPlanOutput.appendChild(grid);
+        }
+        
+        function showMessage(text, type) {
+            messageArea.textContent = text;
+            messageArea.className = type;
+            messageArea.style.display = 'block';
+        }
+        function hideMessage() { messageArea.style.display = 'none'; }
+    </script>
+</body>
+</html>
