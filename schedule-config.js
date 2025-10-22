@@ -24,6 +24,10 @@ const scheduleData = {
             wednesday: {
                 "11:30": { activity: "Lunch Break", location: "Out of office", color: "#d6d6d6ff"},
                 "12:00": { activity: "Lunch Break", location: "Out of office", color: "#d6d6d6ff"},
+                "09:30": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
+                "10:00": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
+                "10:30": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
+                "11:00": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
             },
             thursday: {
                 "13:30": { activity: "EE209 Laboratory (S1)", location: "B2015", color: "#b2ffd2" },
@@ -34,8 +38,8 @@ const scheduleData = {
                 "12:00": { activity: "Lunch Break", location: "Out of office", color: "#d6d6d6ff"},
                 "09:30": { activity: "EE209 Office Hours", location: "2042", color: "#5dffa6ff"},
                 "10:00": { activity: "EE209 Office Hours", location: "2042", color: "#5dffa6ff"},
-                "10:30": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
-                "11:00": { activity: "EE103 Office Hours", location: "2042", color: "#5dbeffff"},
+                "10:30": { activity: "EE209 Office Hours", location: "2042", color: "#5dffa6ff"},
+                "11:00": { activity: "EE209 Office Hours", location: "2042", color: "#5dffa6ff"},
             },
             friday: {
                 "09:30": { activity: "EE209 Laboratory (S2)", location: "B2015", color: "#f8ff9bff" },

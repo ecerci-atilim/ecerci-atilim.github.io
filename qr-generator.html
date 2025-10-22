@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive QR Code Generator</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.6;
+            background-color: #f8f9fa;
+            color: #212529;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.07);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 15px;
+        }
+        .main-content {
+            display: flex;
+            gap: 30px;
+        }
+        .options-panel {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .preview-panel {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border: 1px dashed #ced4da;
+            border-radius: 8px;
+            min-height: 300px;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 10px;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-size: 1em;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tab.active {
+            color: #0056b3;
+            border-bottom-color: #007bff;
+            font-weight: 600;
+        }
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        input[type="text"], input[type="url"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .customization-section {
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+        h3 {
+            margin-bottom: 15px;
+            color: #343a40;
+        }
+        .color-options, .size-options {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .color-picker-wrapper { display: flex; align-items: center; gap: 5px; }
+        input[type="color"] {
+            width: 40px;
+            height: 40px;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        #qr-canvas {
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+        #download-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #download-btn:hover { background-color: #0056b3; }
+
+        @media (max-width: 800px) {
+            .main-content { flex-direction: column; }
+            .preview-panel { order: -1; margin-bottom: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <div class="main-content">
+            <div class="options-panel">
+                <div class="tabs">
+                    <button class="tab active" data-tab="url">URL</button>
+                    <button class="tab" data-tab="text">Text</button>
+                    <button class="tab" data-tab="wifi">Wi-Fi</button>
+                    <button class="tab" data-tab="vcard">Contact</button>
+                </div>
+
+                <div id="form-url" class="form-section active">
+                    <div class="form-group">
+                        <label for="url-input">Website URL</label>
+                        <input type="url" id="url-input" placeholder="https://example.com" value="https://www.google.com">
+                    </div>
+                </div>
+
+                <div id="form-text" class="form-section">
+                    <div class="form-group">
+                        <label for="text-input">Your Text</label>
+                        <textarea id="text-input" placeholder="Enter any text here..."></textarea>
+                    </div>
+                </div>
+                
+                <div id="form-wifi" class="form-section">
+                    <div class="form-group">
+                        <label for="wifi-ssid">Network Name (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="My Home Network">
+                    </div>
+                    <div class="form-group">
+                        <label for="wifi-password">Password</label>
+                        <input type="password" id="wifi-password" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="wifi-encryption">Encryption</label>
+                        <select id="wifi-encryption">
+                            <option value="WPA" selected>WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">None</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="form-vcard" class="form-section">
+                     <div class="form-group"><label for="vcard-fn">Full Name</label><input type="text" id="vcard-fn" placeholder="John Doe"></div>
+                     <div class="form-group"><label for="vcard-org">Organization</label><input type="text" id="vcard-org" placeholder="ACME Inc."></div>
+                     <div class="form-group"><label for="vcard-tel">Phone</label><input type="tel" id="vcard-tel" placeholder="+1-202-555-0199"></div>
+                     <div class="form-group"><label for="vcard-email">Email</label><input type="email" id="vcard-email" placeholder="john.doe@example.com"></div>
+                </div>
+
+                <div class="customization-section">
+                    <h3>Customization</h3>
+                    <div class="form-group size-options">
+                        <label for="size-input">Size (px)</label>
+                        <input type="number" id="size-input" value="300" min="100" max="1000" step="10">
+                    </div>
+                    <div class="form-group color-options">
+                        <div class="color-picker-wrapper">
+                            <label for="color-dark">Dots</label>
+                            <input type="color" id="color-dark" value="#000000">
+                        </div>
+                        <div class="color-picker-wrapper">
+                            <label for="color-light">Background</label>
+                            <input type="color" id="color-light" value="#ffffff">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="preview-panel">
+                <div id="qr-canvas"></div>
+                <button id="download-btn">Download PNG</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const qrCode = new QRCodeStyling({
+                width: 300,
+                height: 300,
+                data: "https://www.google.com",
+                dotsOptions: { color: "#000000", type: "rounded" },
+                backgroundOptions: { color: "#ffffff" },
+                imageOptions: { crossOrigin: "anonymous", margin: 10 }
+            });
+            qrCode.append(document.getElementById("qr-canvas"));
+
+            const updateQrCode = () => {
+                const activeTab = document.querySelector('.tab.active').dataset.tab;
+                let data = "";
+                
+                if (activeTab === 'url') {
+                    data = document.getElementById('url-input').value;
+                } else if (activeTab === 'text') {
+                    data = document.getElementById('text-input').value;
+                } else if (activeTab === 'wifi') {
+                    const ssid = document.getElementById('wifi-ssid').value;
+                    const password = document.getElementById('wifi-password').value;
+                    const encryption = document.getElementById('wifi-encryption').value;
+                    if (ssid) data = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
+                } else if (activeTab === 'vcard') {
+                    const fn = document.getElementById('vcard-fn').value;
+                    const org = document.getElementById('vcard-org').value;
+                    const tel = document.getElementById('vcard-tel').value;
+                    const email = document.getElementById('vcard-email').value;
+                    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${fn}\nORG:${org}\nTEL:${tel}\nEMAIL:${email}\nEND:VCARD`;
+                }
+                
+                const newOptions = {
+                    width: document.getElementById('size-input').value,
+                    height: document.getElementById('size-input').value,
+                    data: data || " ",
+                    dotsOptions: { color: document.getElementById('color-dark').value },
+                    backgroundOptions: { color: document.getElementById('color-light').value }
+                };
+                qrCode.update(newOptions);
+            };
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelector('.tab.active').classList.remove('active');
+                    document.querySelector('.form-section.active').classList.remove('active');
+                    tab.classList.add('active');
+                    document.getElementById(`form-${tab.dataset.tab}`).classList.add('active');
+                    updateQrCode();
+                });
+            });
+
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                input.addEventListener('input', updateQrCode);
+            });
+
+            document.getElementById('download-btn').addEventListener('click', () => {
+                qrCode.download({ name: "qr-code", extension: "png" });
+            });
+
+            updateQrCode();
+        });
+    </script>
+</body>
+</html>
