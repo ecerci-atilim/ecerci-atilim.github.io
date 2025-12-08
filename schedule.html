@@ -4,498 +4,318 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Schedule - Emre Cerci</title>
+    <!-- Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            /* Theme Variables */
+            --bg-gradient: radial-gradient(circle at 50% 0%, #2d3748 0%, #1a202c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent-color: #63b3ed;
+            
+            --success-color: #68d391;
+            --warning-color: #f6ad55;
+            --danger-color: #fc8181;
+            
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --bg-white: #ffffff;
-            --bg-light: #f7fafc;
-            --border-color: #e2e8f0;
-            
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
-            background: var(--primary-gradient);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+        /* --- Animated Background --- */
+        .floating-shapes {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; pointer-events: none;
         }
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            animation: float 25s infinite ease-in-out;
+        }
+        .shape:nth-child(1) { width: 300px; height: 300px; left: -100px; top: -50px; }
+        .shape:nth-child(2) { width: 200px; height: 200px; right: 10%; top: 40%; animation-delay: -5s; }
+        .shape:nth-child(3) { width: 150px; height: 150px; left: 20%; bottom: 10%; animation-delay: -10s; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
 
+        /* --- Layout --- */
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
-            animation: fadeInUp 0.6s ease-out;
+            position: relative; z-index: 1;
+            padding-bottom: 40px;
         }
 
-        /* Header Card */
-        .header-card {
-            background: var(--bg-white);
-            border-radius: 24px;
-            padding: 40px;
+        /* --- Back Button --- */
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
             margin-bottom: 30px;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); transform: translateX(-5px); }
 
-        .header-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            background: var(--primary-gradient);
-        }
-
-        h1 {
-            font-size: 2.5em;
-            font-weight: 800;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            margin-bottom: 10px;
-            animation: slideInDown 0.7s ease-out;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-light);
-            font-size: 1.1em;
-            animation: slideInDown 0.8s ease-out;
-        }
-
-        /* Status Display */
-        .status-card {
-            background: var(--bg-white);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-            animation: slideInLeft 0.7s ease-out;
-        }
-
-        .status-card::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: var(--accent-gradient);
-            opacity: 0.05;
-            transform: rotate(45deg);
-            pointer-events: none;
-        }
-
-        .current-activity-display {
+        /* --- Dashboard Header --- */
+        .dashboard-header {
             display: grid;
-            grid-template-columns: 1fr auto;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            align-items: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
-        #current-datetime {
-            font-size: 1.1em;
-            color: var(--text-light);
-            line-height: 1.5;
-            font-weight: 500;
+        .title-card {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 30px; display: flex; flex-direction: column; justify-content: center;
         }
 
-        #current-status {
-            background: var(--success-gradient);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1em;
-            box-shadow: var(--shadow-md);
-            white-space: nowrap;
-            animation: pulse 2s infinite;
+        .page-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
         }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.1rem; }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        /* Status Card */
+        .status-card {
+            background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 25px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden;
         }
+        
+        .clock-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+        .date-display { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 15px; }
+        
+        .status-badge {
+            align-self: flex-start;
+            padding: 8px 16px; border-radius: 50px;
+            font-weight: 700; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: var(--transition);
+        }
+        
+        /* Status Variants */
+        .status-active { background: rgba(72, 187, 120, 0.2); color: #68d391; border: 1px solid rgba(72, 187, 120, 0.3); }
+        .status-busy { background: rgba(99, 179, 237, 0.2); color: #63b3ed; border: 1px solid rgba(99, 179, 237, 0.3); }
+        .status-off { background: rgba(160, 174, 192, 0.2); color: #a0aec0; border: 1px solid rgba(160, 174, 192, 0.3); }
+        .status-leave { background: rgba(246, 173, 85, 0.2); color: #f6ad55; border: 1px solid rgba(246, 173, 85, 0.3); }
 
-        /* Schedule Table */
-        .schedule-wrapper {
-            background: var(--bg-white);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: var(--shadow-xl);
-            overflow: hidden;
-            animation: slideInUp 0.8s ease-out;
+        /* --- Schedule Table --- */
+        .table-container {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 20px; overflow-x: auto;
+            animation: fadeInUp 0.8s ease-out;
+            box-shadow: var(--shadow-soft);
         }
 
         .schedule-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            font-size: 0.95em;
+            width: 100%; min-width: 1000px;
+            border-collapse: separate; border-spacing: 6px;
         }
 
-        .schedule-table thead th {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 15px 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            border: none;
+        .schedule-table th {
+            padding: 15px; text-align: left;
+            color: var(--text-secondary); font-weight: 600; text-transform: uppercase;
+            font-size: 0.85rem; letter-spacing: 1px;
+            border-bottom: 1px solid var(--glass-border);
         }
+        .schedule-table th small { display: block; font-size: 0.75rem; opacity: 0.7; margin-top: 4px; }
 
-        .schedule-table thead th:first-child {
-            border-top-left-radius: 12px;
-        }
-
-        .schedule-table thead th:last-child {
-            border-top-right-radius: 12px;
-        }
-
-        .schedule-table thead th small {
-            display: block;
-            font-size: 0.8em;
-            font-weight: 400;
-            margin-top: 3px;
-            opacity: 0.9;
-        }
-
-        .schedule-table tbody td {
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            vertical-align: middle;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .time-slot {
-            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-            font-weight: 700;
-            color: var(--text-dark);
-            text-align: center;
-            font-size: 0.9em;
-            letter-spacing: 0.5px;
+        .time-col {
+            width: 80px; text-align: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            color: var(--text-secondary); opacity: 0.8;
         }
 
         .activity-cell {
-            background: var(--bg-white);
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px; padding: 12px;
+            /*height: 70px; vertical-align: middle;*/
+            transition: var(--transition);
+            border: 1px solid transparent;
             position: relative;
-            overflow: hidden;
-            cursor: default;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .activity-cell:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            z-index: 5;
-        }
-
-        .activity {
-            font-weight: 700;
-            color: var(--text-dark);
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.95em;
-        }
-
-        .location {
-            font-size: 0.85em;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .location::before {
-            content: '📍';
-            font-size: 0.9em;
-        }
-
-        .filled-slot {
-            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
-            border-left: 3px solid #8b5cf6;
-        }
-
-        .leave-day-column {
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
-            color: #92400e;
-            font-weight: 600;
+            vertical-align: middle !important;
             text-align: center;
+            height: auto;
+        }
+
+        .activity-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            gap: 5px;
+        }
+
+        .activity-cell:hover { background: rgba(255, 255, 255, 0.05); }
+
+        /* Content inside cell */
+        .activity { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 4px; color: #1a202c; /* Pastel arka planlarda okunabilirlik için siyah renk */ }
+        .location { font-size: 0.8rem; opacity: 0.8; display: flex; align-items: center; gap: 4px; color: #2d3748; }
+        
+        /* Modifiers */
+        .filled-slot {
+            /* Background color comes from JS */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-left: 4px solid rgba(0,0,0,0.2);
+        }
+        
+        .leave-day {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(246, 173, 85, 0.1),
+                rgba(246, 173, 85, 0.1) 10px,
+                rgba(246, 173, 85, 0.05) 10px,
+                rgba(246, 173, 85, 0.05) 20px
+            );
+            color: var(--warning-color); font-weight: 600; text-align: center;
             font-style: italic;
         }
 
+        /* Current Time Highlight */
         .current-slot {
-            background: var(--warning-gradient) !important;
-            color: white !important;
-            font-weight: bold;
-            border: none !important;
-            box-shadow: 0 0 20px rgba(250, 112, 154, 0.4);
-            animation: glow 1.5s ease-in-out infinite;
-            transform: scale(1.05);
-            z-index: 20;
+            position: relative; z-index: 10;
+            border: 2px solid var(--accent-color) !important;
+            box-shadow: 0 0 15px rgba(99, 179, 237, 0.3) !important;
+            animation: pulse 2s infinite;
         }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(99, 179, 237, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(99, 179, 237, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 179, 237, 0); } }
 
-        .current-slot .activity,
-        .current-slot .location {
-            color: white !important;
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(250, 112, 154, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(250, 112, 154, 0.6); }
-        }
-
-        /* Back Button */
-        .back-button-container {
-            text-align: center;
-            margin-top: 40px;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px 30px;
-            background: var(--primary-gradient);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 1em;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .back-link::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .back-link:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .back-link:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-xl);
-        }
-
-        .back-link svg {
-            width: 20px;
-            height: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .back-link:hover svg {
-            transform: translateX(-3px);
+        /* Error Message if Config Missing */
+        #error-banner {
+            background: rgba(245, 101, 101, 0.2); color: #feb2b2;
+            border: 1px solid #f56565; padding: 15px;
+            border-radius: 12px; margin-bottom: 20px;
+            display: none; text-align: center; font-weight: 600;
         }
 
         /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Responsive */
-        @media (max-width: 992px) {
-            .container {
-                padding: 0;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .current-activity-display {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-            
-            #current-status {
-                display: inline-block;
-                margin-top: 10px;
-            }
-            
-            .schedule-wrapper {
-                padding: 15px;
-                border-radius: 16px;
-            }
-            
-            .schedule-table {
-                font-size: 0.85em;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header-card {
-                padding: 25px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-            }
-            
-            .schedule-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            .schedule-wrapper {
-                padding: 10px;
-            }
+        @media (max-width: 900px) {
+            .dashboard-header { grid-template-columns: 1fr; }
+            .schedule-table th, .schedule-table td { padding: 10px; }
         }
     </style>
 </head>
 <body>
+
+    <!-- Background -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
     <div class="container">
-        <!-- Header -->
-        <div class="header-card">
-            <h1>Weekly Schedule</h1>
-            <p class="subtitle">Real-time Activity Tracker</p>
+        <!-- Navigation -->
+        <a href="index.html" class="back-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Homepage
+        </a>
+
+        <!-- Error Banner (Shows if config is missing) -->
+        <div id="error-banner">
+            ⚠️ Error: 'schedule-config.js' file not found or empty. Please check the file.
         </div>
-        
-        <!-- Current Status -->
-        <div class="status-card">
-            <div class="current-activity-display">
-                <div id="current-datetime"></div>
-                <div id="current-status">Loading...</div>
+
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="title-card">
+                <h1 class="page-title">Weekly Schedule</h1>
+            </div>
+            
+            <div class="status-card">
+                <div>
+                    <div class="clock-display" id="clock">--:--:--</div>
+                    <div class="date-display" id="date">--</div>
+                </div>
+                <div id="status-badge" class="status-badge status-off">
+                    <span>●</span> Loading...
+                </div>
             </div>
         </div>
 
         <!-- Schedule Table -->
-        <div class="schedule-wrapper">
+        <div class="table-container">
             <table class="schedule-table">
                 <thead id="schedule-head">
+                    <!-- JS fills this -->
                 </thead>
                 <tbody id="schedule-body">
+                    <!-- JS fills this -->
                 </tbody>
             </table>
         </div>
-
-        <!-- Back Button -->
-        <div class="back-button-container">
-            <a href="index.html" class="back-link">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-                </svg>
-                Back to Homepage
-            </a>
-        </div>
     </div>
 
+    <!-- EXTERNAL CONFIG: Must be in same folder -->
     <script src="schedule-config.js"></script>
+
     <script>
+        // MAIN LOGIC
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const monthAbbrs = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if window.scheduleData exists (populated by external file)
+            if (typeof window.scheduleData === 'undefined') {
+                document.getElementById('error-banner').style.display = 'block';
+                return; // Stop execution
+            }
+
+            // Ensure leaveDays exists
+            if (typeof window.leaveDays === 'undefined') {
+                window.leaveDays = [];
+            }
+
+            generateScheduleTable();
+            updateRealtime();
+            setInterval(updateRealtime, 1000);
+        });
 
         function getWeekDates() {
             const now = new Date();
             const weekDates = {};
-            const dayIndex = now.getDay();
+            const dayIndex = now.getDay(); 
             const offset = dayIndex === 0 ? -6 : 1 - dayIndex;
 
             for (let i = 0; i < 6; i++) {
@@ -507,145 +327,210 @@
             }
             return weekDates;
         }
+        
+        function addMinutesToTimeStr(timeStr, minutesToAdd) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const date = new Date();
+            date.setHours(hours, minutes + minutesToAdd, 0, 0);
+            return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Yardımcı Fonksiyon: Aynı dersin kaç blok sürdüğünü hesaplar
+        function calculateRowSpan(day, startTime, currentEntry) {
+            let span = 1;
+            let checkTime = addMinutesToTimeStr(startTime, 30);
+            
+            // Sonraki slotlara bak: Veri var mı VE aktivite ismi aynı mı VE lokasyon aynı mı?
+            while (
+                window.scheduleData[day] && 
+                window.scheduleData[day][checkTime] && 
+                window.scheduleData[day][checkTime].activity === currentEntry.activity &&
+                window.scheduleData[day][checkTime].location === currentEntry.location
+            ) {
+                span++;
+                checkTime = addMinutesToTimeStr(checkTime, 30);
+            }
+            return span;
+        }
 
         function generateScheduleTable() {
             const scheduleHead = document.getElementById('schedule-head');
             const scheduleBody = document.getElementById('schedule-body');
+            scheduleHead.innerHTML = ''; // Temizle
+            scheduleBody.innerHTML = ''; // Temizle
+            
             const weekDates = getWeekDates();
 
+            // 1. Header Row
             const headerRow = document.createElement('tr');
             headerRow.innerHTML = '<th>Time</th>';
             days.forEach(day => {
                 const date = weekDates[day].dateObj;
-                const displayDate = `${monthAbbrs[date.getMonth()]} ${date.getDate()}`;
-                headerRow.innerHTML += `<th>${day.charAt(0).toUpperCase() + day.slice(1)}<small>${displayDate}</small></th>`;
+                const displayDate = `${monthNames[date.getMonth()]} ${date.getDate()}`;
+                const isToday = new Date().toDateString() === date.toDateString();
+                const activeClass = isToday ? 'color: var(--accent-color);' : '';
+                
+                headerRow.innerHTML += `
+                    <th style="${activeClass}">
+                        ${day.charAt(0).toUpperCase() + day.slice(1)}
+                        <small>${displayDate}</small>
+                    </th>`;
             });
             scheduleHead.appendChild(headerRow);
 
-            const startTime = new Date();
-            startTime.setHours(8, 30, 0, 0);
-            const endTime = new Date();
-            endTime.setHours(17, 30, 0, 0);
-            let currentTime = new Date(startTime);
+            // Hangi günün hangi saatlerinde "atlama" (skip) yapacağımızı tutan takipçi
+            // Örn: Pazartesi 14:30'da 4'lük bir span varsa, 15:00, 15:30, 16:00 atlanmalı.
+            const skipTracker = {};
+            days.forEach(day => skipTracker[day] = 0);
 
-            while (currentTime < endTime) {
+            // 2. Body Rows (08:30 to 17:30)
+            const startTime = new Date(); startTime.setHours(8, 30, 0, 0);
+            const endTime = new Date(); endTime.setHours(17, 30, 0, 0);
+            let loopTime = new Date(startTime);
+
+            while (loopTime < endTime) {
                 const row = document.createElement('tr');
-                const timeSlotStart = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-                const nextTime = new Date(currentTime);
-                nextTime.setMinutes(nextTime.getMinutes() + 30);
-                const timeSlotEnd = nextTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                const timeStr = loopTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                
+                // Zaman Sütunu
+                row.innerHTML = `<td class="time-col">${timeStr}</td>`;
 
-                row.innerHTML = `<td class="time-slot">${timeSlotStart}</td>`;
+                days.forEach((day, index) => {
+                    // Eğer bu gün için atlanması gereken bir slot varsa, hücresini oluşturma ve sayacı düş
+                    if (skipTracker[day] > 0) {
+                        skipTracker[day]--;
+                        return; 
+                    }
 
-                days.forEach((day, dayIndex) => {
                     const cell = document.createElement('td');
                     cell.className = 'activity-cell';
-                    cell.id = `${day}-${timeSlotStart.replace(':', '')}`;
+                    cell.id = `${day}-${timeStr.replace(':', '')}`;
                     
-                    // Add animation delay for stagger effect
-                    cell.style.animationDelay = `${0.9 + (dayIndex * 0.05)}s`;
-                    cell.style.animation = 'fadeInUp 0.5s ease-out forwards';
+                    // Stagger Animation
+                    cell.style.animation = `fadeInUp 0.5s ease-out forwards ${0.1 * index}s`;
                     cell.style.opacity = '0';
 
-                    const isLeaveDay = typeof leaveDays !== 'undefined' && leaveDays.includes(weekDates[day].formatted);
+                    // Check Leave
+                    const dateStr = weekDates[day].formatted;
+                    const isLeave = (window.leaveDays && window.leaveDays.includes(dateStr));
 
-                    if (isLeaveDay) {
-                        cell.classList.add('leave-day-column');
-                        if (timeSlotStart === '08:30') cell.innerHTML = '🏖️ On Leave';
+                    if (isLeave) {
+                        cell.classList.add('leave-day');
+                        // Tüm gün izinliyse tek tek yazmak yerine ilk slotta yazsın veya her slotta yazsın
+                        // Basitlik için her slotta bırakıyoruz
+                        if (timeStr === '08:30') cell.textContent = "On Leave";
                     } else {
-                        const entry = scheduleData[day] && scheduleData[day][timeSlotStart];
-                        if (entry) {
-                            cell.innerHTML = `<span class="activity">${entry.activity}</span><span class="location">${entry.location}</span>`;
-                            cell.classList.add('filled-slot');
+                        // Check Schedule Data
+                        if (window.scheduleData && window.scheduleData[day]) {
+                            const entry = window.scheduleData[day][timeStr];
+                            
+                            if (entry) {
+                                // --- ROWSPAN MANTIĞI ---
+                                const spanCount = calculateRowSpan(day, timeStr, entry);
+                                
+                                if (spanCount > 1) {
+                                    cell.setAttribute('rowspan', spanCount);
+                                    // Takipçiyi güncelle: (spanCount - 1) kadar sonraki hücreyi atla
+                                    skipTracker[day] = spanCount - 1;
+                                }
+
+                                cell.classList.add('filled-slot');
+                                // Force background color from config
+                                if (entry.color) {
+                                    cell.style.backgroundColor = entry.color;
+                                } else {
+                                    cell.style.backgroundColor = '#e2e8f0';
+                                }
+                                
+                                cell.innerHTML = `
+                                    <div class="activity-content">
+                                        <span class="activity">${entry.activity}</span>
+                                        <span class="location">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                            ${entry.location}
+                                        </span>
+                                    </div>
+                                `;
+                            }
                         }
                     }
                     row.appendChild(cell);
                 });
+
                 scheduleBody.appendChild(row);
-                currentTime.setMinutes(currentTime.getMinutes() + 30);
+                loopTime.setMinutes(loopTime.getMinutes() + 30);
             }
         }
-
-        function updateCurrentActivity() {
+        function updateRealtime() {
             const now = new Date();
-            const datetimeDisplay = document.getElementById('current-datetime');
-            const statusDisplay = document.getElementById('current-status');
             
-            const dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });
-            const fullDate = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            const time = now.toLocaleTimeString('en-GB');
-            
-            datetimeDisplay.innerHTML = `
-                <div style="font-weight: 700; color: var(--text-dark); font-size: 1.2em;">${dayOfWeek}</div>
-                <div>${fullDate}</div>
-                <div style="font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;">${time}</div>
-            `;
-            
+            // 1. Clock & Date
+            document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
+            document.getElementById('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+            // 2. Determine Status
+            const dayIndex = now.getDay(); // 0=Sun
+            const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayName = dayMap[dayIndex];
+            const badge = document.getElementById('status-badge');
+
+            // Reset Highlight
             document.querySelectorAll('.current-slot').forEach(el => el.classList.remove('current-slot'));
 
-            const formattedDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-            if (typeof leaveDays !== 'undefined' && leaveDays.includes(formattedDate)) {
-                statusDisplay.textContent = '🏖️ On Leave';
-                statusDisplay.style.background = 'var(--warning-gradient)';
-                return;
-            }
+            // Logic Variables
+            const isWeekend = (dayIndex === 0); 
+            const hour = now.getHours();
+            const min = now.getMinutes();
+            const isOffHours = (hour < 8 || (hour === 8 && min < 30) || hour > 17 || (hour === 17 && min >= 30));
             
-            const dayIndex = now.getDay();
-            const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-            const currentDayName = dayMap[dayIndex];
-            
-            const isSaturdayOff = (currentDayName === 'saturday' && (!scheduleData.saturday || Object.keys(scheduleData.saturday).length === 0));
-            const isOffDuty = (
-                currentDayName === 'sunday' || isSaturdayOff ||
-                now.getHours() < 8 || (now.getHours() === 8 && now.getMinutes() < 30) ||
-                now.getHours() > 17 || (now.getHours() === 17 && now.getMinutes() >= 30)
-            );
+            const ymd = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+            const isLeave = (window.leaveDays && window.leaveDays.includes(ymd));
 
-            if (isOffDuty) {
-                statusDisplay.textContent = '😴 Off-Duty';
-                statusDisplay.style.background = 'var(--secondary-gradient)';
-                return;
-            }
+            // Default State
+            let statusText = "Off-Duty";
+            let statusClass = "status-off";
+            let icon = "💤";
 
-            const timeSlotMinute = now.getMinutes() < 30 ? '00' : '30';
-            const timeSlotHour = now.getHours().toString().padStart(2, '0');
-            const timeKey = `${timeSlotHour}:${timeSlotMinute}`;
-            const cellId = `${currentDayName}-${timeKey.replace(':', '')}`;
-            const currentCell = document.getElementById(cellId);
+            const isSaturdayOff = (dayName === 'saturday' && (!window.scheduleData.saturday || Object.keys(window.scheduleData.saturday).length === 0));
 
-            if (currentCell) {
-                currentCell.classList.add('current-slot');
-            }
-
-            const currentEntry = scheduleData[currentDayName] && scheduleData[currentDayName][timeKey];
-            if (currentEntry) {
-                statusDisplay.textContent = `📚 ${currentEntry.activity}`;
-                statusDisplay.style.background = 'var(--success-gradient)';
+            if (isLeave) {
+                statusText = "On Leave";
+                statusClass = "status-leave";
+                icon = "🏖️";
+            } else if (isWeekend || isOffHours || isSaturdayOff) {
+                // Keep default Off-Duty
             } else {
-                statusDisplay.textContent = '☕ Free Time';
-                statusDisplay.style.background = 'var(--accent-gradient)';
-            }
-        }
+                // Working Hours
+                statusText = "Available / Free";
+                statusClass = "status-active";
+                icon = "✅";
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Check if scheduleData exists
-            if (typeof scheduleData === 'undefined') {
-                // Create empty schedule data if not exists
-                window.scheduleData = {};
-                days.forEach(day => {
-                    window.scheduleData[day] = {};
-                });
+                // Check specific activity
+                let slotMin = min < 30 ? '00' : '30';
+                const timeKey = String(hour).padStart(2,'0') + ':' + slotMin;
+                
+                // Highlight Cell
+                const cellId = `${dayName}-${timeKey.replace(':','')}`;
+                const cell = document.getElementById(cellId);
+                if (cell) cell.classList.add('current-slot');
+
+                if (window.scheduleData && window.scheduleData[dayName] && window.scheduleData[dayName][timeKey]) {
+                    const act = window.scheduleData[dayName][timeKey];
+                    statusText = act.activity; 
+                    statusClass = "status-busy";
+                    icon = "👨‍🏫";
+                    
+                    if (act.activity.includes("Lunch")) {
+                        icon = "🍔";
+                        statusText = "Lunch Break";
+                        statusClass = "status-leave";
+                    }
+                }
             }
-            
-            if (typeof leaveDays === 'undefined') {
-                window.leaveDays = [];
-            }
-            
-            generateScheduleTable();
-            updateCurrentActivity();
-            setInterval(updateCurrentActivity, 1000);
-        });
+
+            badge.className = `status-badge ${statusClass}`;
+            badge.innerHTML = `<span>${icon}</span> ${statusText}`;
+        }
     </script>
 </body>
 </html>
