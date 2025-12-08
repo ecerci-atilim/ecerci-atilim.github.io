@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exam Seating Plan Generator</title>
+    <title>Final Exam Seating Generator</title>
 
     <style>
         /* --- EKRAN GÖRÜNÜMÜ (SCREEN STYLES) --- */
@@ -51,8 +51,8 @@
         }
         .full-width { grid-column: span 2; }
         
-        label, .group-label { display: block; font-weight: 600; color: #555; }
-        input[type="text"], input[type="time"] {
+        label, .group-label { display: block; font-weight: 600; color: #555; font-size: 14px; }
+        input[type="text"], input[type="time"], input[type="date"] {
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -64,43 +64,60 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             padding: 10px;
-            height: 250px;
+            height: 300px; /* Slightly taller */
             overflow-y: auto;
             background-color: #fff;
         }
-        .checkbox-item { display: block; margin-bottom: 8px; }
+        .checkbox-item { display: block; margin-bottom: 8px; font-size: 14px; }
         .checkbox-item label { cursor: pointer; font-weight: normal; display: inline-flex; align-items: center; gap: 8px; }
-        .radio-options label { font-weight: normal; margin-right: 15px; cursor: pointer; }
-        .action-group { display: flex; flex-direction: column; gap: 8px; }
-        input[type="file"] { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .generate-btn, .print-btn {
-            padding: 12px 15px;
+        .action-group { display: flex; flex-direction: column; gap: 10px; }
+        .file-input-wrapper { display: flex; gap: 10px; align-items: center; }
+        input[type="file"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+        
+        /* Buttons */
+        .btn {
+            padding: 10px 15px;
             font-size: 14px;
             font-weight: 600;
             color: #fff;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            flex: 1;
+            transition: opacity 0.2s;
             text-align: center;
+            display: inline-block;
         }
-        .generate-btn { background-color: #27ae60; flex-basis: 100%; }
-        .generate-btn:hover { background-color: #229954; }
-        
-        .print-btn.attendance { background-color: #3498db; }
-        .print-btn.attendance:hover { background-color: #2980b9; }
-        
-        .print-btn.door { background-color: #8e44ad; }
-        .print-btn.door:hover { background-color: #7d3c98; }
+        .btn:hover { opacity: 0.9; }
+        .btn-green { background-color: #27ae60; width: 100%; margin-top: 10px; font-size: 16px; padding: 12px; }
+        .btn-blue { background-color: #3498db; }
+        .btn-purple { background-color: #8e44ad; }
+        .btn-outline { background-color: transparent; border: 1px solid #3498db; color: #3498db; padding: 6px 12px; font-size: 12px; }
+        .btn-outline:hover { background-color: #eaf5ff; opacity: 1; }
 
-        .instructions { background-color: #eaf5ff; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group .btn { flex: 1; }
+
+        .instructions { background-color: #eaf5ff; border-left: 4px solid #3498db; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 14px; }
         #message-area { padding: 15px; border-radius: 6px; margin-bottom: 20px; font-weight: 500; display: none; }
         #message-area.error { background-color: #fbeaea; color: #c0392b; }
         #message-area.warning { background-color: #fef5e7; color: #d35400; }
         
+        /* Stats Panel */
+        #stats-panel {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none; /* Hidden initially */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+        .stat-box strong { display: block; font-size: 20px; }
+        .stat-box span { font-size: 12px; opacity: 0.8; }
+
         /* Grid Styles (Screen) */
         .seating-grid { 
             display: grid; 
@@ -129,11 +146,11 @@
             border-radius: 6px;
             padding: 8px;
             text-align: center;
-            min-height: 80px;
+            min-height: 85px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            gap: 5px;
+            gap: 4px;
             font-size: 14px;
             word-break: break-word;
             position: relative;
@@ -146,14 +163,15 @@
         .seat.drag-over { border: 2px dashed #2980b9; background-color: #eaf5ff !important; transform: scale(1.02); }
         .seat.dragging { opacity: 0.5; }
         .grid-gap { background-color: transparent; border: none; }
-        .seat-number { font-size: 11px; color: #888; font-weight: bold; align-self: flex-start; margin-bottom: 2px; }
+        
+        .seat-number { font-size: 11px; color: #888; font-weight: bold; align-self: flex-start; }
         .student-info { margin: auto 0; pointer-events: none; width: 100%; }
-        .student-name { font-weight: 500; }
-        .student-id { font-size: 12px; color: #666; margin-top: 4px; }
-        .empty-text { margin: auto; color: #aaa; pointer-events: none; }
+        .student-name { font-weight: 500; line-height: 1.2; }
+        .student-id { font-size: 12px; color: #666; margin-top: 2px; }
+        .empty-text { margin: auto; color: #aaa; pointer-events: none; font-size: 12px; font-weight: bold; }
 
-        .print-signature-area { display: none; } /* Hidden on screen */
-        .print-header, .print-footer { display: none; }
+        /* Elements hidden on screen but used in print */
+        .print-signature-area, .print-absent-check, .print-header, .print-footer { display: none; }
 
         /* --- YAZDIRMA GÖRÜNÜMÜ (PRINT STYLES) --- */
         @media print {
@@ -165,31 +183,42 @@
                 background-color: #fff; 
                 padding: 0; 
                 font-family: 'Times New Roman', Times, serif !important; 
-                color: #000;
+                color: #000 !important; /* Force Black */
                 width: 100%;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
             .app-container { box-shadow: none; border: none; padding: 0; max-width: 100%; margin: 0; width: 100%; }
-            .controls-grid, .instructions, h1, #message-area, .generate-btn, .print-btn, .action-group {
+            /* Hide non-print elements */
+            .controls-grid, .instructions, h1, #message-area, .btn, .action-group, #stats-panel {
                 display: none !important;
             }
             
-            /* -- KEY FIX: SCROLLBAR REMOVAL -- */
+            /* --- 2. BLACK & WHITE ENFORCEMENT --- */
+            * { border-color: #000 !important; color: #000 !important; }
+            .seat.occupied { background-color: transparent !important; }
+            .seat.empty { background-color: transparent !important; }
+            
+            /* Grid & Layout */
             .seating-grid {
-                overflow: visible !important; /* Forces content to expand, removing scrollbars */
-                border: 1px solid #000;
-                background-color: #fff;
+                overflow: visible !important;
+                border: 2px solid #000;
                 padding: 0;
                 gap: 0;
                 display: grid;
                 border-right: none; 
                 border-bottom: none;
-                width: 100%; /* Ensure full width usage */
+                width: 100%;
+                margin-bottom: 0;
             }
 
             .seating-wrapper {
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
+                display: flex;
+                flex-direction: column;
+                height: 98vh; /* Try to fill page nicely */
             }
             .seating-wrapper:last-child { page-break-after: auto; }
 
@@ -197,106 +226,176 @@
             .print-header {
                 display: block;
                 border-bottom: 2px solid #000;
-                padding-bottom: 10px;
+                padding-bottom: 5px;
                 margin-bottom: 10px;
             }
             .print-header-table { width: 100%; border-collapse: collapse; font-family: 'Times New Roman', serif; }
-            .print-header-table td { padding: 4px; vertical-align: top; font-size: 14px; }
+            .print-header-table td { padding: 2px; vertical-align: top; font-size: 12px; }
             .print-header-title { 
-                font-size: 20px; 
+                font-size: 18px; 
                 font-weight: bold; 
                 text-align: center; 
-                margin-bottom: 10px; 
+                margin-bottom: 5px; 
                 text-transform: uppercase; 
             }
             
-            h2 { display: none; }
+            h2 { display: none; } /* Hide screen titles */
 
             .board-indicator {
-                background-color: #ddd;
-                color: #000;
-                border: 1px solid #000;
+                background-color: #eee !important; /* Light grey allowed for board */
+                color: #000 !important;
+                border: 1px solid #000 !important;
                 padding: 2px;
                 font-size: 12px;
-                margin: 0 0 5px 0;
+                margin: 0 0 0 0;
+                border-bottom: none; /* Merge with grid */
             }
             
             /* Seat Box */
             .seat, .grid-gap {
-                border-right: 1px solid #000;
-                border-bottom: 1px solid #000;
+                border-right: 1px solid #000 !important;
+                border-bottom: 1px solid #000 !important;
                 border-top: none;
                 border-left: none;
                 border-radius: 0;
-                padding: 4px;
+                padding: 3px;
                 page-break-inside: avoid;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                min-height: 55px; /* Default height */
+                min-height: 60px;
             }
-            .seat.occupied { background-color: transparent !important; }
-            .seat.empty .empty-text { display: none; }
             
-            .seat-number { 
-                position: static; 
+            /* --- 6. EMPTY SEAT INDICATION --- */
+            .seat.empty .empty-text { 
+                display: block; 
                 font-size: 10px; 
-                color: #000; 
-                margin-bottom: 2px;
+                color: #000 !important; 
+                opacity: 0.6;
+                text-align: center;
+                margin-top: auto;
+                margin-bottom: auto;
             }
-            .student-info { margin: 0; text-align: center; }
-            .student-name { font-size: 11px; font-weight: bold; line-height: 1.1; }
-            .student-id { font-size: 10px; color: #000; margin-top: 1px; }
-
-            /* --- CONDITIONAL DISPLAYS BASED ON PRINT MODE --- */
             
-            /* 1. ATTENDANCE MODE (Yoklama Listesi) */
+            .seat-number { font-size: 10px; color: #000; margin-bottom: 0; position: static; }
+            .student-info { margin: 0; text-align: center; }
+            .student-name { font-size: 10px; font-weight: bold; line-height: 1.1; }
+            .student-id { font-size: 9px; color: #000; margin-top: 1px; }
+
+            /* --- 7. ABSENT CHECKBOX --- */
+            .print-absent-check {
+                display: block;
+                font-size: 8px;
+                text-align: right;
+                margin-top: 2px;
+            }
+            .check-box-visual {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                border: 1px solid #000;
+                margin-left: 2px;
+                vertical-align: middle;
+            }
+
+            /* Signature Area (Only for Attendance) */
             body.print-attendance .print-signature-area {
                 display: block;
                 margin-top: auto;
                 padding-top: 2px;
             }
             body.print-attendance .signature-line {
-                border-bottom: 1px dotted #000;
-                height: 10px;
-                width: 80%;
+                border-bottom: 1px dotted #000 !important;
+                height: 8px;
+                width: 90%;
                 margin: 0 auto;
             }
             body.print-attendance .signature-label {
-                font-size: 8px;
+                font-size: 7px;
                 text-align: center;
                 display: block;
-                margin-top: 1px;
                 font-style: italic;
             }
-            body.print-attendance .print-footer { display: block; }
-            body.print-attendance .proctor-row { display: table-row; }
-            body.print-attendance .door-title { display: none; }
-            body.print-attendance .attendance-title { display: block; }
 
-            /* 2. DOOR MODE (Kapı Planı) */
-            body.print-door .print-signature-area { display: none; } /* No signatures */
-            body.print-door .print-footer { display: none; } /* No footer with signature */
-            body.print-door .proctor-row { display: none; } /* No proctor info */
-            body.print-door .door-title { display: block; }
-            body.print-door .attendance-title { display: none; }
+            /* --- 5. FOOTER REARRANGEMENT --- */
+            .print-footer {
+                display: block;
+                margin-top: auto; /* Push to bottom of wrapper */
+                padding-top: 10px;
+                font-family: 'Times New Roman', serif;
+                font-size: 12px;
+                page-break-inside: avoid;
+            }
             
-            /* Make seats smaller in door mode to save space/ink if needed, or keep same */
+            /* Proctor Section First */
+            .footer-proctor-section {
+                display: flex;
+                justify-content: space-between;
+                border-top: 2px solid #000;
+                padding-top: 10px;
+                margin-bottom: 15px;
+            }
+            
+            /* Notes Section Last */
+            .footer-notes-section {
+                border: 1px solid #000 !important;
+                height: 60px;
+                padding: 5px;
+                position: relative;
+            }
+            .footer-notes-label {
+                font-weight: bold;
+                font-size: 10px;
+                background: #fff;
+                position: absolute;
+                top: -8px;
+                left: 10px;
+                padding: 0 5px;
+            }
+
+            /* CONDITIONAL DISPLAYS */
+            body.print-attendance .print-header-title.door-title { display: none; }
+            body.print-door .print-header-title.attendance-title { display: none; }
+            body.print-door .print-signature-area { display: none; }
+            body.print-door .print-footer { display: none; } /* No footer for door */
+            body.print-door .print-absent-check { display: none; } /* No absent check for door */
             body.print-door .seat { justify-content: center; } 
-            body.print-door .student-info { margin: auto 0; }
+            
+            /* Hide Proctor row in header for Attendance (since it's at bottom now) 
+               But show it for Door? Usually door plans don't need proctor name, 
+               but if you want it, keep it. Request said "No proctor info on door".
+               Request said "Proctor name at bottom of table" for Attendance. */
+            .header-proctor-row { display: none; } 
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <h1>Final Seating Plan Generator</h1>
+        <h1>Final Exam Seating Generator</h1>
         
+        <!-- SUGGESTION: Quick Stats Panel -->
+        <div id="stats-panel">
+            <div class="stat-box">
+                <strong id="stat-students">0</strong>
+                <span>Total Students</span>
+            </div>
+            <div class="stat-box">
+                <strong id="stat-capacity">0</strong>
+                <span>Total Capacity</span>
+            </div>
+            <div class="stat-box">
+                <strong id="stat-occupancy">0%</strong>
+                <span>Occupancy</span>
+            </div>
+        </div>
+
         <div class="instructions">
-            <strong>How it Works:</strong>
+            <strong>Instructions:</strong>
             <ul>
-                <li><strong>Drag & Drop:</strong> You can drag students to swap seats.</li>
-                <li><strong>Print Attendance:</strong> Includes signatures and proctor field (for circulation).</li>
-                <li><strong>Print Door Plan:</strong> No signatures, no proctor info (for posting on door).</li>
+                <li><strong>Template:</strong> Download the sample CSV to see the required format.</li>
+                <li><strong>Drag & Drop:</strong> Swap students after generating the plan.</li>
+                <li><strong>Print Modes:</strong> "Attendance" includes signature/absent boxes. "Door" is clean.</li>
+                <li><strong>Black & White:</strong> All outputs are optimized for black ink printing.</li>
             </ul>
         </div>
 
@@ -312,14 +411,24 @@
                     </div>
                     <div>
                         <label>Course Name</label>
-                        <input type="text" id="course-name" placeholder="e.g. Intro to Algo">
+                        <input type="text" id="course-name" placeholder="e.g. Algorithms">
                     </div>
                     <div>
-                        <label>Exam Time</label>
-                        <input type="text" id="exam-time" placeholder="e.g. 10:00">
+                        <label>Exam Name</label>
+                        <input type="text" id="exam-name" placeholder="e.g. Midterm 1">
                     </div>
-                    <div>
-                        <label>Proctor (Screen Only)</label>
+                    <div class="full-width" style="display:flex; gap:10px;">
+                        <div style="flex:1">
+                            <label>Date</label>
+                            <input type="date" id="exam-date">
+                        </div>
+                        <div style="flex:1">
+                            <label>Time</label>
+                            <input type="time" id="exam-time">
+                        </div>
+                    </div>
+                    <div class="full-width">
+                        <label>Proctor Name (Screen Only)</label>
                         <input type="text" id="proctor-name" placeholder="Instructor Name">
                     </div>
                 </div>
@@ -339,14 +448,19 @@
                 </div>
                 
                 <div class="action-group" style="margin-top: 20px;">
-                    <label for="student-list-upload">3. Upload Student List (.csv)</label>
-                    <input type="file" id="student-list-upload" accept=".csv, .txt">
+                    <label>3. Upload Student List (.csv)</label>
                     
-                    <button id="generate-btn" class="generate-btn">Generate Plan</button>
+                    <button id="download-template-btn" class="btn btn-outline">Download Sample CSV Template</button>
+                    
+                    <div class="file-input-wrapper">
+                        <input type="file" id="student-list-upload" accept=".csv, .txt">
+                    </div>
+                    
+                    <button id="generate-btn" class="btn btn-green">Generate Plan</button>
                     
                     <div class="btn-group" id="print-group" style="display:none;">
-                        <button id="print-attendance-btn" class="print-btn attendance">Print Attendance Sheet</button>
-                        <button id="print-door-btn" class="print-btn door">Print Door Plan</button>
+                        <button id="print-attendance-btn" class="btn btn-blue">Print Attendance Sheet</button>
+                        <button id="print-door-btn" class="btn btn-purple">Print Door Plan</button>
                     </div>
                 </div>
             </div>
@@ -356,21 +470,26 @@
     </div>
 
     <script>
-        // --- 1. DATABASE AND DOM REFERENCES ---
+        // --- 1. DATABASE ---
         const classroomsDB = [ { id: '1003', name: 'Room 1003', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1009', name: 'Room 1009', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1015', name: 'Room 1015', capacity: 60, examCapacity: 20, cols: 8, rows: 8 }, { id: '1017', name: 'Room 1017', capacity: 63, examCapacity: 24, cols: 6, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1019', name: 'Room 1019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1023', name: 'Room 1023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1024', name: 'Room 1024', capacity: 132, examCapacity: 44, cols: 4, isIrregular: true, colSeats: [11, 11, 11, 11] }, { id: '1025', name: 'Room 1025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1026II', name: 'Room 1026II', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1027', name: 'Room 1027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1029', name: 'Room 1029', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }, { id: '2003', name: 'Room 2003', capacity: 63, examCapacity: 21, cols: 8, rows: 8 }, { id: '2009', name: 'Room 2009', capacity: 63, examCapacity: 24, cols: 8, rows: 8 }, { id: '2015', name: 'Room 2015', capacity: 70, examCapacity: 28, cols: 9, rows: 8 }, { id: '2017', name: 'Room 2017', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '2019', name: 'Room 2019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2023', name: 'Room 2023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2025', name: 'Room 2025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2027', name: 'Room 2027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2029', name: 'Room 2029', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2031', name: 'Room 2031', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2035', name: 'Room 2035', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2043', name: 'Room 2043', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1003', name: 'Room B1003', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1006', name: 'Room B1006', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1007', name: 'Room B1007', capacity: 48, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1008', name: 'Room B1008', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1010', name: 'Room B1010', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1012', name: 'Room B1012', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1014', name: 'Room B1014', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1015', name: 'Room B1015', capacity: 56, examCapacity: 24, cols: 8, rows: 7 }, { id: 'B1017', name: 'Room B1017', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1019', name: 'Room B1019', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1023', name: 'Room B1023', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1025', name: 'Room B1025', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1027', name: 'Room B1027', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1029', name: 'Room B1029', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1033', name: 'Room B1033', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1037', name: 'Room B1037', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }];
 
+        // DOM Elements
         const studentListUpload = document.getElementById('student-list-upload');
         const classroomContainer = document.getElementById('classroom-checkbox-container');
         const generateBtn = document.getElementById('generate-btn');
+        const downloadTemplateBtn = document.getElementById('download-template-btn');
         const printGroup = document.getElementById('print-group');
         const printAttendanceBtn = document.getElementById('print-attendance-btn');
         const printDoorBtn = document.getElementById('print-door-btn');
         const seatingPlanOutput = document.getElementById('seating-plan-output');
         const messageArea = document.getElementById('message-area');
+        const statsPanel = document.getElementById('stats-panel');
 
         // Inputs
         const courseCodeInput = document.getElementById('course-code');
         const courseNameInput = document.getElementById('course-name');
+        const examNameInput = document.getElementById('exam-name');
+        const examDateInput = document.getElementById('exam-date');
         const examTimeInput = document.getElementById('exam-time');
         const proctorNameInput = document.getElementById('proctor-name');
 
@@ -378,14 +497,13 @@
         window.onload = () => {
             populateClassroomCheckboxes();
             generateBtn.addEventListener('click', generatePlan);
+            downloadTemplateBtn.addEventListener('click', downloadTemplate);
             
-            // Print Logic
+            // Print Handlers
             printAttendanceBtn.addEventListener('click', () => {
                 document.body.classList.add('print-attendance');
                 document.body.classList.remove('print-door');
                 window.print();
-                // Clean up classes after print dialog closes (approximate)
-                // In modern Chrome/Firefox window.print is blocking, so this runs after cancel/print
                 document.body.classList.remove('print-attendance');
             });
 
@@ -407,12 +525,36 @@
                 itemDiv.appendChild(checkbox); itemDiv.appendChild(label); classroomContainer.appendChild(itemDiv);
             });
         }
+
+        // --- 3. TEMPLATE DOWNLOAD ---
+        function downloadTemplate() {
+            const names = ["Ahmet", "Mehmet", "Ayse", "Fatma", "Ali", "Veli", "Can", "Zeynep", "Elif", "Burak", "Cem", "Deniz", "Ege", "Selin", "Yusuf", "Mert", "Ozan", "Gizem", "Seda", "Eren"];
+            const surnames = ["Yilmaz", "Kaya", "Demir", "Celik", "Sahin", "Yildiz", "Ozturk", "Aydin", "Ozdemir", "Arslan", "Dogan", "Kilic", "Aslan", "Cetin", "Kara", "Koc", "Kurt", "Ozkan", "Simsek", "Polat"];
+            
+            let csvContent = "data:text/csv;charset=utf-8,ID,Name,Surname\n";
+            
+            for (let i = 0; i < 40; i++) {
+                const id = 20230001 + i;
+                const name = names[Math.floor(Math.random() * names.length)];
+                const surname = surnames[Math.floor(Math.random() * surnames.length)];
+                csvContent += `${id},${name},${surname}\n`;
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "student_list_template.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
         
-        // --- 3. CORE LOGIC ---
+        // --- 4. CORE GENERATION LOGIC ---
         function generatePlan() {
             hideMessage();
             seatingPlanOutput.innerHTML = '';
             printGroup.style.display = 'none';
+            statsPanel.style.display = 'none';
 
             const seatingMode = document.querySelector('input[name="seatingMode"]:checked').value;
             const getRoomCapacity = (room) => (seatingMode === 'exam' ? room.examCapacity : room.capacity);
@@ -430,6 +572,14 @@
                 if (students.length === 0) return showMessage("Student list is empty or in the wrong format.", "error");
                 
                 const totalCapacity = selectedClassrooms.reduce((sum, room) => sum + getRoomCapacity(room), 0);
+                
+                // Update Stats
+                document.getElementById('stat-students').textContent = students.length;
+                document.getElementById('stat-capacity').textContent = totalCapacity;
+                const occupancy = Math.round((students.length / totalCapacity) * 100);
+                document.getElementById('stat-occupancy').textContent = `${occupancy}%`;
+                statsPanel.style.display = 'grid';
+
                 if (students.length > totalCapacity) {
                     showMessage(`Warning: ${students.length} students exceeds the total ${seatingMode} capacity of ${totalCapacity}. Not all students will be seated.`, "warning");
                 }
@@ -490,21 +640,24 @@
             const printHeader = document.createElement('div');
             printHeader.className = 'print-header';
             
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('tr-TR');
-            // const timeStr = now.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-
+            // Format Date
+            let dateStr = "___/___/____";
+            if(examDateInput.value) {
+                const d = new Date(examDateInput.value);
+                dateStr = d.toLocaleDateString('tr-TR');
+            }
+            
             printHeader.innerHTML = `
                 <div class="print-header-title attendance-title">EXAM ATTENDANCE SHEET (YOKLAMA LİSTESİ)</div>
                 <div class="print-header-title door-title">EXAM SEATING PLAN (OTURMA PLANI)</div>
                 <table class="print-header-table">
                     <tr>
-                        <td><strong>Course:</strong> ${courseCodeInput.value || '_______'} - ${courseNameInput.value || '__________________'}</td>
-                        <td style="text-align:right;"><strong>Date:</strong> ${dateStr} - ${examTimeInput.value || '____:____'}</td>
+                        <td style="width: 60%;"><strong>Course:</strong> ${courseCodeInput.value || '_______'} - ${courseNameInput.value || '__________________'}</td>
+                        <td style="width: 40%; text-align:right;"><strong>Exam Name:</strong> ${examNameInput.value || '__________________'}</td>
                     </tr>
                     <tr>
                         <td><strong>Classroom:</strong> ${classroom.name}</td>
-                        <td class="proctor-row" style="text-align:right;"><strong>Proctor:</strong> ________________________</td>
+                        <td style="text-align:right;"><strong>Date/Time:</strong> ${dateStr} - ${examTimeInput.value || '____:____'}</td>
                     </tr>
                 </table>
             `;
@@ -515,6 +668,7 @@
             title.textContent = `Seating Plan for ${classroom.name}`;
             wrapper.appendChild(title);
 
+            // Grid
             const grid = document.createElement('div');
             grid.className = 'seating-grid';
             grid.style.gridTemplateColumns = `repeat(${classroom.cols}, 1fr)`;
@@ -571,8 +725,8 @@
                             seatDiv.innerHTML += generateStudentHtml(student);
                         } else {
                             seatDiv.classList.add('empty');
-                            seatDiv.innerHTML += `<div class="empty-text">Empty</div>`;
-                            seatDiv.innerHTML += `<div class="print-signature-area" style="visibility:hidden;"><div class="signature-line"></div></div>`;
+                            // REQUIREMENT 6: Explicitly mark empty seats
+                            seatDiv.innerHTML += `<div class="empty-text">EMPTY / BOŞ</div>`;
                         }
 
                         addDragHandlers(seatDiv);
@@ -584,17 +738,19 @@
             }
             wrapper.appendChild(grid);
 
-            // --- PRINT FOOTER (Only for Attendance) ---
+            // --- 5. FOOTER (Bottom of table, Proctor then Notes) ---
             const footer = document.createElement('div');
             footer.className = 'print-footer';
+            
+            // REQUIREMENT 5: Proctor Name and Signature AT THE BOTTOM
+            // REQUIREMENT 5: Notes/Remarks BELOW Proctor
             footer.innerHTML = `
-                <div class="notes-section">
-                    <strong>Notes / Remarks:</strong>
+                <div class="footer-proctor-section">
+                    <div><strong>Proctor Name:</strong> ____________________________________</div>
+                    <div><strong>Signature:</strong> __________________________</div>
                 </div>
-                <div class="signature-section">
-                    <div>
-                        <strong>Proctor Signature:</strong> ________________________
-                    </div>
+                <div class="footer-notes-section">
+                    <span class="footer-notes-label">Notes / Remarks / Tutanak</span>
                 </div>
             `;
             wrapper.appendChild(footer);
@@ -603,12 +759,15 @@
         }
 
         function generateStudentHtml(student) {
+            // REQUIREMENT 7: Absent Checkbox
             return `
                 <div class="student-info" data-id="${student.id}" data-name="${student.name}" data-surname="${student.surname}">
                     <div class="student-name">${student.name} ${student.surname}</div>
                     <div class="student-id">${student.id}</div>
                 </div>
-                <!-- Signature Area (Logic handled by CSS classes) -->
+                <div class="print-absent-check">
+                    Gelmedi / Absent <span class="check-box-visual"></span>
+                </div>
                 <div class="print-signature-area">
                     <div class="signature-line"></div>
                     <span class="signature-label">Signature / İmza</span>
@@ -616,7 +775,7 @@
             `;
         }
 
-        // --- 6. DRAG AND DROP IMPLEMENTATION ---
+        // --- 6. DRAG AND DROP ---
         let dragSrcEl = null;
 
         function addDragHandlers(seat) {
@@ -656,20 +815,28 @@
                 const srcNumber = dragSrcEl.querySelector('.seat-number').textContent;
                 const targetNumber = this.querySelector('.seat-number').textContent;
                 
-                const getStudentHtml = (el) => {
+                // Helper to extract content minus seat number
+                const getSeatContent = (el) => {
                     const info = el.querySelector('.student-info');
                     if(info) {
-                        return info.outerHTML + `
-                            <div class="print-signature-area">
-                                <div class="signature-line"></div>
-                                <span class="signature-label">Signature / İmza</span>
-                            </div>`;
+                        // It's occupied, return student HTML structure
+                        // We reconstruct it to ensure event listeners/structure remain clean if needed, 
+                        // but simple innerHTML swap works for visual.
+                        // However, we must ensure we don't duplicate the seat number.
+                        // We will return the inner HTML *without* the seat number span.
+                        
+                        // Easiest way: clone and remove seat-number
+                        const clone = el.cloneNode(true);
+                        const sn = clone.querySelector('.seat-number');
+                        if(sn) sn.remove();
+                        return clone.innerHTML;
                     }
-                    return `<div class="empty-text">Empty</div><div class="print-signature-area" style="visibility:hidden;"><div class="signature-line"></div></div>`;
+                    // It's empty
+                    return `<div class="empty-text">EMPTY / BOŞ</div>`;
                 };
 
-                const srcContent = getStudentHtml(dragSrcEl);
-                const targetContent = getStudentHtml(this);
+                const srcContent = getSeatContent(dragSrcEl);
+                const targetContent = getSeatContent(this);
 
                 dragSrcEl.innerHTML = `<span class="seat-number">${srcNumber}</span>` + targetContent;
                 this.innerHTML = `<span class="seat-number">${targetNumber}</span>` + srcContent;
