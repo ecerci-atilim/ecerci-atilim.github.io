@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Exam Seating Generator</title>
+    <title>Exam Seating Generator</title>
 
     <style>
-        /* --- EKRAN GÖRÜNÜMÜ (SCREEN STYLES) --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f7f9;
@@ -64,7 +63,7 @@
             border: 1px solid #ccc;
             border-radius: 6px;
             padding: 10px;
-            height: 300px; /* Slightly taller */
+            height: 300px;
             overflow-y: auto;
             background-color: #fff;
         }
@@ -75,7 +74,6 @@
         .file-input-wrapper { display: flex; gap: 10px; align-items: center; }
         input[type="file"] { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
         
-        /* Buttons */
         .btn {
             padding: 10px 15px;
             font-size: 14px;
@@ -103,14 +101,13 @@
         #message-area.error { background-color: #fbeaea; color: #c0392b; }
         #message-area.warning { background-color: #fef5e7; color: #d35400; }
         
-        /* Stats Panel */
         #stats-panel {
             background-color: #2c3e50;
             color: white;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            display: none; /* Hidden initially */
+            display: none;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             text-align: center;
@@ -118,7 +115,6 @@
         .stat-box strong { display: block; font-size: 20px; }
         .stat-box span { font-size: 12px; opacity: 0.8; }
 
-        /* Grid Styles (Screen) */
         .seating-grid { 
             display: grid; 
             gap: 10px; 
@@ -170,59 +166,37 @@
         .student-id { font-size: 12px; color: #666; margin-top: 2px; }
         .empty-text { margin: auto; color: #aaa; pointer-events: none; font-size: 12px; font-weight: bold; }
 
-        /* Elements hidden on screen but used in print */
         .print-signature-area, .print-absent-check, .print-header, .print-footer { display: none; }
 
-        /* --- YAZDIRMA GÖRÜNÜMÜ (PRINT STYLES) --- */
         @media print {
             @page {
-                margin: 10mm;
+                margin: 5mm;
                 size: portrait;
             }
             body { 
                 background-color: #fff; 
                 padding: 0; 
                 font-family: 'Times New Roman', Times, serif !important; 
-                color: #000 !important; /* Force Black */
+                color: #000 !important;
                 width: 100%;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
             }
             .app-container { box-shadow: none; border: none; padding: 0; max-width: 100%; margin: 0; width: 100%; }
-            /* Hide non-print elements */
             .controls-grid, .instructions, h1, #message-area, .btn, .action-group, #stats-panel {
                 display: none !important;
             }
             
-            /* --- 2. BLACK & WHITE ENFORCEMENT --- */
-            * { border-color: #000 !important; color: #000 !important; }
-            .seat.occupied { background-color: transparent !important; }
-            .seat.empty { background-color: transparent !important; }
-            
-            /* Grid & Layout */
-            .seating-grid {
-                overflow: visible !important;
-                border: 2px solid #000;
-                padding: 0;
-                gap: 0;
-                display: grid;
-                border-right: none; 
-                border-bottom: none;
-                width: 100%;
-                margin-bottom: 0;
-            }
-
             .seating-wrapper {
                 page-break-after: always;
                 page-break-inside: avoid;
                 width: 100%;
                 display: flex;
                 flex-direction: column;
-                height: 98vh; /* Try to fill page nicely */
+                height: 98vh;
             }
             .seating-wrapper:last-child { page-break-after: auto; }
 
-            /* Header */
             .print-header {
                 display: block;
                 border-bottom: 2px solid #000;
@@ -230,7 +204,7 @@
                 margin-bottom: 10px;
             }
             .print-header-table { width: 100%; border-collapse: collapse; font-family: 'Times New Roman', serif; }
-            .print-header-table td { padding: 2px; vertical-align: top; font-size: 12px; }
+            .print-header-table td { padding: 2px; vertical-align: bottom; font-size: 12px; }
             .print-header-title { 
                 font-size: 18px; 
                 font-weight: bold; 
@@ -239,75 +213,90 @@
                 text-transform: uppercase; 
             }
             
-            h2 { display: none; } /* Hide screen titles */
+            h2 { display: none; } 
+
+            .seating-grid {
+                overflow: visible !important;
+                display: grid;
+                background-color: #000;
+                border: 2px solid #000;
+                gap: 1px;
+                padding: 0;
+                width: 100%;
+                margin-bottom: 0;
+                box-sizing: border-box;
+            }
 
             .board-indicator {
-                background-color: #eee !important; /* Light grey allowed for board */
+                background-color: #e0e0e0 !important;
                 color: #000 !important;
-                border: 1px solid #000 !important;
-                padding: 2px;
-                font-size: 12px;
-                margin: 0 0 0 0;
-                border-bottom: none; /* Merge with grid */
+                border: none !important;
+                border-bottom: 2px solid #000 !important;
+                padding: 5px;
+                font-size: 14px;
+                margin: 0;
+                border-radius: 0 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
-            /* Seat Box */
             .seat, .grid-gap {
-                border-right: 1px solid #000 !important;
-                border-bottom: 1px solid #000 !important;
-                border-top: none;
-                border-left: none;
-                border-radius: 0;
-                padding: 3px;
+                background-color: #fff !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 4px;
                 page-break-inside: avoid;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                min-height: 60px;
+                min-height: 65px;
             }
             
-            /* --- 6. EMPTY SEAT INDICATION --- */
             .seat.empty .empty-text { 
                 display: block; 
                 font-size: 10px; 
                 color: #000 !important; 
-                opacity: 0.6;
+                opacity: 0.5;
                 text-align: center;
                 margin-top: auto;
                 margin-bottom: auto;
+                text-transform: uppercase;
+                letter-spacing: 1px;
             }
             
             .seat-number { font-size: 10px; color: #000; margin-bottom: 0; position: static; }
-            .student-info { margin: 0; text-align: center; }
-            .student-name { font-size: 10px; font-weight: bold; line-height: 1.1; }
-            .student-id { font-size: 9px; color: #000; margin-top: 1px; }
+            .student-info { margin: 0; text-align: center; width: 100%; }
+            .student-name { font-size: 11px; font-weight: bold; line-height: 1.1; text-transform: uppercase; }
+            .student-id { font-size: 10px; color: #000; margin-top: 1px; font-family: 'Courier New', Courier, monospace; letter-spacing: -0.5px; }
 
-            /* --- 7. ABSENT CHECKBOX --- */
             .print-absent-check {
                 display: block;
-                font-size: 8px;
+                font-size: 9px;
                 text-align: right;
                 margin-top: 2px;
+                line-height: 1;
             }
             .check-box-visual {
                 display: inline-block;
-                width: 8px;
-                height: 8px;
+                width: 10px;
+                height: 10px;
                 border: 1px solid #000;
-                margin-left: 2px;
+                margin-left: 3px;
                 vertical-align: middle;
+                background: #fff;
             }
 
-            /* Signature Area (Only for Attendance) */
             body.print-attendance .print-signature-area {
                 display: block;
                 margin-top: auto;
-                padding-top: 2px;
+                padding-top: 4px;
+                width: 100%;
             }
             body.print-attendance .signature-line {
-                border-bottom: 1px dotted #000 !important;
-                height: 8px;
-                width: 90%;
+                border-bottom: 1px solid #000 !important;
+                height: 1px;
+                width: 100%;
                 margin: 0 auto;
             }
             body.print-attendance .signature-label {
@@ -315,19 +304,18 @@
                 text-align: center;
                 display: block;
                 font-style: italic;
+                margin-top: 1px;
             }
 
-            /* --- 5. FOOTER REARRANGEMENT --- */
             .print-footer {
                 display: block;
-                margin-top: auto; /* Push to bottom of wrapper */
+                margin-top: auto;
                 padding-top: 10px;
                 font-family: 'Times New Roman', serif;
                 font-size: 12px;
                 page-break-inside: avoid;
             }
             
-            /* Proctor Section First */
             .footer-proctor-section {
                 display: flex;
                 justify-content: space-between;
@@ -336,16 +324,15 @@
                 margin-bottom: 15px;
             }
             
-            /* Notes Section Last */
             .footer-notes-section {
                 border: 1px solid #000 !important;
                 height: 60px;
-                padding: 5px;
+                padding: 8px;
                 position: relative;
             }
             .footer-notes-label {
                 font-weight: bold;
-                font-size: 10px;
+                font-size: 11px;
                 background: #fff;
                 position: absolute;
                 top: -8px;
@@ -353,27 +340,20 @@
                 padding: 0 5px;
             }
 
-            /* CONDITIONAL DISPLAYS */
             body.print-attendance .print-header-title.door-title { display: none; }
             body.print-door .print-header-title.attendance-title { display: none; }
             body.print-door .print-signature-area { display: none; }
-            body.print-door .print-footer { display: none; } /* No footer for door */
-            body.print-door .print-absent-check { display: none; } /* No absent check for door */
+            body.print-door .print-footer { display: none; } 
+            body.print-door .print-absent-check { display: none; } 
             body.print-door .seat { justify-content: center; } 
-            
-            /* Hide Proctor row in header for Attendance (since it's at bottom now) 
-               But show it for Door? Usually door plans don't need proctor name, 
-               but if you want it, keep it. Request said "No proctor info on door".
-               Request said "Proctor name at bottom of table" for Attendance. */
             .header-proctor-row { display: none; } 
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <h1>Final Exam Seating Generator</h1>
+        <h1>Professional Exam Seating Generator</h1>
         
-        <!-- SUGGESTION: Quick Stats Panel -->
         <div id="stats-panel">
             <div class="stat-box">
                 <strong id="stat-students">0</strong>
@@ -392,17 +372,15 @@
         <div class="instructions">
             <strong>Instructions:</strong>
             <ul>
-                <li><strong>Template:</strong> Download the sample CSV to see the required format.</li>
-                <li><strong>Drag & Drop:</strong> Swap students after generating the plan.</li>
-                <li><strong>Print Modes:</strong> "Attendance" includes signature/absent boxes. "Door" is clean.</li>
-                <li><strong>Black & White:</strong> All outputs are optimized for black ink printing.</li>
+                <li><strong>Balanced Distribution:</strong> Students are mixed and distributed equally among rooms.</li>
+                <li><strong>Local Priority:</strong> Inside each room, students are sorted by ID (Seniors get best seats).</li>
+                <li><strong>Modes:</strong> "Packed" places seniors at front/aisles. "Spread" spaces everyone out.</li>
             </ul>
         </div>
 
         <div id="message-area"></div>
 
         <div class="controls-grid">
-            <!-- Left Column: Inputs -->
             <div class="input-group">
                 <div class="meta-data-group">
                     <div>
@@ -437,13 +415,26 @@
                 <div id="classroom-checkbox-container" class="classroom-checkbox-container"></div>
             </div>
 
-            <!-- Right Column: Settings & Actions -->
             <div>
                 <div class="mode-group">
-                    <label class="group-label">1. Choose Seating Mode</label>
+                    <label class="group-label">1. Capacity Mode</label>
                     <div class="radio-options">
                         <label><input type="radio" name="seatingMode" value="normal" checked> Normal Capacity</label>
                         <label><input type="radio" name="seatingMode" value="exam"> Exam Capacity</label>
+                    </div>
+                </div>
+                
+                <div class="mode-group" style="margin-top: 15px;">
+                    <label class="group-label">2. Filling Strategy</label>
+                    <div class="radio-options">
+                        <label title="Fills front rows first. Older students get best seats.">
+                            <input type="radio" name="fillingMode" value="packed" checked> 
+                            Front Packed & Priority
+                        </label>
+                        <label title="Maximizes distance between students.">
+                            <input type="radio" name="fillingMode" value="spread"> 
+                            Spread Out
+                        </label>
                     </div>
                 </div>
                 
@@ -470,10 +461,8 @@
     </div>
 
     <script>
-        // --- 1. DATABASE ---
         const classroomsDB = [ { id: '1003', name: 'Room 1003', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1009', name: 'Room 1009', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1015', name: 'Room 1015', capacity: 60, examCapacity: 20, cols: 8, rows: 8 }, { id: '1017', name: 'Room 1017', capacity: 63, examCapacity: 24, cols: 6, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1019', name: 'Room 1019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1023', name: 'Room 1023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1024', name: 'Room 1024', capacity: 132, examCapacity: 44, cols: 4, isIrregular: true, colSeats: [11, 11, 11, 11] }, { id: '1025', name: 'Room 1025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1026II', name: 'Room 1026II', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1027', name: 'Room 1027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1029', name: 'Room 1029', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }, { id: '2003', name: 'Room 2003', capacity: 63, examCapacity: 21, cols: 8, rows: 8 }, { id: '2009', name: 'Room 2009', capacity: 63, examCapacity: 24, cols: 8, rows: 8 }, { id: '2015', name: 'Room 2015', capacity: 70, examCapacity: 28, cols: 9, rows: 8 }, { id: '2017', name: 'Room 2017', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '2019', name: 'Room 2019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2023', name: 'Room 2023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2025', name: 'Room 2025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2027', name: 'Room 2027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2029', name: 'Room 2029', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2031', name: 'Room 2031', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2035', name: 'Room 2035', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2043', name: 'Room 2043', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1003', name: 'Room B1003', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1006', name: 'Room B1006', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1007', name: 'Room B1007', capacity: 48, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1008', name: 'Room B1008', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1010', name: 'Room B1010', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1012', name: 'Room B1012', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1014', name: 'Room B1014', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1015', name: 'Room B1015', capacity: 56, examCapacity: 24, cols: 8, rows: 7 }, { id: 'B1017', name: 'Room B1017', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1019', name: 'Room B1019', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1023', name: 'Room B1023', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1025', name: 'Room B1025', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1027', name: 'Room B1027', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1029', name: 'Room B1029', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1033', name: 'Room B1033', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1037', name: 'Room B1037', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }];
 
-        // DOM Elements
         const studentListUpload = document.getElementById('student-list-upload');
         const classroomContainer = document.getElementById('classroom-checkbox-container');
         const generateBtn = document.getElementById('generate-btn');
@@ -485,7 +474,6 @@
         const messageArea = document.getElementById('message-area');
         const statsPanel = document.getElementById('stats-panel');
 
-        // Inputs
         const courseCodeInput = document.getElementById('course-code');
         const courseNameInput = document.getElementById('course-name');
         const examNameInput = document.getElementById('exam-name');
@@ -493,13 +481,11 @@
         const examTimeInput = document.getElementById('exam-time');
         const proctorNameInput = document.getElementById('proctor-name');
 
-        // --- 2. INITIALIZATION ---
         window.onload = () => {
             populateClassroomCheckboxes();
             generateBtn.addEventListener('click', generatePlan);
             downloadTemplateBtn.addEventListener('click', downloadTemplate);
             
-            // Print Handlers
             printAttendanceBtn.addEventListener('click', () => {
                 document.body.classList.add('print-attendance');
                 document.body.classList.remove('print-door');
@@ -526,7 +512,6 @@
             });
         }
 
-        // --- 3. TEMPLATE DOWNLOAD ---
         function downloadTemplate() {
             const names = ["Ahmet", "Mehmet", "Ayse", "Fatma", "Ali", "Veli", "Can", "Zeynep", "Elif", "Burak", "Cem", "Deniz", "Ege", "Selin", "Yusuf", "Mert", "Ozan", "Gizem", "Seda", "Eren"];
             const surnames = ["Yilmaz", "Kaya", "Demir", "Celik", "Sahin", "Yildiz", "Ozturk", "Aydin", "Ozdemir", "Arslan", "Dogan", "Kilic", "Aslan", "Cetin", "Kara", "Koc", "Kurt", "Ozkan", "Simsek", "Polat"];
@@ -549,7 +534,6 @@
             document.body.removeChild(link);
         }
         
-        // --- 4. CORE GENERATION LOGIC ---
         function generatePlan() {
             hideMessage();
             seatingPlanOutput.innerHTML = '';
@@ -557,6 +541,7 @@
             statsPanel.style.display = 'none';
 
             const seatingMode = document.querySelector('input[name="seatingMode"]:checked').value;
+            const fillingMode = document.querySelector('input[name="fillingMode"]:checked').value;
             const getRoomCapacity = (room) => (seatingMode === 'exam' ? room.examCapacity : room.capacity);
 
             const selectedClassrooms = Array.from(document.querySelectorAll('#classroom-checkbox-container input:checked'))
@@ -571,9 +556,11 @@
                 const students = parseStudentList(e.target.result);
                 if (students.length === 0) return showMessage("Student list is empty or in the wrong format.", "error");
                 
+                // 1. GLOBAL SHUFFLE: Ensure randomness across all rooms
+                const shuffledStudents = shuffleArray(students);
+
                 const totalCapacity = selectedClassrooms.reduce((sum, room) => sum + getRoomCapacity(room), 0);
                 
-                // Update Stats
                 document.getElementById('stat-students').textContent = students.length;
                 document.getElementById('stat-capacity').textContent = totalCapacity;
                 const occupancy = Math.round((students.length / totalCapacity) * 100);
@@ -584,11 +571,18 @@
                     showMessage(`Warning: ${students.length} students exceeds the total ${seatingMode} capacity of ${totalCapacity}. Not all students will be seated.`, "warning");
                 }
                 
-                const shuffledStudents = shuffleArray(students);
-                const studentDistribution = distributeStudentsSequentially(selectedClassrooms, shuffledStudents, getRoomCapacity);
+                const studentDistribution = distributeStudentsBalanced(selectedClassrooms, shuffledStudents, getRoomCapacity);
                 
-                studentDistribution.forEach((studentsForRoom, room) => {
-                    renderSinglePlan(room, studentsForRoom, getRoomCapacity(room));
+                let currentIndex = 0;
+                studentDistribution.forEach((count, room) => {
+                    // 2. Get random batch for this room
+                    let studentsForRoom = shuffledStudents.slice(currentIndex, currentIndex + count);
+
+                    // 3. LOCAL SORT: Sort only this batch so seniors in this room get priority
+                    studentsForRoom.sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
+
+                    renderSinglePlan(room, studentsForRoom, getRoomCapacity(room), fillingMode);
+                    currentIndex += count;
                 });
 
                 if (seatingPlanOutput.children.length > 0) {
@@ -598,16 +592,43 @@
             reader.readAsText(file);
         }
 
-        function distributeStudentsSequentially(classrooms, students, capacityGetter) {
+        function distributeStudentsBalanced(classrooms, students, capacityGetter) {
             const distribution = new Map();
-            let studentStartIndex = 0;
-            for (const room of classrooms) {
-                if (studentStartIndex >= students.length) break;
-                const roomCapacity = capacityGetter(room);
-                const studentsForThisRoom = students.slice(studentStartIndex, studentStartIndex + roomCapacity);
-                distribution.set(room, studentsForThisRoom);
-                studentStartIndex += roomCapacity;
+            const totalStudents = students.length;
+            const totalCapacity = classrooms.reduce((sum, r) => sum + capacityGetter(r), 0);
+            
+            let assignedCount = 0;
+            const remainingCapacityMap = new Map();
+
+            classrooms.forEach(room => {
+                const cap = capacityGetter(room);
+                const share = (cap / totalCapacity) * totalStudents;
+                let count = Math.floor(share);
+                if (count > cap) count = cap; 
+                distribution.set(room, count);
+                assignedCount += count;
+                remainingCapacityMap.set(room, cap - count);
+            });
+
+            let remainingStudents = totalStudents - assignedCount;
+            while (remainingStudents > 0) {
+                let bestRoom = null;
+                let maxFreeSpace = -1;
+
+                classrooms.forEach(room => {
+                    const free = remainingCapacityMap.get(room);
+                    if (free > 0 && free > maxFreeSpace) {
+                        maxFreeSpace = free;
+                        bestRoom = room;
+                    }
+                });
+
+                if (!bestRoom) break; 
+                distribution.set(bestRoom, distribution.get(bestRoom) + 1);
+                remainingCapacityMap.set(bestRoom, remainingCapacityMap.get(bestRoom) - 1);
+                remainingStudents--;
             }
+
             return distribution;
         }
 
@@ -622,6 +643,7 @@
             }
             return students;
         }
+
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -631,16 +653,13 @@
             return shuffled;
         }
 
-        // --- 5. REVISED RENDERING LOGIC ---
-        function renderSinglePlan(classroom, studentsInRoom, capacityUsed) {
+        function renderSinglePlan(classroom, studentsInRoom, capacityLimit, fillingMode) {
             const wrapper = document.createElement('div');
             wrapper.className = 'seating-wrapper';
 
-            // --- PRINT HEADER ---
             const printHeader = document.createElement('div');
             printHeader.className = 'print-header';
             
-            // Format Date
             let dateStr = "___/___/____";
             if(examDateInput.value) {
                 const d = new Date(examDateInput.value);
@@ -663,55 +682,80 @@
             `;
             wrapper.appendChild(printHeader);
 
-            // Screen Only Title
             const title = document.createElement('h2');
             title.textContent = `Seating Plan for ${classroom.name}`;
             wrapper.appendChild(title);
 
-            // Grid
             const grid = document.createElement('div');
             grid.className = 'seating-grid';
             grid.style.gridTemplateColumns = `repeat(${classroom.cols}, 1fr)`;
 
-            // BOARD INDICATOR
             const board = document.createElement('div');
             board.className = 'board-indicator';
             board.textContent = "BOARD / TAHTA";
             grid.appendChild(board);
 
             const numRows = classroom.isIrregular ? Math.max(...classroom.colSeats) : classroom.rows;
+            const validSeats = [];
 
-            const fillingOrder = [];
             for (let r = 0; r < numRows; r++) {
                 for (let c = 0; c < classroom.cols; c++) {
                     const isSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
-                    if (isSeatValid) fillingOrder.push({ r, c });
+                    if (isSeatValid) {
+                        validSeats.push({ r, c });
+                    }
                 }
             }
-            const numberingOrder = [];
-            for (let c = 0; c < classroom.cols; c++) {
-                for (let r = 0; r < numRows; r++) {
-                    const isSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
-                    if (isSeatValid) numberingOrder.push({ r, c });
+
+            let sortedSeatsForAssignment = [];
+
+            if (fillingMode === 'packed') {
+                const centerCol = (classroom.cols - 1) / 2;
+                sortedSeatsForAssignment = [...validSeats].sort((a, b) => {
+                    const costA = (a.r * 1000) + Math.abs(a.c - centerCol);
+                    const costB = (b.r * 1000) + Math.abs(b.c - centerCol);
+                    return costA - costB;
+                });
+            } else {
+                if (studentsInRoom.length === 0) {
+                    sortedSeatsForAssignment = validSeats;
+                } else {
+                    const step = Math.max(1, Math.floor(validSeats.length / studentsInRoom.length));
+                    for (let i = 0; i < studentsInRoom.length; i++) {
+                        let idx = Math.floor(i * (validSeats.length / studentsInRoom.length));
+                        if (idx >= validSeats.length) idx = validSeats.length - 1;
+                        sortedSeatsForAssignment.push(validSeats[idx]);
+                    }
                 }
             }
-            
-            const seatAssignments = new Map(); 
+
+            const seatAssignments = new Map();
             studentsInRoom.forEach((student, i) => {
-                if (i < capacityUsed) {
-                    const coords = fillingOrder[i];
-                    if (coords) seatAssignments.set(`${coords.r},${coords.c}`, student);
+                if (i < sortedSeatsForAssignment.length) {
+                    const seat = sortedSeatsForAssignment[i];
+                    seatAssignments.set(`${seat.r},${seat.c}`, student);
                 }
             });
 
             for (let r = 0; r < numRows; r++) {
                 for (let c = 0; c < classroom.cols; c++) {
-                    const isVisualSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
+                    const isSeatValid = classroom.isIrregular ? r < classroom.colSeats[c] : true;
 
-                    if (isVisualSeatValid) {
+                    if (isSeatValid) {
                         const student = seatAssignments.get(`${r},${c}`);
-                        const numberIndex = numberingOrder.findIndex(pos => pos.r === r && pos.c === c);
-                        const seatNumber = numberIndex + 1;
+                        
+                        let seatNumber = 0;
+                        let count = 0;
+                        for(let cc=0; cc<classroom.cols; cc++) {
+                            for(let rr=0; rr<numRows; rr++) {
+                                const valid = classroom.isIrregular ? rr < classroom.colSeats[cc] : true;
+                                if(valid) {
+                                    count++;
+                                    if(rr === r && cc === c) seatNumber = count;
+                                }
+                            }
+                        }
+
                         const seatId = `seat-${classroom.id}-${seatNumber}`;
 
                         const seatDiv = document.createElement('div');
@@ -725,25 +769,23 @@
                             seatDiv.innerHTML += generateStudentHtml(student);
                         } else {
                             seatDiv.classList.add('empty');
-                            // REQUIREMENT 6: Explicitly mark empty seats
                             seatDiv.innerHTML += `<div class="empty-text">EMPTY / BOŞ</div>`;
                         }
 
                         addDragHandlers(seatDiv);
                         grid.appendChild(seatDiv);
                     } else {
-                        grid.appendChild(document.createElement('div')).className = 'grid-gap';
+                        const gapDiv = document.createElement('div');
+                        gapDiv.className = 'grid-gap'; 
+                        gapDiv.style.backgroundColor = "#eee";
+                        grid.appendChild(gapDiv);
                     }
                 }
             }
             wrapper.appendChild(grid);
 
-            // --- 5. FOOTER (Bottom of table, Proctor then Notes) ---
             const footer = document.createElement('div');
             footer.className = 'print-footer';
-            
-            // REQUIREMENT 5: Proctor Name and Signature AT THE BOTTOM
-            // REQUIREMENT 5: Notes/Remarks BELOW Proctor
             footer.innerHTML = `
                 <div class="footer-proctor-section">
                     <div><strong>Proctor Name:</strong> ____________________________________</div>
@@ -759,7 +801,6 @@
         }
 
         function generateStudentHtml(student) {
-            // REQUIREMENT 7: Absent Checkbox
             return `
                 <div class="student-info" data-id="${student.id}" data-name="${student.name}" data-surname="${student.surname}">
                     <div class="student-name">${student.name} ${student.surname}</div>
@@ -775,7 +816,6 @@
             `;
         }
 
-        // --- 6. DRAG AND DROP ---
         let dragSrcEl = null;
 
         function addDragHandlers(seat) {
@@ -815,23 +855,14 @@
                 const srcNumber = dragSrcEl.querySelector('.seat-number').textContent;
                 const targetNumber = this.querySelector('.seat-number').textContent;
                 
-                // Helper to extract content minus seat number
                 const getSeatContent = (el) => {
                     const info = el.querySelector('.student-info');
                     if(info) {
-                        // It's occupied, return student HTML structure
-                        // We reconstruct it to ensure event listeners/structure remain clean if needed, 
-                        // but simple innerHTML swap works for visual.
-                        // However, we must ensure we don't duplicate the seat number.
-                        // We will return the inner HTML *without* the seat number span.
-                        
-                        // Easiest way: clone and remove seat-number
                         const clone = el.cloneNode(true);
                         const sn = clone.querySelector('.seat-number');
                         if(sn) sn.remove();
                         return clone.innerHTML;
                     }
-                    // It's empty
                     return `<div class="empty-text">EMPTY / BOŞ</div>`;
                 };
 
