@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage - [Your Website Name Here]</title>
-    <meta name="description" content="[A brief description of your website here]">
-
+    <title>Emre Cerci - Research Assistant</title>
+    <meta name="description" content="Research Assistant at Atılım University - Signal Processing & Neural Networks">
+    
     <style>
         * {
             margin: 0;
@@ -13,203 +13,553 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary-color: #64748b;
+            --accent-color: #0ea5e9;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.6;
-            background-color: #f8f9fa;
-            color: #343a40;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-dark);
             min-height: 100vh;
-            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,138.7C960,139,1056,117,1152,106.7C1248,96,1344,96,1392,96L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            max-width: 800px;
-            width: 100%;
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
         }
 
-        header h1 {
-            color: #0056b3;
+        /* Header Section */
+        .header-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: var(--shadow-xl);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .header-content {
+            text-align: center;
+            position: relative;
+        }
+
+        .header-content h1 {
+            font-size: 3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
-            font-size: 2.5em;
-            font-weight: bold;
+            animation: fadeInUp 0.8s ease-out;
         }
 
-        header .subtitle {
-            color: #6c757d;
-            margin-bottom: 40px;
+        .header-content .title {
+            font-size: 1.3em;
+            color: var(--text-light);
+            margin-bottom: 15px;
+            font-weight: 500;
+            animation: fadeInUp 0.9s ease-out;
+        }
+
+        .header-content .institution {
             font-size: 1.1em;
+            color: var(--secondary-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            animation: fadeInUp 1s ease-out;
         }
 
-        h2 {
-            margin-bottom: 25px;
-            color: #495057;
-            font-size: 1.6em;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 10px;
-            display: inline-block;
-            font-weight: bold;
+        .institution-icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-color);
         }
 
-        .navigation-menu ul {
-            list-style: none;
-            padding: 0;
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        /* Tools Section */
+        .tools-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow-lg);
+            animation: slideInLeft 0.7s ease-out;
+        }
+
+        .section-header {
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
             justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 40px;
         }
 
-        .nav-button {
-            display: inline-block;
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 12px 25px;
+        .tool-card {
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 18px 20px;
             text-decoration: none;
-            border-radius: 5px;
-            font-family: 'Times New Roman', Times, serif;
-            font-weight: bold;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-            border: none;
-            cursor: pointer;
-            min-width: 180px;
-            font-size: 1em;
+            color: var(--text-dark);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .nav-button:hover,
-        .nav-button:focus {
-            background-color: #0056b3;
-            color: #ffffff;
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            outline: none;
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
         }
 
-        .useful-links {
-            margin-top: 30px;
-            text-align: left;
-            padding: 20px;
-            background-color: #f1f3f5;
-            border-radius: 8px;
+        .tool-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
         }
 
-        .useful-links h2 {
-            text-align: center;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            display: block;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 10px;
+        .tool-card:hover .tool-icon {
+            transform: scale(1.1);
+            filter: brightness(0) invert(1);
         }
 
-        .useful-links ul {
+        .tool-name {
+            font-weight: 600;
+            font-size: 1em;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .tool-card:hover .tool-name {
+            color: white;
+        }
+
+        .tool-badge {
+            background: var(--accent-color);
+            color: white;
+            font-size: 0.7em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Links Section */
+        .links-section {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.7s ease-out;
+        }
+
+        .links-list {
             list-style: none;
-            padding-left: 0;
         }
 
-        .useful-links li {
-            margin-bottom: 12px;
-            font-size: 1.1em;
+        .link-item {
+            margin-bottom: 15px;
         }
 
-        .useful-links a {
-            color: #0056b3;
+        .link-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--bg-light);
+            border: 2px solid transparent;
+            border-radius: 12px;
             text-decoration: none;
-            transition: color 0.2s ease, text-decoration 0.2s ease;
-            word-break: break-all;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
-        .useful-links a:hover,
-        .useful-links a:focus {
-            color: #007bff;
-            text-decoration: underline;
-            outline: none;
+        .link-button:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            transform: translateX(5px);
+            box-shadow: var(--shadow-md);
         }
 
-        .useful-links a i {
-            margin-right: 8px;
-            color: #6c757d;
+        .link-icon {
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
         }
 
-        footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-            font-size: 0.9em;
-            color: #6c757d;
+        /* Footer */
+        .footer {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.8s ease-out;
         }
 
-        @media (max-width: 768px) {
-            .container { padding: 30px; }
-            header h1 { font-size: 2.2em; }
-            h2 { font-size: 1.5em; }
-            .navigation-menu ul { flex-direction: column; align-items: center; gap: 12px; }
-            .nav-button { width: 90%; padding: 12px 20px; min-width: unset; }
-            .useful-links { padding: 15px; }
-            .useful-links h2 { font-size: 1.4em; }
-            .useful-links li { font-size: 1.05em; }
+        .footer-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            color: var(--text-light);
+            font-size: 0.95em;
         }
 
-        @media (max-width: 480px) {
-            .container { padding: 20px; }
-            header h1 { font-size: 2em; }
-            header .subtitle { font-size: 1.1em; }
-            h2 { font-size: 1.4em; }
-            .nav-button { width: 100%; padding: 10px 15px; }
-            .useful-links { padding: 10px; text-align: center; }
-            .useful-links h2 { font-size: 1.3em; }
-            .useful-links li { font-size: 1em; }
+        .footer-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border-color);
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content h1 {
+                font-size: 2.5em;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            .header-card {
+                padding: 30px 20px;
+            }
+
+            .header-content h1 {
+                font-size: 2em;
+            }
+
+            .header-content .title {
+                font-size: 1.1em;
+            }
+
+            .tools-section,
+            .links-section {
+                padding: 25px 20px;
+            }
+
+            .section-title {
+                font-size: 1.5em;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .footer-divider {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <header>
-            <h1>Welcome</h1>
-            <p class="subtitle">-</p>
+        <!-- Header -->
+        <header class="header-card">
+            <div class="header-content">
+                <h1>Emre Cerci</h1>
+                <p class="title">Research Assistant & PhD Candidate</p>
+                <p class="institution">
+                    <svg class="institution-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                    </svg>
+                    Atılım University
+                </p>
+            </div>
         </header>
 
-        <main>
-            <nav class="navigation-menu">
-                <h2>Tools</h2>
-                <ul>
-                    <li><a href="about.html" class="nav-button">About Me</a></li>
-                    <li><a href="mbcjr.html" class="nav-button">M-BCJR (old)</a></li>
-                    <li><a href="mbcjr-new.html" class="nav-button">M-BCJR Trellis</a></li>
-                    <li><a href="seating-plan.html" class="nav-button">Seating Plan</a></li>
-                    <li><a href="https://eebk-mudek.vercel.app" class="nav-button">MÜDEK</a></li>
-                    <li><a href="eemudek0724.pdf" class="nav-button"target="_blank" rel="noopener noreferrer">View Document (PDF)</a>
-                    <li><a href="timer2.html" class="nav-button">Exam Timer</a></li>
-                    <li><a href="schedule.html" class="nav-button">Weekly Schedule</a></li>
-                </ul>
-            </nav>
-
-            <section class="useful-links">
-                <h2>Useful Links</h2>
-                <ul>
-                    <li><a href="https://github.com/ecerci-atilim?tab=repositories" target="_blank" rel="noopener noreferrer">GitHub Repositories</a></li>
-                    <li><a href="mailto:emre.cerci@atilim.edu.tr" target="_blank" rel="noopener noreferrer">Contact</a></li>
-                </ul>
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Tools Section -->
+            <section class="tools-section">
+                <div class="section-header">
+                    <div class="section-icon">🛠️</div>
+                    <h2 class="section-title">Academic Tools</h2>
+                </div>
+                <div class="tools-grid">
+                    <a href="about.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                        </svg>
+                        <span class="tool-name">About Me</span>
+                    </a>
+                    <a href="mbcjr.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9 2v2H7v2h2v2H7v2h2v2H7v2h2v2H7v2h2v2H7v2h2v2h2v-2h2v2h2v-2h2v2h2v-2h2v-2h-2v-2h2v-2h-2v-2h2v-2h-2v-2h2V8h-2V6h2V4h-2V2h-2v2h-2V2h-2v2h-2V2H9zm2 4h2v2h-2V6zm4 0h2v2h-2V6zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/>
+                        </svg>
+                        <span class="tool-name">M-BCJR</span>
+                        <span class="tool-badge">Legacy</span>
+                    </a>
+                    <a href="mbcjr-new.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+                        </svg>
+                        <span class="tool-name">M-BCJR Trellis</span>
+                    </a>
+                    <a href="seating-plan.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M4 6h2v3H4zm0 5h2v3H4zm0 5h2v3H4zm14-10h2v3h-2zm0 5h2v3h-2zm0 5h2v3h-2zm-7-10h2v3h-2zm0 5h2v3h-2zm0 5h2v3h-2z"/>
+                        </svg>
+                        <span class="tool-name">Seating Plan</span>
+                    </a>
+                    <a href="https://eebk-mudek.vercel.app" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8 16h8v2H8v-2zm0-4h8v2H8v-2z"/>
+                        </svg>
+                        <span class="tool-name">MÜDEK System</span>
+                    </a>
+                    <a href="eemudek0724.pdf" class="tool-card" target="_blank">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                        </svg>
+                        <span class="tool-name">View Document</span>
+                        <span class="tool-badge">PDF</span>
+                    </a>
+                    <a href="timer2.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42A8.962 8.962 0 0 0 12 3c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                        </svg>
+                        <span class="tool-name">Exam Timer</span>
+                    </a>
+                    <a href="schedule.html" class="tool-card">
+                        <svg class="tool-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                        </svg>
+                        <span class="tool-name">Weekly Schedule</span>
+                    </a>
+                </div>
             </section>
-        </main>
 
-        <footer>
-            <p><span id="currentYear"></span></p>
+            <!-- Links Section -->
+            <aside class="links-section">
+                <div class="section-header">
+                    <div class="section-icon">🔗</div>
+                    <h2 class="section-title">Connect</h2>
+                </div>
+                <ul class="links-list">
+                    <li class="link-item">
+                        <a href="https://github.com/ecerci-atilim?tab=repositories" class="link-button" target="_blank">
+                            <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+                            </svg>
+                            <span>GitHub</span>
+                        </a>
+                    </li>
+                    <li class="link-item">
+                        <a href="mailto:emre.cerci@atilim.edu.tr" class="link-button">
+                            <svg class="link-icon" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                            </svg>
+                            <span>Email</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <span>© <span id="currentYear"></span> Emre Cerci</span>
+                <div class="footer-divider"></div>
+                <span>Atılım University</span>
+                <div class="footer-divider"></div>
+                <span>Research Assistant</span>
+            </div>
         </footer>
     </div>
 
     <script>
+        // Set current year
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-    </script>
 
+        // Add stagger animation to tool cards
+        const toolCards = document.querySelectorAll('.tool-card');
+        toolCards.forEach((card, index) => {
+            card.style.animationDelay = `${0.7 + index * 0.1}s`;
+            card.style.animation = 'fadeInUp 0.5s ease-out forwards';
+            card.style.opacity = '0';
+        });
+
+        // Add hover effect to links
+        const linkButtons = document.querySelectorAll('.link-button');
+        linkButtons.forEach((button, index) => {
+            button.style.animationDelay = `${0.8 + index * 0.15}s`;
+            button.style.animation = 'slideInRight 0.5s ease-out forwards';
+            button.style.opacity = '0';
+        });
+    </script>
 </body>
 </html>
