@@ -6,10 +6,10 @@ window.scheduleData = {
         "11:30": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
     },
     tuesday: {
-        "11:30": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
-        "12:00": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
         "11:00": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
         "11:30": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
+        "12:30": { activity: "EE352 Laboratory (S1)", location: "B4015", color: "rgb(250, 255, 175)"},
+        "13:00": { activity: "EE352 Laboratory (S1)", location: "B4015", color: "rgb(250, 255, 175)"},
     },
     wednesday: {
         "11:00": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
@@ -28,8 +28,8 @@ window.scheduleData = {
     friday: {
         "11:00": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
         "11:30": { activity: "Lunch Break", location: "Out of office", color: "rgb(173, 173, 173)"},
-        "12:30": { activity: "EE352 Laboratory (S2)", location: "B4015", color: "#rgb(244, 255, 91)"},
-        "13:00": { activity: "EE352 Laboratory (S2)", location: "B4015", color: "#rgb(244, 255, 91)"},
+        "12:30": { activity: "EE352 Laboratory (S2)", location: "B4015", color: "#f4ff5b"},
+        "13:00": { activity: "EE352 Laboratory (S2)", location: "B4015", color: "#f4ff5b"},
         "14:30": { activity: "EE316 Laboratory (S2)", location: "B2013", color: "#46ff93"},
         "15:00": { activity: "EE316 Laboratory (S2)", location: "B2013", color: "#46ff93"},
     },
