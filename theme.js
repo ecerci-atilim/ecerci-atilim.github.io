@@ -51,7 +51,7 @@
 /*  Serif headings · System-like body · No effects · Institutional  */\n\
 /* ================================================================ */\n\
 \n\
-[data-theme="academic"] {\n\
+html[data-theme="academic"] {\n\
   --bg: #f4f3ef;\n\
   --card-bg: #ffffff;\n\
   --card-border: #d8d5cd;\n\
@@ -399,7 +399,7 @@
 /*  Geometric sans · Ultra flat · Monochrome · Clean lines          */\n\
 /* ================================================================ */\n\
 \n\
-[data-theme="dark"] {\n\
+html[data-theme="dark"] {\n\
   --bg: #0c0c0c;\n\
   --card-bg: #161616;\n\
   --card-border: #232323;\n\
