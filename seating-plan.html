@@ -87,7 +87,7 @@
         .app-title {
             font-family: 'Outfit', sans-serif;
             font-size: 2rem; font-weight: 800;
-            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            background: var(--text-primary);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
@@ -187,7 +187,7 @@
         .btn-outline:hover { background: rgba(99, 179, 237, 0.1); }
         
         .btn-primary { background: var(--accent-gradient); color: white; }
-        .btn-primary:hover { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(190, 190, 190, 0.4); }
 
         .print-actions { display: flex; gap: 10px; margin-top: 10px; display: none; } /* Hidden initially */
         .btn-print { flex: 1; background: #2d3748; color: white; border: 1px solid var(--glass-border); }
@@ -418,11 +418,11 @@
                 <div class="input-grid">
                     <div class="form-group">
                         <label>Course Code</label>
-                        <input type="text" id="course-code" class="modern-input" placeholder="e.g. CS101">
+                        <input type="text" id="course-code" class="modern-input" placeholder="e.g. EE103">
                     </div>
                     <div class="form-group">
                         <label>Course Name</label>
-                        <input type="text" id="course-name" class="modern-input" placeholder="Algorithms">
+                        <input type="text" id="course-name" class="modern-input" placeholder="Introduction to Electrical and Electronics Engineering">
                     </div>
                     <div class="form-group full-width">
                         <label>Exam Name</label>
@@ -457,14 +457,14 @@
                 <div class="radio-group">
                     <label class="form-group"><label>Capacity Mode</label></label>
                     <label class="radio-card">
-                        <input type="radio" name="seatingMode" value="normal" checked>
+                        <input type="radio" name="seatingMode" value="normal">
                         <div>
                             <div style="font-weight:600;">Normal Capacity</div>
                             <div style="font-size:0.8rem; color:var(--text-secondary);">Full room usage</div>
                         </div>
                     </label>
                     <label class="radio-card">
-                        <input type="radio" name="seatingMode" value="exam">
+                        <input type="radio" name="seatingMode" value="exam" checked>
                         <div>
                             <div style="font-weight:600;">Exam Capacity</div>
                             <div style="font-size:0.8rem; color:var(--text-secondary);">Reduced/Spaced seating</div>
