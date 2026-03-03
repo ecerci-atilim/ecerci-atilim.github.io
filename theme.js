@@ -50,26 +50,38 @@
     var css = '\
 \n\
 /* ================================================================ */\n\
-/*  CLASSIC THEME (Claude-inspired)                                 */\n\
-/*  Warm cream · Terracotta accent · Clean sans-serif · Rounded     */\n\
+/*  CLASSIC THEME (Claude Dark)                                     */\n\
+/*  Warm dark · Terracotta accent · Clean sans · Rounded            */\n\
 /* ================================================================ */\n\
 \n\
 html[data-theme="academic"] {\n\
-  --bg: #FAF9F6;\n\
-  --card-bg: #ffffff;\n\
-  --card-border: #E8E5DE;\n\
-  --card-hover: #F5F3EE;\n\
-  --text-primary: #1A1A2E;\n\
-  --text-secondary: #6B6B7B;\n\
+  --bg: #1C1917;\n\
+  --card-bg: #292524;\n\
+  --card-border: #3D3835;\n\
+  --card-hover: #35302D;\n\
+  --text-primary: #E7E0D5;\n\
+  --text-secondary: #9C9588;\n\
   --accent: #DA7756;\n\
   --accent-light: #E89B7B;\n\
-  --accent-bg: rgba(218, 119, 86, 0.07);\n\
-  --accent-border: rgba(218, 119, 86, 0.18);\n\
+  --accent-bg: rgba(218, 119, 86, 0.10);\n\
+  --accent-border: rgba(218, 119, 86, 0.22);\n\
   --radius: 12px;\n\
-  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);\n\
+  --shadow: 0 1px 3px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.15);\n\
   --font-heading: "Source Sans 3", "Plus Jakarta Sans", -apple-system, sans-serif;\n\
   --font-body: "Source Sans 3", "Plus Jakarta Sans", -apple-system, sans-serif;\n\
   --transition: all 0.15s ease;\n\
+  /* Page variable overrides (timer2, seating-plan, schedule) */\n\
+  --bg-gradient: #1C1917;\n\
+  --glass-bg: rgba(41, 37, 36, 0.95);\n\
+  --glass-border: #3D3835;\n\
+  --glass-hover: #35302D;\n\
+  --input-bg: #1C1917;\n\
+  --accent-color: #DA7756;\n\
+  --accent-gradient: linear-gradient(135deg, #DA7756, #E89B7B);\n\
+  --success-color: #68d391;\n\
+  --danger-color: #fc8181;\n\
+  --warning-bg: rgba(218, 119, 86, 0.15);\n\
+  --warning-text: #E89B7B;\n\
 }\n\
 \n\
 /* --- Body --- */\n\
@@ -354,16 +366,16 @@ html[data-theme="academic"] {\n\
   border-radius: 8px !important;\n\
 }\n\
 [data-theme="academic"] .activity-cell:not(.filled-slot):not(.leave-day) {\n\
-  background: #FDFCFA !important;\n\
+  background: #231F1D !important;\n\
 }\n\
 [data-theme="academic"] .activity-cell:not(.filled-slot):not(.leave-day):hover { background: var(--card-hover) !important; }\n\
-[data-theme="academic"] .status-active  { background: rgba(30,95,60,0.08) !important; color: #1e5f3c !important; border: 1px solid rgba(30,95,60,0.18) !important; }\n\
-[data-theme="academic"] .status-busy    { background: rgba(30,58,95,0.08) !important; color: var(--accent) !important; border: 1px solid var(--accent-border) !important; }\n\
-[data-theme="academic"] .status-off     { background: rgba(82,82,110,0.06) !important; color: var(--text-secondary) !important; border: 1px solid rgba(82,82,110,0.12) !important; }\n\
-[data-theme="academic"] .status-leave   { background: rgba(140,70,20,0.08) !important; color: #8c4614 !important; border: 1px solid rgba(140,70,20,0.18) !important; }\n\
+[data-theme="academic"] .status-active  { background: rgba(72,187,120,0.12) !important; color: #68d391 !important; border: 1px solid rgba(72,187,120,0.2) !important; }\n\
+[data-theme="academic"] .status-busy    { background: rgba(218,119,86,0.12) !important; color: var(--accent) !important; border: 1px solid var(--accent-border) !important; }\n\
+[data-theme="academic"] .status-off     { background: rgba(156,149,136,0.10) !important; color: var(--text-secondary) !important; border: 1px solid rgba(156,149,136,0.15) !important; }\n\
+[data-theme="academic"] .status-leave   { background: rgba(246,173,85,0.12) !important; color: #f6ad55 !important; border: 1px solid rgba(246,173,85,0.2) !important; }\n\
 [data-theme="academic"] .status-badge   { border-radius: var(--radius) !important; box-shadow: none !important; font-family: var(--font-body) !important; }\n\
 [data-theme="academic"] .current-slot   { border: 2px solid var(--accent) !important; box-shadow: none !important; }\n\
-[data-theme="academic"] #error-banner   { background: rgba(180,40,40,0.06) !important; color: #b42828 !important; border-color: rgba(180,40,40,0.18) !important; border-radius: var(--radius) !important; }\n\
+[data-theme="academic"] #error-banner   { background: rgba(248,113,113,0.10) !important; color: #f87171 !important; border-color: rgba(248,113,113,0.18) !important; border-radius: var(--radius) !important; }\n\
 \n\
 /* --- PDF GATE: Classic --- */\n\
 [data-theme="academic"] .gate-card {\n\
@@ -376,7 +388,7 @@ html[data-theme="academic"] {\n\
 [data-theme="academic"] .gate-desc  { color: var(--text-secondary) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="academic"] .gate-icon  { color: var(--accent) !important; }\n\
 [data-theme="academic"] .pin-input  {\n\
-  background: #F5F3EE !important; color: var(--text-primary) !important;\n\
+  background: #1C1917 !important; color: var(--text-primary) !important;\n\
   border: 1px solid var(--card-border) !important; border-radius: var(--radius) !important;\n\
   font-family: var(--font-body) !important;\n\
 }\n\
@@ -387,7 +399,7 @@ html[data-theme="academic"] {\n\
   font-family: var(--font-body) !important;\n\
 }\n\
 [data-theme="academic"] .submit-btn:hover { background: var(--accent-light) !important; transform: none !important; }\n\
-[data-theme="academic"] .error-msg  { background: rgba(180,40,40,0.06) !important; border-color: rgba(180,40,40,0.18) !important; color: #b42828 !important; border-radius: var(--radius) !important; }\n\
+[data-theme="academic"] .error-msg  { background: rgba(248,113,113,0.10) !important; border-color: rgba(248,113,113,0.18) !important; color: #f87171 !important; border-radius: var(--radius) !important; }\n\
 [data-theme="academic"] .back-link  { color: var(--text-secondary) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="academic"] .back-link:hover { color: var(--text-primary) !important; }\n\
 \n\
@@ -413,6 +425,18 @@ html[data-theme="dark"] {\n\
   --font-heading: "Inter", -apple-system, "Segoe UI", sans-serif;\n\
   --font-body: "Inter", -apple-system, "Segoe UI", sans-serif;\n\
   --transition: all 0.12s ease;\n\
+  /* Page variable overrides */\n\
+  --bg-gradient: #0c0c0c;\n\
+  --glass-bg: rgba(22, 22, 22, 0.95);\n\
+  --glass-border: #232323;\n\
+  --glass-hover: #1c1c1c;\n\
+  --input-bg: #0c0c0c;\n\
+  --accent-color: #7c8cf0;\n\
+  --accent-gradient: linear-gradient(135deg, #7c8cf0, #a5b0ff);\n\
+  --success-color: #4ade80;\n\
+  --danger-color: #f87171;\n\
+  --warning-bg: rgba(124, 140, 240, 0.1);\n\
+  --warning-text: #a5b0ff;\n\
 }\n\
 \n\
 /* --- Body --- */\n\
@@ -756,6 +780,18 @@ html[data-theme="skeu"] {\n\
   --font-heading: "Merriweather", Georgia, serif;\n\
   --font-body: "Open Sans", "Plus Jakarta Sans", -apple-system, sans-serif;\n\
   --transition: all 0.15s ease;\n\
+  /* Page variable overrides */\n\
+  --bg-gradient: #d4cfc4;\n\
+  --glass-bg: rgba(240, 232, 216, 0.95);\n\
+  --glass-border: #b8a88a;\n\
+  --glass-hover: #e8dece;\n\
+  --input-bg: #ede4d4;\n\
+  --accent-color: #5b3a1a;\n\
+  --accent-gradient: linear-gradient(135deg, #5b3a1a, #7a5230);\n\
+  --success-color: #2e7d32;\n\
+  --danger-color: #c62828;\n\
+  --warning-bg: rgba(91, 58, 26, 0.12);\n\
+  --warning-text: #7a5230;\n\
 }\n\
 \n\
 [data-theme="skeu"] body {\n\
@@ -1081,6 +1117,19 @@ html[data-theme="neu"] {\n\
   --font-heading: "Nunito", -apple-system, sans-serif;\n\
   --font-body: "Nunito", -apple-system, sans-serif;\n\
   --transition: all 0.2s ease;\n\
+  /* Page variable overrides */\n\
+  --bg-gradient: #e0e5ec;\n\
+  --glass-bg: #e0e5ec;\n\
+  --glass-border: transparent;\n\
+  --glass-hover: #d5dae1;\n\
+  --input-bg: #e0e5ec;\n\
+  --accent-color: #6c5ce7;\n\
+  --accent-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);\n\
+  --success-color: #00b894;\n\
+  --danger-color: #e17055;\n\
+  --warning-bg: rgba(108, 92, 231, 0.1);\n\
+  --warning-text: #a29bfe;\n\
+  --shadow-soft: 6px 6px 12px #b8bec7, -6px -6px 12px #ffffff;\n\
 }\n\
 \n\
 [data-theme="neu"] body {\n\
@@ -1364,6 +1413,266 @@ html[data-theme="neu"] {\n\
 \n\
 \n\
 /* ================================================================ */\n\
+/*  TOOL PAGE OVERRIDES (timer2, seating-plan)                      */\n\
+/*  Hardcoded element values that need per-theme overrides          */\n\
+/* ================================================================ */\n\
+\n\
+/* --- ACADEMIC (Claude Dark): modal & inputs --- */\n\
+[data-theme="academic"] .modal-card {\n\
+  background: #292524 !important;\n\
+  border-color: #3D3835 !important;\n\
+}\n\
+[data-theme="academic"] .modern-input {\n\
+  background: #1C1917 !important;\n\
+  border-color: #3D3835 !important;\n\
+  color: #E7E0D5 !important;\n\
+}\n\
+[data-theme="academic"] .modern-input:focus {\n\
+  border-color: #DA7756 !important;\n\
+}\n\
+[data-theme="academic"] #countdownDisplay {\n\
+  background: linear-gradient(180deg, #E7E0D5 0%, #9C9588 100%) !important;\n\
+  -webkit-background-clip: text !important;\n\
+  -webkit-text-fill-color: transparent !important;\n\
+}\n\
+[data-theme="academic"] .real-time-clock {\n\
+  background: rgba(41,37,36,0.8) !important;\n\
+  border-color: #3D3835 !important;\n\
+  color: #E7E0D5 !important;\n\
+}\n\
+[data-theme="academic"] .instruction-item {\n\
+  background: rgba(231,224,213,0.04) !important;\n\
+  border-color: #3D3835 !important;\n\
+}\n\
+[data-theme="academic"] .instruction-item h4 {\n\
+  color: #DA7756 !important;\n\
+}\n\
+\n\
+/* --- DARK: modal & inputs --- */\n\
+[data-theme="dark"] .modal-card {\n\
+  background: #161616 !important;\n\
+  border-color: #232323 !important;\n\
+}\n\
+[data-theme="dark"] .modern-input {\n\
+  background: #0c0c0c !important;\n\
+  border-color: #232323 !important;\n\
+  color: #c8c8c8 !important;\n\
+}\n\
+[data-theme="dark"] .modern-input:focus {\n\
+  border-color: #7c8cf0 !important;\n\
+}\n\
+[data-theme="dark"] #countdownDisplay {\n\
+  background: linear-gradient(180deg, #c8c8c8 0%, #666666 100%) !important;\n\
+  -webkit-background-clip: text !important;\n\
+  -webkit-text-fill-color: transparent !important;\n\
+}\n\
+[data-theme="dark"] .real-time-clock {\n\
+  background: #161616 !important;\n\
+  border-color: #232323 !important;\n\
+  color: #c8c8c8 !important;\n\
+  backdrop-filter: none !important;\n\
+}\n\
+[data-theme="dark"] .instruction-item {\n\
+  background: #111111 !important;\n\
+  border-color: #232323 !important;\n\
+}\n\
+[data-theme="dark"] .instruction-item h4 {\n\
+  color: #7c8cf0 !important;\n\
+}\n\
+\n\
+/* --- SKEU: light overrides for dark-base tool pages --- */\n\
+[data-theme="skeu"] .modal-card {\n\
+  background: linear-gradient(180deg, #faf8f4, #f0ece4) !important;\n\
+  border-color: #b8a88a !important;\n\
+  box-shadow: 0 25px 50px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.5) !important;\n\
+}\n\
+[data-theme="skeu"] .modal-header { border-bottom-color: #b8a88a !important; }\n\
+[data-theme="skeu"] .modal-header h2,\n\
+[data-theme="skeu"] .modal-header h3 { color: #2c2418 !important; }\n\
+[data-theme="skeu"] .close-btn { color: #6b5e4e !important; }\n\
+[data-theme="skeu"] .form-group label { color: #6b5e4e !important; }\n\
+[data-theme="skeu"] .checkbox-text { color: #2c2418 !important; }\n\
+[data-theme="skeu"] .modern-input {\n\
+  background: #ede4d4 !important;\n\
+  border-color: #b8a88a !important;\n\
+  color: #2c2418 !important;\n\
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.12) !important;\n\
+}\n\
+[data-theme="skeu"] .modern-input:focus {\n\
+  border-color: #5b3a1a !important;\n\
+  background: #f5f0e8 !important;\n\
+}\n\
+[data-theme="skeu"] #countdownDisplay {\n\
+  background: linear-gradient(180deg, #2c2418 0%, #6b5e4e 100%) !important;\n\
+  -webkit-background-clip: text !important;\n\
+  -webkit-text-fill-color: transparent !important;\n\
+  text-shadow: none !important;\n\
+}\n\
+[data-theme="skeu"] .real-time-clock {\n\
+  background: linear-gradient(180deg, #f5f0e8, #ddd6c8) !important;\n\
+  border-color: #b8a88a !important;\n\
+  color: #2c2418 !important;\n\
+  backdrop-filter: none !important;\n\
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5) !important;\n\
+}\n\
+[data-theme="skeu"] .btn {\n\
+  background: linear-gradient(180deg, #f5f0e8, #ddd6c8) !important;\n\
+  border-color: #b8a88a !important;\n\
+  color: #2c2418 !important;\n\
+  box-shadow: 0 2px 4px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5) !important;\n\
+  backdrop-filter: none !important;\n\
+}\n\
+[data-theme="skeu"] .btn:hover {\n\
+  background: linear-gradient(180deg, #fff, #ede8dc) !important;\n\
+}\n\
+[data-theme="skeu"] .btn-primary {\n\
+  background: linear-gradient(180deg, #3a8a3e, #2e7d32) !important;\n\
+  color: #fff !important;\n\
+  border-color: #1b5e20 !important;\n\
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.3) !important;\n\
+}\n\
+[data-theme="skeu"] .btn-primary:hover {\n\
+  background: linear-gradient(180deg, #4caf50, #388e3c) !important;\n\
+}\n\
+[data-theme="skeu"] .btn-danger {\n\
+  background: linear-gradient(180deg, #f5cec4, #e8b4a4) !important;\n\
+  color: #c62828 !important;\n\
+  border-color: #d4a494 !important;\n\
+}\n\
+[data-theme="skeu"] .btn-accent {\n\
+  background: linear-gradient(180deg, #e8d8c8, #d8c4b0) !important;\n\
+  color: #5b3a1a !important;\n\
+  border-color: #b8a88a !important;\n\
+}\n\
+[data-theme="skeu"] .settings-fab {\n\
+  background: linear-gradient(180deg, #f5f0e8, #ddd6c8) !important;\n\
+  border-color: #b8a88a !important;\n\
+  color: #2c2418 !important;\n\
+  backdrop-filter: none !important;\n\
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5) !important;\n\
+}\n\
+[data-theme="skeu"] .info-panel,\n\
+[data-theme="skeu"] .info-item { color: #6b5e4e !important; }\n\
+[data-theme="skeu"] .info-item span { color: #2c2418 !important; }\n\
+[data-theme="skeu"] .instruction-item {\n\
+  background: linear-gradient(180deg, #faf8f4, #f0ece4) !important;\n\
+  border-color: #b8a88a !important;\n\
+}\n\
+[data-theme="skeu"] .instruction-item h4 { color: #5b3a1a !important; }\n\
+[data-theme="skeu"] .instruction-item ul { color: #6b5e4e !important; }\n\
+/* Seating-plan glass-panel overrides */\n\
+[data-theme="skeu"] .glass-panel {\n\
+  background: linear-gradient(180deg, #faf8f4, #f0ece4) !important;\n\
+  border-color: #b8a88a !important;\n\
+  backdrop-filter: none !important;\n\
+  -webkit-backdrop-filter: none !important;\n\
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.5) !important;\n\
+}\n\
+[data-theme="skeu"] .app-title { color: #2c2418 !important; }\n\
+[data-theme="skeu"] .stat-card {\n\
+  background: linear-gradient(180deg, #f0ece4, #e8e0d4) !important;\n\
+  border-color: #b8a88a !important;\n\
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.08) !important;\n\
+}\n\
+\n\
+/* --- NEU: neumorphic overrides for dark-base tool pages --- */\n\
+[data-theme="neu"] .modal-card {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  box-shadow: 12px 12px 24px #b8bec7, -12px -12px 24px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .modal-header { border-bottom: none !important; }\n\
+[data-theme="neu"] .modal-header h2,\n\
+[data-theme="neu"] .modal-header h3 { color: #2d3436 !important; }\n\
+[data-theme="neu"] .close-btn { color: #636e72 !important; }\n\
+[data-theme="neu"] .form-group label { color: #636e72 !important; }\n\
+[data-theme="neu"] .checkbox-text { color: #2d3436 !important; }\n\
+[data-theme="neu"] .modern-input {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  color: #2d3436 !important;\n\
+  box-shadow: inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff !important;\n\
+  border-radius: 12px !important;\n\
+}\n\
+[data-theme="neu"] .modern-input:focus {\n\
+  box-shadow: inset 4px 4px 8px #b8bec7, inset -4px -4px 8px #ffffff, 0 0 0 3px rgba(108,92,231,0.15) !important;\n\
+}\n\
+[data-theme="neu"] #countdownDisplay {\n\
+  background: linear-gradient(180deg, #2d3436 0%, #636e72 100%) !important;\n\
+  -webkit-background-clip: text !important;\n\
+  -webkit-text-fill-color: transparent !important;\n\
+  text-shadow: none !important;\n\
+}\n\
+[data-theme="neu"] .real-time-clock {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  color: #2d3436 !important;\n\
+  backdrop-filter: none !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .btn {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  color: #2d3436 !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+  backdrop-filter: none !important;\n\
+}\n\
+[data-theme="neu"] .btn:hover {\n\
+  box-shadow: inset 2px 2px 5px #b8bec7, inset -2px -2px 5px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .btn-primary {\n\
+  background: #00b894 !important;\n\
+  color: #fff !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .btn-primary:hover {\n\
+  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.15), inset -2px -2px 5px rgba(255,255,255,0.3) !important;\n\
+}\n\
+[data-theme="neu"] .btn-danger {\n\
+  background: #e0e5ec !important;\n\
+  color: #e17055 !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .btn-accent {\n\
+  background: #e0e5ec !important;\n\
+  color: #6c5ce7 !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .settings-fab {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  color: #2d3436 !important;\n\
+  backdrop-filter: none !important;\n\
+  box-shadow: 4px 4px 8px #b8bec7, -4px -4px 8px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .info-panel,\n\
+[data-theme="neu"] .info-item { color: #636e72 !important; }\n\
+[data-theme="neu"] .info-item span { color: #2d3436 !important; }\n\
+[data-theme="neu"] .instruction-item {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  box-shadow: inset 2px 2px 5px #b8bec7, inset -2px -2px 5px #ffffff !important;\n\
+  border-radius: 12px !important;\n\
+}\n\
+[data-theme="neu"] .instruction-item h4 { color: #6c5ce7 !important; }\n\
+[data-theme="neu"] .instruction-item ul { color: #636e72 !important; }\n\
+/* Seating-plan glass-panel overrides */\n\
+[data-theme="neu"] .glass-panel {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  backdrop-filter: none !important;\n\
+  -webkit-backdrop-filter: none !important;\n\
+  box-shadow: 8px 8px 16px #b8bec7, -8px -8px 16px #ffffff !important;\n\
+}\n\
+[data-theme="neu"] .app-title { color: #2d3436 !important; }\n\
+[data-theme="neu"] .stat-card {\n\
+  background: #e0e5ec !important;\n\
+  border: none !important;\n\
+  box-shadow: inset 2px 2px 5px #b8bec7, inset -2px -2px 5px #ffffff !important;\n\
+}\n\
+\n\
+\n\
+/* ================================================================ */\n\
 /*  GLASSMORPHISM — uses page defaults, no overrides                */\n\
 /* ================================================================ */\n\
 \n\
@@ -1383,7 +1692,7 @@ html[data-theme="neu"] {\n\
 }\n\
 \n\
 [data-theme="academic"] #theme-picker-btn {\n\
-  background: #fff; border-color: #E8E5DE; color: #6B6B7B; border-radius: 12px;\n\
+  background: #292524; border-color: #3D3835; color: #9C9588; border-radius: 12px;\n\
 }\n\
 [data-theme="academic"] #theme-picker-btn:hover { border-color: #DA7756; color: #DA7756; }\n\
 \n\
@@ -1417,7 +1726,7 @@ html[data-theme="neu"] {\n\
 #theme-picker-panel.open { display: flex; }\n\
 \n\
 [data-theme="academic"] #theme-picker-panel {\n\
-  background: #fff; border: 1px solid #E8E5DE; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-radius: 12px;\n\
+  background: #292524; border: 1px solid #3D3835; box-shadow: 0 4px 20px rgba(0,0,0,0.4); border-radius: 12px;\n\
 }\n\
 [data-theme="glass"] #theme-picker-panel {\n\
   background: rgba(30,40,55,0.95); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 30px rgba(0,0,0,0.3);\n\
@@ -1444,8 +1753,8 @@ html[data-theme="neu"] {\n\
   transition: all 0.12s ease; text-align: left; width: 100%;\n\
 }\n\
 \n\
-[data-theme="academic"] .theme-option { font-family: "Source Sans 3", "Plus Jakarta Sans", sans-serif; color: #6B6B7B; }\n\
-[data-theme="academic"] .theme-option:hover { background: #F5F3EE; color: #1A1A2E; border-radius: 8px; }\n\
+[data-theme="academic"] .theme-option { font-family: "Source Sans 3", "Plus Jakarta Sans", sans-serif; color: #9C9588; }\n\
+[data-theme="academic"] .theme-option:hover { background: #35302D; color: #E7E0D5; border-radius: 8px; }\n\
 [data-theme="academic"] .theme-option.active { color: #DA7756; border-color: #DA7756; border-radius: 8px; }\n\
 \n\
 [data-theme="glass"] .theme-option { font-family: "Plus Jakarta Sans", sans-serif; color: #a0aec0; }\n\
