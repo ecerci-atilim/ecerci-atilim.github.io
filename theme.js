@@ -23,7 +23,7 @@
        1. Dynamic Google Fonts per theme
        ---------------------------------------------------------------- */
     var fontLinks = {
-        academic: 'https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap',
+        academic: 'https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;500;600;700&display=swap',
         dark: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
         skeu: 'https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600&display=swap',
         neu: 'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap'
@@ -50,24 +50,24 @@
     var css = '\
 \n\
 /* ================================================================ */\n\
-/*  CLASSIC THEME                                                   */\n\
-/*  Serif headings · System-like body · No effects · Institutional  */\n\
+/*  CLASSIC THEME (Claude-inspired)                                 */\n\
+/*  Warm cream · Terracotta accent · Clean sans-serif · Rounded     */\n\
 /* ================================================================ */\n\
 \n\
 html[data-theme="academic"] {\n\
-  --bg: #f4f3ef;\n\
+  --bg: #FAF9F6;\n\
   --card-bg: #ffffff;\n\
-  --card-border: #d8d5cd;\n\
-  --card-hover: #f0efeb;\n\
-  --text-primary: #1b1b30;\n\
-  --text-secondary: #52526e;\n\
-  --accent: #1e3a5f;\n\
-  --accent-light: #2b5a8a;\n\
-  --accent-bg: rgba(30, 58, 95, 0.06);\n\
-  --accent-border: rgba(30, 58, 95, 0.15);\n\
-  --radius: 4px;\n\
-  --shadow: 0 1px 2px rgba(0,0,0,0.04);\n\
-  --font-heading: "Lora", Georgia, "Times New Roman", serif;\n\
+  --card-border: #E8E5DE;\n\
+  --card-hover: #F5F3EE;\n\
+  --text-primary: #1A1A2E;\n\
+  --text-secondary: #6B6B7B;\n\
+  --accent: #DA7756;\n\
+  --accent-light: #E89B7B;\n\
+  --accent-bg: rgba(218, 119, 86, 0.07);\n\
+  --accent-border: rgba(218, 119, 86, 0.18);\n\
+  --radius: 12px;\n\
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);\n\
+  --font-heading: "Source Sans 3", "Plus Jakarta Sans", -apple-system, sans-serif;\n\
   --font-body: "Source Sans 3", "Plus Jakarta Sans", -apple-system, sans-serif;\n\
   --transition: all 0.15s ease;\n\
 }\n\
@@ -115,16 +115,9 @@ html[data-theme="academic"] {\n\
   position: relative;\n\
 }\n\
 \n\
-/* Accent top-border on cards */\n\
-[data-theme="academic"] .glass-card::before {\n\
-  content: "" !important;\n\
-  display: block !important;\n\
-  position: absolute !important;\n\
-  top: 0; left: 0; right: 0 !important;\n\
-  height: 3px !important;\n\
-  background: var(--accent) !important;\n\
-  border-radius: var(--radius) var(--radius) 0 0 !important;\n\
-}\n\
+/* No accent top-border — clean Claude look */\n\
+[data-theme="academic"] .glass-card::before { display: none !important; }\n\
+[data-theme="academic"] .glass-card::after { display: none !important; }\n\
 \n\
 /* --- Headings --- */\n\
 [data-theme="academic"] .header-title {\n\
@@ -179,12 +172,12 @@ html[data-theme="academic"] {\n\
 \n\
 /* --- Section borders --- */\n\
 [data-theme="academic"] .section-header {\n\
-  border-bottom: 2px solid var(--accent) !important;\n\
+  border-bottom: 1px solid var(--card-border) !important;\n\
   padding-bottom: 12px !important;\n\
   margin-bottom: 20px !important;\n\
 }\n\
 [data-theme="academic"] .card-title {\n\
-  border-bottom: 2px solid var(--accent) !important;\n\
+  border-bottom: 1px solid var(--card-border) !important;\n\
   padding-bottom: 12px !important;\n\
 }\n\
 \n\
@@ -223,7 +216,7 @@ html[data-theme="academic"] {\n\
 [data-theme="academic"] .tool-badge {\n\
   background: var(--accent-bg) !important;\n\
   color: var(--accent) !important;\n\
-  border-radius: 2px !important;\n\
+  border-radius: 6px !important;\n\
   font-size: 0.6rem !important;\n\
   text-transform: uppercase !important;\n\
   letter-spacing: 0.8px !important;\n\
@@ -290,12 +283,12 @@ html[data-theme="academic"] {\n\
   background: var(--accent-bg) !important;\n\
   border: 1px solid var(--accent-border) !important;\n\
   color: var(--text-primary) !important;\n\
-  border-radius: 2px !important;\n\
+  border-radius: 20px !important;\n\
   font-family: var(--font-body) !important;\n\
   font-size: 0.85rem !important;\n\
 }\n\
 [data-theme="academic"] .tag:hover {\n\
-  background: rgba(30, 58, 95, 0.12) !important;\n\
+  background: rgba(218, 119, 86, 0.12) !important;\n\
   transform: none !important;\n\
 }\n\
 \n\
@@ -357,11 +350,13 @@ html[data-theme="academic"] {\n\
   font-family: var(--font-body) !important;\n\
 }\n\
 [data-theme="academic"] .activity-cell {\n\
-  background: #fafaf7 !important;\n\
-  border: 1px solid #eeece6 !important;\n\
-  border-radius: 3px !important;\n\
+  border: 1px solid var(--card-border) !important;\n\
+  border-radius: 8px !important;\n\
 }\n\
-[data-theme="academic"] .activity-cell:hover { background: var(--card-hover) !important; }\n\
+[data-theme="academic"] .activity-cell:not(.filled-slot):not(.leave-day) {\n\
+  background: #FDFCFA !important;\n\
+}\n\
+[data-theme="academic"] .activity-cell:not(.filled-slot):not(.leave-day):hover { background: var(--card-hover) !important; }\n\
 [data-theme="academic"] .status-active  { background: rgba(30,95,60,0.08) !important; color: #1e5f3c !important; border: 1px solid rgba(30,95,60,0.18) !important; }\n\
 [data-theme="academic"] .status-busy    { background: rgba(30,58,95,0.08) !important; color: var(--accent) !important; border: 1px solid var(--accent-border) !important; }\n\
 [data-theme="academic"] .status-off     { background: rgba(82,82,110,0.06) !important; color: var(--text-secondary) !important; border: 1px solid rgba(82,82,110,0.12) !important; }\n\
@@ -381,11 +376,11 @@ html[data-theme="academic"] {\n\
 [data-theme="academic"] .gate-desc  { color: var(--text-secondary) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="academic"] .gate-icon  { color: var(--accent) !important; }\n\
 [data-theme="academic"] .pin-input  {\n\
-  background: #f0efeb !important; color: var(--text-primary) !important;\n\
+  background: #F5F3EE !important; color: var(--text-primary) !important;\n\
   border: 1px solid var(--card-border) !important; border-radius: var(--radius) !important;\n\
   font-family: var(--font-body) !important;\n\
 }\n\
-[data-theme="academic"] .pin-input:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 2px rgba(30,58,95,0.1) !important; }\n\
+[data-theme="academic"] .pin-input:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(218,119,86,0.12) !important; }\n\
 [data-theme="academic"] .submit-btn {\n\
   background: var(--accent) !important;\n\
   border-radius: var(--radius) !important;\n\
@@ -694,11 +689,13 @@ html[data-theme="dark"] {\n\
 [data-theme="dark"] .schedule-table th { color: var(--text-secondary) !important; border-bottom-color: var(--card-border) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="dark"] .time-col { color: var(--text-secondary) !important; font-family: "JetBrains Mono", var(--font-body), monospace !important; }\n\
 [data-theme="dark"] .activity-cell {\n\
-  background: #111111 !important;\n\
   border: 1px solid #1a1a1a !important;\n\
   border-radius: 6px !important;\n\
 }\n\
-[data-theme="dark"] .activity-cell:hover { background: var(--card-hover) !important; }\n\
+[data-theme="dark"] .activity-cell:not(.filled-slot):not(.leave-day) {\n\
+  background: #111111 !important;\n\
+}\n\
+[data-theme="dark"] .activity-cell:not(.filled-slot):not(.leave-day):hover { background: var(--card-hover) !important; }\n\
 [data-theme="dark"] .status-active  { background: rgba(74,222,128,0.08) !important; color: #4ade80 !important; border: 1px solid rgba(74,222,128,0.15) !important; }\n\
 [data-theme="dark"] .status-busy    { background: rgba(124,140,240,0.08) !important; color: var(--accent) !important; border: 1px solid var(--accent-border) !important; }\n\
 [data-theme="dark"] .status-off     { background: rgba(102,102,102,0.08) !important; color: var(--text-secondary) !important; border: 1px solid rgba(102,102,102,0.15) !important; }\n\
@@ -1012,12 +1009,14 @@ html[data-theme="skeu"] {\n\
 [data-theme="skeu"] .schedule-table th { color: var(--text-secondary) !important; border-bottom-color: var(--card-border) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="skeu"] .time-col { color: var(--text-secondary) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="skeu"] .activity-cell {\n\
-  background: linear-gradient(180deg, #faf8f4, #f0ece4) !important;\n\
   border: 1px solid #ccc5b8 !important;\n\
   border-radius: 4px !important;\n\
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 1px 2px rgba(0,0,0,0.06) !important;\n\
 }\n\
-[data-theme="skeu"] .activity-cell:hover { background: linear-gradient(180deg, #fff, #f5f0e8) !important; }\n\
+[data-theme="skeu"] .activity-cell:not(.filled-slot):not(.leave-day) {\n\
+  background: linear-gradient(180deg, #faf8f4, #f0ece4) !important;\n\
+}\n\
+[data-theme="skeu"] .activity-cell:not(.filled-slot):not(.leave-day):hover { background: linear-gradient(180deg, #fff, #f5f0e8) !important; }\n\
 [data-theme="skeu"] .status-active  { background: linear-gradient(180deg, #e8f5e9, #d5ebd7) !important; color: #2e7d32 !important; border: 1px solid #a5d6a7 !important; }\n\
 [data-theme="skeu"] .status-busy    { background: linear-gradient(180deg, #e8e0d4, #d8d0c0) !important; color: var(--accent) !important; border: 1px solid var(--accent-border) !important; }\n\
 [data-theme="skeu"] .status-off     { background: linear-gradient(180deg, #ece8e0, #ddd8cc) !important; color: var(--text-secondary) !important; border: 1px solid #c8c0b4 !important; }\n\
@@ -1317,12 +1316,14 @@ html[data-theme="neu"] {\n\
 [data-theme="neu"] .schedule-table th { color: var(--text-secondary) !important; border-bottom: none !important; font-family: var(--font-body) !important; }\n\
 [data-theme="neu"] .time-col { color: var(--text-secondary) !important; font-family: var(--font-body) !important; }\n\
 [data-theme="neu"] .activity-cell {\n\
-  background: var(--card-bg) !important;\n\
   border: none !important;\n\
   border-radius: 10px !important;\n\
   box-shadow: var(--shadow-out-sm) !important;\n\
 }\n\
-[data-theme="neu"] .activity-cell:hover { box-shadow: var(--shadow-in-sm) !important; }\n\
+[data-theme="neu"] .activity-cell:not(.filled-slot):not(.leave-day) {\n\
+  background: var(--card-bg) !important;\n\
+}\n\
+[data-theme="neu"] .activity-cell:not(.filled-slot):not(.leave-day):hover { box-shadow: var(--shadow-in-sm) !important; }\n\
 [data-theme="neu"] .status-active  { background: #d4edda !important; color: #28a745 !important; box-shadow: inset 2px 2px 5px #b3cdb9, inset -2px -2px 5px #f5fff8 !important; border: none !important; }\n\
 [data-theme="neu"] .status-busy    { background: #ddd8f0 !important; color: var(--accent) !important; box-shadow: inset 2px 2px 5px #c0bbd4, inset -2px -2px 5px #faf5ff !important; border: none !important; }\n\
 [data-theme="neu"] .status-off     { background: #dde0e5 !important; color: var(--text-secondary) !important; box-shadow: inset 2px 2px 5px #c0c3c8, inset -2px -2px 5px #fafbff !important; border: none !important; }\n\
@@ -1382,9 +1383,9 @@ html[data-theme="neu"] {\n\
 }\n\
 \n\
 [data-theme="academic"] #theme-picker-btn {\n\
-  background: #fff; border-color: #d8d5cd; color: #52526e;\n\
+  background: #fff; border-color: #E8E5DE; color: #6B6B7B; border-radius: 12px;\n\
 }\n\
-[data-theme="academic"] #theme-picker-btn:hover { border-color: #1e3a5f; color: #1e3a5f; }\n\
+[data-theme="academic"] #theme-picker-btn:hover { border-color: #DA7756; color: #DA7756; }\n\
 \n\
 [data-theme="glass"] #theme-picker-btn {\n\
   background: rgba(255,255,255,0.05); color: #a0aec0;\n\
@@ -1416,7 +1417,7 @@ html[data-theme="neu"] {\n\
 #theme-picker-panel.open { display: flex; }\n\
 \n\
 [data-theme="academic"] #theme-picker-panel {\n\
-  background: #fff; border: 1px solid #d8d5cd; box-shadow: 0 4px 16px rgba(0,0,0,0.08);\n\
+  background: #fff; border: 1px solid #E8E5DE; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-radius: 12px;\n\
 }\n\
 [data-theme="glass"] #theme-picker-panel {\n\
   background: rgba(30,40,55,0.95); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 30px rgba(0,0,0,0.3);\n\
@@ -1443,9 +1444,9 @@ html[data-theme="neu"] {\n\
   transition: all 0.12s ease; text-align: left; width: 100%;\n\
 }\n\
 \n\
-[data-theme="academic"] .theme-option { font-family: "Source Sans 3", "Plus Jakarta Sans", sans-serif; color: #52526e; }\n\
-[data-theme="academic"] .theme-option:hover { background: #f0efeb; color: #1b1b30; }\n\
-[data-theme="academic"] .theme-option.active { color: #1e3a5f; border-color: #1e3a5f; }\n\
+[data-theme="academic"] .theme-option { font-family: "Source Sans 3", "Plus Jakarta Sans", sans-serif; color: #6B6B7B; }\n\
+[data-theme="academic"] .theme-option:hover { background: #F5F3EE; color: #1A1A2E; border-radius: 8px; }\n\
+[data-theme="academic"] .theme-option.active { color: #DA7756; border-color: #DA7756; border-radius: 8px; }\n\
 \n\
 [data-theme="glass"] .theme-option { font-family: "Plus Jakarta Sans", sans-serif; color: #a0aec0; }\n\
 [data-theme="glass"] .theme-option:hover { background: rgba(255,255,255,0.05); color: #fff; }\n\
