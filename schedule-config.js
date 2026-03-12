@@ -20,31 +20,30 @@
 
 window.scheduleCategories = {
     lab:     { label: "Laboratory",   color: "#a78bfa" },  // Purple
-    lecture: { label: "Lecture",       color: "#60a5fa" },  // Blue
-    office:  { label: "Office Hours", color: "#34d399" },  // Green
-    meeting: { label: "Meeting",      color: "#f472b6" },  // Pink
+    office:  { label: "Office Hours", color: "#00be79" },  // Green
     break:   { label: "Break",        color: "#9ca3af" },  // Gray
 };
 
 window.scheduleData = {
     monday: [
-        { activity: "Lunch Break",          location: "Out of office", start: "11:00", end: "12:00", category: "break" },
+        { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
     ],
     tuesday: [
-        { activity: "Lunch Break",          location: "Out of office", start: "11:00", end: "12:00", category: "break" },
+        { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
         { activity: "EE352 Laboratory (S1)", location: "B4015",        start: "12:30", end: "14:20", category: "lab" },
     ],
     wednesday: [
-        { activity: "Lunch Break",          location: "Out of office", start: "11:00", end: "12:00", category: "break" },
+        { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
         { activity: "EE214 Laboratory (S1)", location: "B2015",        start: "13:30", end: "15:20", category: "lab" },
         { activity: "EE214 Laboratory (S2)", location: "B2015",        start: "15:30", end: "17:20", category: "lab" },
     ],
     thursday: [
         { activity: "EE316 Laboratory (S1)", location: "B2013",        start: "09:30", end: "11:20", category: "lab" },
-        { activity: "Lunch Break",          location: "Out of office", start: "11:00", end: "12:00", category: "break" },
+        { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
+        { activity: "Office Hours",         location: "2042",          start: "13:00", end: "15:00", category: "office"}
     ],
     friday: [
-        { activity: "Lunch Break",          location: "Out of office", start: "11:00", end: "12:00", category: "break" },
+        { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
         { activity: "EE352 Laboratory (S2)", location: "B4015",        start: "12:30", end: "14:20", category: "lab" },
         { activity: "EE316 Laboratory (S2)", location: "B2013",        start: "14:30", end: "16:20", category: "lab" },
     ],
@@ -53,4 +52,5 @@ window.scheduleData = {
 
 // Dates when you are on leave (YYYY-MM-DD format)
 window.leaveDays = [
+    "2026-03-13"
 ];
