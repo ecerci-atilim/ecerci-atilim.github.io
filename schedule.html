@@ -256,7 +256,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Legend */
+        /* Legend (auto-generated from categories) */
         .schedule-legend {
             display: flex;
             gap: 16px;
@@ -278,6 +278,13 @@
             height: 10px;
             border-radius: 3px;
             flex-shrink: 0;
+        }
+
+        /* Event duration label */
+        .event-duration {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            font-family: 'JetBrains Mono', monospace;
         }
 
         /* Animations */
@@ -345,22 +352,8 @@
                     <!-- JS fills this -->
                 </tbody>
             </table>
-            <div class="schedule-legend">
-                <div class="legend-item">
-                    <span class="legend-dot" style="background: #68d391;"></span> Available
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot" style="background: #63b3ed;"></span> In Class / Busy
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot" style="background: #f6ad55;"></span> On Leave
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot" style="background: #a0aec0;"></span> Off-Duty
-                </div>
-                <div class="legend-item">
-                    <span class="legend-dot" style="background: rgba(99,179,237,0.15); border: 1px solid #63b3ed;"></span> Current Slot
-                </div>
+            <div class="schedule-legend" id="schedule-legend">
+                <!-- Auto-generated from categories -->
             </div>
         </div>
     </div>
@@ -369,33 +362,102 @@
     <script src="schedule-config.js"></script>
 
     <script>
-        // MAIN LOGIC
+        // ─── MAIN LOGIC (Event-based schedule) ───
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+        // Time helpers
+        function timeToMinutes(str) {
+            const [h, m] = str.split(':').map(Number);
+            return h * 60 + m;
+        }
+        function minutesToTime(mins) {
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+        }
+        function formatDuration(startMin, endMin) {
+            const diff = endMin - startMin;
+            const h = Math.floor(diff / 60);
+            const m = diff % 60;
+            if (h === 0) return m + 'min';
+            if (m === 0) return h + 'h';
+            return h + 'h ' + m + 'min';
+        }
+
+        // Get category color (with fallback)
+        function getCategoryColor(cat) {
+            if (window.scheduleCategories && window.scheduleCategories[cat]) {
+                return window.scheduleCategories[cat].color;
+            }
+            return '#94a3b8'; // fallback gray
+        }
+
+        // Find event at a specific time for a given day
+        function findEventAt(day, minutes) {
+            if (!window.scheduleData || !window.scheduleData[day]) return null;
+            const events = window.scheduleData[day];
+            for (const ev of events) {
+                const s = timeToMinutes(ev.start);
+                const e = timeToMinutes(ev.end);
+                if (minutes >= s && minutes < e) return ev;
+            }
+            return null;
+        }
+
+        // Find event that STARTS at a specific slot time
+        function findEventStartingAt(day, minutes) {
+            if (!window.scheduleData || !window.scheduleData[day]) return null;
+            const events = window.scheduleData[day];
+            for (const ev of events) {
+                if (timeToMinutes(ev.start) === minutes) return ev;
+            }
+            return null;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if window.scheduleData exists (populated by external file)
             if (typeof window.scheduleData === 'undefined') {
                 document.getElementById('error-banner').style.display = 'block';
-                return; // Stop execution
+                return;
+            }
+            if (typeof window.leaveDays === 'undefined') window.leaveDays = [];
+            if (typeof window.scheduleCategories === 'undefined') {
+                window.scheduleCategories = { default: { label: 'Event', color: '#94a3b8' } };
             }
 
-            // Ensure leaveDays exists
-            if (typeof window.leaveDays === 'undefined') {
-                window.leaveDays = [];
-            }
-
+            generateLegend();
             generateScheduleTable();
             updateRealtime();
             setInterval(updateRealtime, 1000);
         });
 
+        // ─── Auto-generate legend from categories ───
+        function generateLegend() {
+            const legend = document.getElementById('schedule-legend');
+            const cats = window.scheduleCategories;
+
+            // Add category colors
+            for (const key in cats) {
+                legend.innerHTML += `
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: ${cats[key].color};"></span> ${cats[key].label}
+                    </div>`;
+            }
+            // Add special items
+            legend.innerHTML += `
+                <div class="legend-item">
+                    <span class="legend-dot" style="background: repeating-linear-gradient(45deg, rgba(246,173,85,0.3), rgba(246,173,85,0.3) 3px, rgba(246,173,85,0.1) 3px, rgba(246,173,85,0.1) 6px);"></span> On Leave
+                </div>
+                <div class="legend-item">
+                    <span class="legend-dot" style="background: rgba(99,179,237,0.15); border: 1px solid var(--accent-color, #63b3ed);"></span> Current Slot
+                </div>`;
+        }
+
         function getWeekDates() {
             const now = new Date();
             const weekDates = {};
-            const dayIndex = now.getDay(); 
+            const dayIndex = now.getDay();
             const offset = dayIndex === 0 ? -6 : 1 - dayIndex;
-
             for (let i = 0; i < 6; i++) {
                 const date = new Date(now);
                 date.setDate(now.getDate() + offset + i);
@@ -405,50 +467,25 @@
             }
             return weekDates;
         }
-        
-        function addMinutesToTimeStr(timeStr, minutesToAdd) {
-            const [hours, minutes] = timeStr.split(':').map(Number);
-            const date = new Date();
-            date.setHours(hours, minutes + minutesToAdd, 0, 0);
-            return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-        }
 
-        // Yardımcı Fonksiyon: Aynı dersin kaç blok sürdüğünü hesaplar
-        function calculateRowSpan(day, startTime, currentEntry) {
-            let span = 1;
-            let checkTime = addMinutesToTimeStr(startTime, 30);
-            
-            // Sonraki slotlara bak: Veri var mı VE aktivite ismi aynı mı VE lokasyon aynı mı?
-            while (
-                window.scheduleData[day] && 
-                window.scheduleData[day][checkTime] && 
-                window.scheduleData[day][checkTime].activity === currentEntry.activity &&
-                window.scheduleData[day][checkTime].location === currentEntry.location
-            ) {
-                span++;
-                checkTime = addMinutesToTimeStr(checkTime, 30);
-            }
-            return span;
-        }
-
+        // ─── Schedule table generation ───
         function generateScheduleTable() {
             const scheduleHead = document.getElementById('schedule-head');
             const scheduleBody = document.getElementById('schedule-body');
-            scheduleHead.innerHTML = ''; // Temizle
-            scheduleBody.innerHTML = ''; // Temizle
-            
-            const weekDates = getWeekDates();
+            scheduleHead.innerHTML = '';
+            scheduleBody.innerHTML = '';
 
-            // 1. Header Row
+            const weekDates = getWeekDates();
+            const todayDayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
+
+            // Header
             const headerRow = document.createElement('tr');
             headerRow.innerHTML = '<th>Time</th>';
-            const todayDayName = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][new Date().getDay()];
             days.forEach(day => {
                 const date = weekDates[day].dateObj;
                 const displayDate = `${monthNames[date.getMonth()]} ${date.getDate()}`;
                 const isToday = new Date().toDateString() === date.toDateString();
                 const todayClass = isToday ? ' today-header' : '';
-
                 headerRow.innerHTML += `
                     <th class="${todayClass}">
                         ${day.charAt(0).toUpperCase() + day.slice(1)}
@@ -457,37 +494,36 @@
             });
             scheduleHead.appendChild(headerRow);
 
-            // Hangi günün hangi saatlerinde "atlama" (skip) yapacağımızı tutan takipçi
-            // Örn: Pazartesi 14:30'da 4'lük bir span varsa, 15:00, 15:30, 16:00 atlanmalı.
+            // Skip tracker: how many remaining rows to skip per day (for rowspan)
             const skipTracker = {};
             days.forEach(day => skipTracker[day] = 0);
 
-            // 2. Body Rows (08:30 to 17:30)
-            const startTime = new Date(); startTime.setHours(8, 30, 0, 0);
-            const endTime = new Date(); endTime.setHours(17, 30, 0, 0);
-            let loopTime = new Date(startTime);
+            // Rows: 30-min slots from 08:30 to 17:30
+            const SLOT = 30; // minutes
+            const START = timeToMinutes('08:30');
+            const END = timeToMinutes('17:30');
 
-            while (loopTime < endTime) {
+            for (let slotMin = START; slotMin < END; slotMin += SLOT) {
                 const row = document.createElement('tr');
-                const timeStr = loopTime.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                
-                // Zaman Sütunu (with time range)
-                const endTimeStr = addMinutesToTimeStr(timeStr, 30);
-                row.innerHTML = `<td class="time-col">${timeStr}<span class="time-end">— ${endTimeStr}</span></td>`;
+                const timeStr = minutesToTime(slotMin);
+                const endStr = minutesToTime(slotMin + SLOT);
+
+                // Time column
+                row.innerHTML = `<td class="time-col">${timeStr}<span class="time-end">— ${endStr}</span></td>`;
 
                 days.forEach((day, index) => {
-                    // Eğer bu gün için atlanması gereken bir slot varsa, hücresini oluşturma ve sayacı düş
+                    // Skip cells covered by a rowspan
                     if (skipTracker[day] > 0) {
                         skipTracker[day]--;
-                        return; 
+                        return;
                     }
 
                     const cell = document.createElement('td');
                     const isTodayCol = (day === todayDayName);
                     cell.className = 'activity-cell' + (isTodayCol ? ' today-col' : '');
                     cell.id = `${day}-${timeStr.replace(':', '')}`;
-                    
-                    // Stagger Animation
+
+                    // Stagger animation
                     cell.style.animation = `fadeInUp 0.5s ease-out forwards ${0.1 * index}s`;
                     cell.style.opacity = '0';
 
@@ -497,115 +533,111 @@
 
                     if (isLeave) {
                         cell.classList.add('leave-day');
-                        // Tüm gün izinliyse tek tek yazmak yerine ilk slotta yazsın veya her slotta yazsın
-                        // Basitlik için her slotta bırakıyoruz
                         if (timeStr === '08:30') cell.textContent = "On Leave";
                     } else {
-                        // Check Schedule Data
-                        if (window.scheduleData && window.scheduleData[day]) {
-                            const entry = window.scheduleData[day][timeStr];
-                            
-                            if (entry) {
-                                // --- ROWSPAN MANTIĞI ---
-                                const spanCount = calculateRowSpan(day, timeStr, entry);
-                                
-                                if (spanCount > 1) {
-                                    cell.setAttribute('rowspan', spanCount);
-                                    // Takipçiyi güncelle: (spanCount - 1) kadar sonraki hücreyi atla
-                                    skipTracker[day] = spanCount - 1;
-                                }
+                        // Find event that starts at this slot
+                        const event = findEventStartingAt(day, slotMin);
 
-                                cell.classList.add('filled-slot');
-                                // Force background color from config
-                                if (entry.color) {
-                                    cell.style.backgroundColor = entry.color;
-                                } else {
-                                    cell.style.backgroundColor = '#e2e8f0';
-                                }
-                                
-                                cell.innerHTML = `
-                                    <div class="activity-content">
-                                        <span class="activity">${entry.activity}</span>
-                                        <span class="location">
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                                            ${entry.location}
-                                        </span>
-                                    </div>
-                                `;
+                        if (event) {
+                            const evStartMin = timeToMinutes(event.start);
+                            const evEndMin = timeToMinutes(event.end);
+                            // How many 30-min slots does this event span?
+                            const slotSpan = Math.ceil((evEndMin - evStartMin) / SLOT);
+
+                            if (slotSpan > 1) {
+                                cell.setAttribute('rowspan', slotSpan);
+                                skipTracker[day] = slotSpan - 1;
                             }
+
+                            cell.classList.add('filled-slot');
+                            cell.style.backgroundColor = getCategoryColor(event.category);
+
+                            const duration = formatDuration(evStartMin, evEndMin);
+                            cell.innerHTML = `
+                                <div class="activity-content">
+                                    <span class="activity">${event.activity}</span>
+                                    <span class="event-duration">${event.start} — ${event.end}</span>
+                                    <span class="location">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                                        ${event.location}
+                                    </span>
+                                </div>
+                            `;
+                        } else if (!findEventAt(day, slotMin)) {
+                            // Empty slot (no event covering this time) — leave empty
                         }
+                        // If an event covers this slot but doesn't start here, it's handled by rowspan skip
                     }
+
                     row.appendChild(cell);
                 });
 
                 scheduleBody.appendChild(row);
-                loopTime.setMinutes(loopTime.getMinutes() + 30);
             }
         }
+
+        // ─── Real-time status ───
         function updateRealtime() {
             const now = new Date();
-            
-            // 1. Clock & Date
+
+            // Clock & Date
             document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
             document.getElementById('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
-            // 2. Determine Status
-            const dayIndex = now.getDay(); // 0=Sun
+            const dayIndex = now.getDay();
             const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
             const dayName = dayMap[dayIndex];
             const badge = document.getElementById('status-badge');
 
-            // Reset Highlight
+            // Reset current-slot highlight
             document.querySelectorAll('.current-slot').forEach(el => el.classList.remove('current-slot'));
 
-            // Logic Variables
-            const isWeekend = (dayIndex === 0); 
+            const isWeekend = (dayIndex === 0);
             const hour = now.getHours();
             const min = now.getMinutes();
-            const isOffHours = (hour < 8 || (hour === 8 && min < 30) || hour > 17 || (hour === 17 && min >= 30));
-            
-            const ymd = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+            const nowMinutes = hour * 60 + min;
+            const isOffHours = (nowMinutes < timeToMinutes('08:30') || nowMinutes >= timeToMinutes('17:30'));
+
+            const ymd = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
             const isLeave = (window.leaveDays && window.leaveDays.includes(ymd));
 
-            // Default State
             let statusText = "Off-Duty";
             let statusClass = "status-off";
-            let icon = "💤";
+            let icon = "❇️";
 
-            const isSaturdayOff = (dayName === 'saturday' && (!window.scheduleData.saturday || Object.keys(window.scheduleData.saturday).length === 0));
+            const isSaturdayOff = (dayName === 'saturday' && (!window.scheduleData.saturday || window.scheduleData.saturday.length === 0));
 
             if (isLeave) {
                 statusText = "On Leave";
                 statusClass = "status-leave";
-                icon = "🏖️";
+                icon = "❌";
             } else if (isWeekend || isOffHours || isSaturdayOff) {
-                // Keep default Off-Duty
+                // Keep Off-Duty
             } else {
-                // Working Hours
-                statusText = "Available / Free";
-                statusClass = "status-active";
-                icon = "✅";
-
-                // Check specific activity
-                let slotMin = min < 30 ? '00' : '30';
-                const timeKey = String(hour).padStart(2,'0') + ':' + slotMin;
-                
-                // Highlight Cell
-                const cellId = `${dayName}-${timeKey.replace(':','')}`;
+                // Working hours — find current slot time
+                const slotMin = min < 30 ? 0 : 30;
+                const timeKey = String(hour).padStart(2, '0') + ':' + String(slotMin).padStart(2, '0');
+                const cellId = `${dayName}-${timeKey.replace(':', '')}`;
                 const cell = document.getElementById(cellId);
                 if (cell) cell.classList.add('current-slot');
 
-                if (window.scheduleData && window.scheduleData[dayName] && window.scheduleData[dayName][timeKey]) {
-                    const act = window.scheduleData[dayName][timeKey];
-                    statusText = act.activity; 
+                // Check if currently in an event
+                const currentEvent = findEventAt(dayName, nowMinutes);
+
+                if (currentEvent) {
+                    statusText = currentEvent.activity;
                     statusClass = "status-busy";
                     icon = "⛔";
-                    
-                    if (act.activity.includes("Lunch")) {
+
+                    if (currentEvent.category === 'break' || currentEvent.activity.toLowerCase().includes('lunch')) {
                         icon = "🍽️";
-                        statusText = "Lunch Break";
+                        statusText = currentEvent.activity;
                         statusClass = "status-leave";
                     }
+                } else {
+                    statusText = "Available / Free";
+                    statusClass = "status-active";
+                    icon = "✅";
                 }
             }
 
