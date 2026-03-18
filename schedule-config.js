@@ -34,8 +34,8 @@ window.scheduleData = {
     ],
     wednesday: [
         { activity: "Lunch Break",          location: "Out of office", start: "11:30", end: "12:30", category: "break" },
-        { activity: "EE214 Laboratory (S1)", location: "B2015",        start: "13:30", end: "15:20", category: "lab" },
-        { activity: "EE214 Laboratory (S2)", location: "B2015",        start: "15:30", end: "17:20", category: "lab" },
+        { activity: "EE214 Laboratory (S1)", location: "B2015",        start: "12:30", end: "14:20", category: "lab" },
+        { activity: "EE214 Laboratory (S2)", location: "B2015",        start: "14:30", end: "16:20", category: "lab" },
     ],
     thursday: [
         { activity: "EE316 Laboratory (S1)", location: "B2013",        start: "09:30", end: "11:20", category: "lab" },
