@@ -52,5 +52,6 @@ window.scheduleData = {
 
 // Dates when you are on leave (YYYY-MM-DD format)
 window.leaveDays = [
-    "2026-03-13"
+    "2026-03-13",
+    "2026-04-16"
 ];
