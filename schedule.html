@@ -416,6 +416,10 @@
             height: 1.2em;
             line-height: 1.2;
             vertical-align: top;
+            white-space: pre;
+        }
+        .glitch .char.space {
+            min-width: 0.32em;
         }
         /* Heavy "data corruption" applied to chars near the click */
         .glitch .char.corrupting {
@@ -603,8 +607,14 @@
                     var ch = originalText[i];
                     var s = document.createElement('span');
                     s.className = 'char';
-                    s.textContent = (ch === ' ') ? ' ' : ch;
-                    s.dataset.original = s.textContent;
+                    if (ch === ' ') {
+                        s.classList.add('space');
+                        s.textContent = ' ';
+                        s.dataset.original = ' ';
+                    } else {
+                        s.textContent = ch;
+                        s.dataset.original = ch;
+                    }
                     titleEl.appendChild(s);
                     spans.push(s);
                 }
@@ -613,13 +623,21 @@
                     titleEl.setAttribute('data-text', spans.map(function(s) { return s.textContent; }).join(''));
                 }
                 syncDataText();
-                // Freeze each char's natural width on next frame
-                requestAnimationFrame(function() {
+                // Freeze each char's natural width once the title font has loaded,
+                // otherwise we'd measure with the fallback font and get the wrong widths.
+                function freezeWidths() {
                     spans.forEach(function(sp) {
                         var w = sp.getBoundingClientRect().width;
-                        sp.style.width = w + 'px';
+                        if (w > 0) sp.style.width = w + 'px';
                     });
-                });
+                }
+                if (document.fonts && document.fonts.ready) {
+                    document.fonts.ready.then(function() {
+                        requestAnimationFrame(freezeWidths);
+                    });
+                } else {
+                    requestAnimationFrame(freezeWidths);
+                }
 
                 // Ambient scrambler — flickers a random non-space char to a glitch
                 // symbol for a fixed 160ms then restores it.
