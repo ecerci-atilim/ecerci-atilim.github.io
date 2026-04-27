@@ -287,6 +287,38 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
+        /* --- Leave Screen --- */
+        .leave-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+        .leave-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+        .leave-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+        .leave-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out 0.7s forwards;
+        }
+
         /* Animations */
         @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -325,8 +357,15 @@
             Error: 'schedule-config.js' file not found or empty. Please check the file.
         </div>
 
+        <!-- Leave Screen (shown when scheduleEnabled = false) -->
+        <div class="leave-screen" id="leave-screen">
+            <div class="leave-icon">🏖️</div>
+            <div class="leave-title">Currently on leave</div>
+            <div class="leave-subtitle">The schedule is not available at this time.</div>
+        </div>
+
         <!-- Dashboard Header -->
-        <div class="dashboard-header">
+        <div class="dashboard-header" id="dashboard-header">
             <div class="title-card">
                 <h1 class="page-title">Weekly Schedule</h1>
             </div>
@@ -343,7 +382,7 @@
         </div>
 
         <!-- Schedule Table -->
-        <div class="table-container">
+        <div class="table-container" id="table-container">
             <table class="schedule-table">
                 <thead id="schedule-head">
                     <!-- JS fills this -->
@@ -420,6 +459,15 @@
                 document.getElementById('error-banner').style.display = 'block';
                 return;
             }
+
+            // Leave mode: hide everything, show leave screen
+            if (window.scheduleEnabled === false) {
+                document.getElementById('dashboard-header').style.display = 'none';
+                document.getElementById('table-container').style.display = 'none';
+                document.getElementById('leave-screen').style.display = 'flex';
+                return;
+            }
+
             if (typeof window.leaveDays === 'undefined') window.leaveDays = [];
             if (typeof window.scheduleCategories === 'undefined') {
                 window.scheduleCategories = { default: { label: 'Event', color: '#94a3b8' } };
