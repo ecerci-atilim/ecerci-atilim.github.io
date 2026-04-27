@@ -400,7 +400,7 @@
 
     <div class="container">
         <!-- Navigation -->
-        <a href="index.html" class="back-btn">
+        <a href="index.html" class="back-btn" id="back-btn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Back to Homepage
         </a>
@@ -514,6 +514,7 @@
 
             // Leave mode: hide everything, show leave screen
             if (window.scheduleEnabled === false) {
+                document.getElementById('back-btn').style.display = 'none';
                 document.getElementById('dashboard-header').style.display = 'none';
                 document.getElementById('table-container').style.display = 'none';
                 var ls = document.getElementById('leave-screen');
