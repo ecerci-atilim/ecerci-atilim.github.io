@@ -431,46 +431,68 @@
             93.4%     { clip-path: inset(20% 0 70% 0); }
             94%, 100% { clip-path: inset(0 0 100% 0); }
         }
-        /* Subtle horizontal jitter on the parent during the heavy meltdown only */
+        /* Tiny horizontal jitter — only during the heavy meltdown, max 1px */
         @keyframes glitch-shake {
             0%, 49%, 57%, 100% { transform: translate(0, 0); }
-            50%   { transform: translate(-3px, 1px); }
-            50.5% { transform: translate(2px, -1px); }
-            51%   { transform: translate(-2px, 0); }
-            51.5% { transform: translate(3px, 1px); }
-            52%   { transform: translate(-1px, -2px); }
-            52.5% { transform: translate(2px, 0); }
-            53%   { transform: translate(-3px, 1px); }
-            53.5% { transform: translate(1px, -1px); }
-            54%   { transform: translate(-2px, 1px); }
-            54.5% { transform: translate(2px, 0); }
-            55%   { transform: translate(0, -1px); }
-            55.5% { transform: translate(-1px, 1px); }
+            50%   { transform: translate(-1px, 0); }
+            50.5% { transform: translate(1px, 0); }
+            51%   { transform: translate(-1px, 0); }
+            51.5% { transform: translate(1px, 0); }
+            52%   { transform: translate(0, -1px); }
+            52.5% { transform: translate(1px, 0); }
+            53%   { transform: translate(-1px, 0); }
+            53.5% { transform: translate(0, 0); }
+            54%   { transform: translate(-1px, 0); }
+            54.5% { transform: translate(1px, 0); }
+            55%   { transform: translate(0, 0); }
+            55.5% { transform: translate(-1px, 0); }
             56%   { transform: translate(0, 0); }
         }
 
-        /* Click glitch artifact — small, transient burst at cursor */
+        /* Click chromatic shockwave — expanding RGB-split rings, no text */
         .click-glitch {
             position: fixed;
             pointer-events: none;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            white-space: nowrap;
-            text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
             z-index: 9999;
-            --rot: 0deg;
-            animation: click-glitch-anim 0.55s steps(1, end) forwards;
+            border: 2px solid rgba(255,255,255,0.95);
+            animation: click-shock-core 0.6s ease-out forwards;
         }
-        @keyframes click-glitch-anim {
-            0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(0.7); text-shadow: 6px 0 #ff3860, -6px 0 #00d1ff; }
-            15%  { opacity: 1; transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1.4) skewX(-10deg); text-shadow: 6px 0 #ff3860, -6px 0 #00d1ff; }
-            35%  { opacity: 1; transform: translate(-46%, -52%) rotate(var(--rot)) scaleX(0.8) skewX(8deg); text-shadow: -4px 0 #ff3860, 4px 0 #00d1ff; }
-            55%  { opacity: 1; transform: translate(-54%, -48%) rotate(var(--rot)) scaleX(1.15) skewX(-3deg); text-shadow: 5px 0 #ff3860, -5px 0 #00d1ff; }
-            75%  { opacity: 0.85; transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1) skewX(0); text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
-            90%  { opacity: 0.4; transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1.05); }
-            100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--rot)) scaleX(1); }
+        .click-glitch::before,
+        .click-glitch::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            border: 2px solid;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+        .click-glitch::before {
+            border-color: #ff3860;
+            animation: click-shock-r 0.6s ease-out forwards !important;
+        }
+        .click-glitch::after {
+            border-color: #00d1ff;
+            animation: click-shock-c 0.6s ease-out forwards !important;
+        }
+        @keyframes click-shock-core {
+            0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 3px; }
+            25%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; border-width: 2px; }
+            100% { transform: translate(-50%, -50%) scale(4); opacity: 0; border-width: 1px; }
+        }
+        @keyframes click-shock-r {
+            0%   { transform: translateX(8px); opacity: 1; }
+            25%  { transform: translateX(5px); opacity: 1; }
+            100% { transform: translateX(2px); opacity: 0; }
+        }
+        @keyframes click-shock-c {
+            0%   { transform: translateX(-8px); opacity: 1; }
+            25%  { transform: translateX(-5px); opacity: 1; }
+            100% { transform: translateX(-2px); opacity: 0; }
         }
 
         /* Animations */
@@ -629,26 +651,48 @@
                 ls.style.display = 'flex';
                 requestAnimationFrame(function() { ls.classList.add('active'); });
 
-                // Click anywhere → spawn a small, transient glitch artifact
-                var glitchChars = ['▓','▒','░','█','╳','╱','╲','╋','╬','◉','◇','◈','▪','▫','◢','◣','◤','◥','▚','▞'];
+                // Click anywhere → chromatic shockwave at cursor
                 function spawnClickGlitch(x, y) {
-                    var len = 3 + Math.floor(Math.random() * 4);
-                    var text = '';
-                    for (var i = 0; i < len; i++) {
-                        text += glitchChars[Math.floor(Math.random() * glitchChars.length)];
-                    }
                     var g = document.createElement('div');
                     g.className = 'click-glitch';
-                    g.textContent = text;
                     g.style.left = x + 'px';
                     g.style.top = y + 'px';
-                    g.style.setProperty('--rot', (Math.random() * 16 - 8).toFixed(1) + 'deg');
                     document.body.appendChild(g);
-                    setTimeout(function() { g.remove(); }, 600);
+                    setTimeout(function() { g.remove(); }, 650);
                 }
                 window.addEventListener('pointerdown', function(e) {
                     spawnClickGlitch(e.clientX, e.clientY);
                 });
+
+                // Character scrambling — periodically replace one char with a glitchy
+                // symbol then restore it, to make the title feel chaotic.
+                var titleEl = document.querySelector('.glitch');
+                var originalText = titleEl.getAttribute('data-text');
+                var scrambleSet = '█▓▒░◇◈╳╋▪▫◢◣◤◥▚▞⌬◉#@*?$%&';
+                function scrambleOnce() {
+                    var chars = originalText.split('');
+                    var changes = 1 + Math.floor(Math.random() * 2); // 1 or 2 chars
+                    for (var i = 0; i < changes; i++) {
+                        var idx = Math.floor(Math.random() * chars.length);
+                        if (chars[idx] === ' ') continue;
+                        chars[idx] = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
+                    }
+                    var scrambled = chars.join('');
+                    titleEl.textContent = scrambled;
+                    titleEl.setAttribute('data-text', scrambled);
+                    setTimeout(function() {
+                        titleEl.textContent = originalText;
+                        titleEl.setAttribute('data-text', originalText);
+                    }, 60 + Math.floor(Math.random() * 100));
+                }
+                function scheduleScramble() {
+                    var delay = 700 + Math.random() * 2500; // 0.7-3.2s between flickers
+                    setTimeout(function() {
+                        scrambleOnce();
+                        scheduleScramble();
+                    }, delay);
+                }
+                scheduleScramble();
                 return;
             }
 
