@@ -449,83 +449,29 @@
             56%   { transform: translate(0, 0); }
         }
 
-        /* Click effect: a small "data block" flicker at the cursor */
-        .click-block {
-            position: fixed;
-            pointer-events: none;
-            width: 24px;
-            height: 6px;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            background: var(--text-primary);
-            animation: click-block 0.42s steps(6, end) forwards !important;
+        /* Per-char glitch span — used by both ambient scrambler and click corruption */
+        .glitch .char {
+            display: inline-block;
+            text-align: center;
+            position: relative;
         }
-        .click-block::before,
-        .click-block::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+        /* Heavy "data corruption" applied to chars near the click */
+        .glitch .char.corrupting {
+            animation: char-corrupt 0.55s steps(11, end) forwards !important;
         }
-        .click-block::before {
-            background: #ff3860;
-            animation: click-block-r 0.42s steps(6, end) forwards !important;
-        }
-        .click-block::after {
-            background: #00d1ff;
-            animation: click-block-c 0.42s steps(6, end) forwards !important;
-        }
-        @keyframes click-block {
-            0%   { transform: translate(-50%, -50%) scaleX(0.4) scaleY(0.4); opacity: 1; }
-            16%  { transform: translate(-50%, -50%) scaleX(1.6) scaleY(2.2); opacity: 1; }
-            33%  { transform: translate(-46%, -54%) scaleX(0.6) scaleY(1.4); opacity: 0.7; }
-            50%  { transform: translate(-54%, -48%) scaleX(2.1) scaleY(0.5); opacity: 1; }
-            66%  { transform: translate(-48%, -52%) scaleX(0.9) scaleY(1.7); opacity: 0.5; }
-            83%  { transform: translate(-50%, -50%) scaleX(1.3) scaleY(0.6); opacity: 0.3; }
-            100% { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 0; }
-        }
-        @keyframes click-block-r {
-            0%   { transform: translate(-5px, -3px); opacity: 1; }
-            16%  { transform: translate(-2px, -2px); opacity: 1; }
-            33%  { transform: translate(-7px, -4px); opacity: 0.85; }
-            50%  { transform: translate(-3px, -1px); opacity: 1; }
-            66%  { transform: translate(-6px, -3px); opacity: 0.6; }
-            83%  { transform: translate(-4px, -2px); opacity: 0.3; }
-            100% { transform: translate(-3px, -2px); opacity: 0; }
-        }
-        @keyframes click-block-c {
-            0%   { transform: translate(5px, 3px); opacity: 1; }
-            16%  { transform: translate(2px, 2px); opacity: 1; }
-            33%  { transform: translate(7px, 4px); opacity: 0.85; }
-            50%  { transform: translate(3px, 1px); opacity: 1; }
-            66%  { transform: translate(6px, 3px); opacity: 0.6; }
-            83%  { transform: translate(4px, 2px); opacity: 0.3; }
-            100% { transform: translate(3px, 2px); opacity: 0; }
-        }
-
-        /* Click effect: a horizontal scanline tear across the viewport */
-        .click-tear {
-            position: fixed;
-            pointer-events: none;
-            left: 0;
-            width: 100vw;
-            height: 2px;
-            transform: translateY(-50%);
-            z-index: 9998;
-            background: rgba(255,255,255,0.18);
-            box-shadow:
-                0 -2px 0 -1px rgba(255,56,96,0.55),
-                0  2px 0 -1px rgba(0,209,255,0.55);
-            animation: click-tear 0.28s steps(4, end) forwards !important;
-        }
-        @keyframes click-tear {
-            0%   { transform: translateY(-50%) scaleY(0.4); opacity: 0; }
-            25%  { transform: translateY(-50%) scaleY(2);   opacity: 1; }
-            50%  { transform: translateY(-30%) scaleY(0.6); opacity: 0.85; }
-            75%  { transform: translateY(-70%) scaleY(1.2); opacity: 0.6; }
-            100% { transform: translateY(-50%) scaleY(0);   opacity: 0; }
+        @keyframes char-corrupt {
+            0%   { transform: translate(0, 0);  text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
+            9%   { transform: translate(-3px, 1px);  text-shadow: 6px 0 #ff3860, -6px 0 #00d1ff; }
+            18%  { transform: translate(2px, -2px);  text-shadow: -5px 0 #ff3860, 5px 0 #00d1ff; }
+            27%  { transform: translate(-2px, 2px);  text-shadow: 7px 1px #ff3860, -7px -1px #00d1ff; }
+            36%  { transform: translate(3px, 0);     text-shadow: -4px -1px #ff3860, 4px 1px #00d1ff; }
+            45%  { transform: translate(-1px, -1px); text-shadow: 5px 0 #ff3860, -5px 0 #00d1ff; }
+            54%  { transform: translate(2px, 1px);   text-shadow: -6px 0 #ff3860, 6px 0 #00d1ff; }
+            63%  { transform: translate(-3px, -2px); text-shadow: 4px 0 #ff3860, -4px 0 #00d1ff; }
+            72%  { transform: translate(1px, 2px);   text-shadow: -3px 0 #ff3860, 3px 0 #00d1ff; }
+            81%  { transform: translate(-1px, 0);    text-shadow: 3px 0 #ff3860, -3px 0 #00d1ff; }
+            90%  { transform: translate(1px, 0);     text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
+            100% { transform: translate(0, 0);       text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
         }
 
         /* Animations */
@@ -684,29 +630,54 @@
                 ls.style.display = 'flex';
                 requestAnimationFrame(function() { ls.classList.add('active'); });
 
-                // Character scrambling — periodically replace one char with a glitchy
-                // symbol then restore it, to make the title feel chaotic.
+                // Build per-char spans with frozen widths so symbol swaps don't
+                // shift the title's layout (Outfit isn't monospace).
                 var titleEl = document.querySelector('.glitch');
                 var originalText = titleEl.getAttribute('data-text');
                 var scrambleSet = '█▓▒░◇◈╳╋▪▫◢◣◤◥▚▞⌬◉#@*?$%&';
+                titleEl.textContent = '';
+                var spans = [];
+                for (var i = 0; i < originalText.length; i++) {
+                    var ch = originalText[i];
+                    var s = document.createElement('span');
+                    s.className = 'char';
+                    s.textContent = (ch === ' ') ? ' ' : ch;
+                    s.dataset.original = s.textContent;
+                    titleEl.appendChild(s);
+                    spans.push(s);
+                }
+                // Refresh data-text so pseudo-elements show the current state (with nbsp)
+                function syncDataText() {
+                    titleEl.setAttribute('data-text', spans.map(function(s) { return s.textContent; }).join(''));
+                }
+                syncDataText();
+                // Freeze each char's natural width on next frame
+                requestAnimationFrame(function() {
+                    spans.forEach(function(sp) {
+                        var w = sp.getBoundingClientRect().width;
+                        sp.style.width = w + 'px';
+                    });
+                });
+
+                // Ambient scrambler — flickers a random non-space char to a glitch
+                // symbol for a fixed 160ms then restores it.
+                var swappable = spans.filter(function(sp) { return sp.dataset.original !== ' '; });
                 function scrambleOnce() {
-                    var chars = originalText.split('');
-                    var changes = 1 + Math.floor(Math.random() * 2); // 1 or 2 chars
-                    for (var i = 0; i < changes; i++) {
-                        var idx = Math.floor(Math.random() * chars.length);
-                        if (chars[idx] === ' ') continue;
-                        chars[idx] = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
-                    }
-                    var scrambled = chars.join('');
-                    titleEl.textContent = scrambled;
-                    titleEl.setAttribute('data-text', scrambled);
+                    if (!swappable.length) return;
+                    var sp = swappable[Math.floor(Math.random() * swappable.length)];
+                    if (sp.classList.contains('corrupting')) return; // skip if already in heavy state
+                    var orig = sp.dataset.original;
+                    sp.textContent = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
+                    syncDataText();
                     setTimeout(function() {
-                        titleEl.textContent = originalText;
-                        titleEl.setAttribute('data-text', originalText);
-                    }, 160 + Math.floor(Math.random() * 140));
+                        if (!sp.classList.contains('corrupting')) {
+                            sp.textContent = orig;
+                            syncDataText();
+                        }
+                    }, 160);
                 }
                 function scheduleScramble() {
-                    var delay = 700 + Math.random() * 2500; // 0.7-3.2s between flickers
+                    var delay = 700 + Math.random() * 2500;
                     setTimeout(function() {
                         scrambleOnce();
                         scheduleScramble();
@@ -714,25 +685,47 @@
                 }
                 scheduleScramble();
 
-                // Click anywhere → "data corruption shock":
-                //   1) local data block flicker at cursor
-                //   2) horizontal scanline tear across viewport at cursor Y
-                //   3) force a title scramble flicker for connection
-                window.addEventListener('pointerdown', function(e) {
-                    var block = document.createElement('div');
-                    block.className = 'click-block';
-                    block.style.left = e.clientX + 'px';
-                    block.style.top = e.clientY + 'px';
-                    document.body.appendChild(block);
-                    setTimeout(function() { block.remove(); }, 450);
-
-                    var tear = document.createElement('div');
-                    tear.className = 'click-tear';
-                    tear.style.top = e.clientY + 'px';
-                    document.body.appendChild(tear);
-                    setTimeout(function() { tear.remove(); }, 320);
-
-                    scrambleOnce();
+                // Click on the title → heavy corruption around that character:
+                // the clicked char and 1-2 neighbours rapidly cycle through glitch
+                // symbols while shaking with chromatic aberration, then restore.
+                function corruptAround(centerIdx) {
+                    var range = 1 + Math.floor(Math.random() * 2); // 1 or 2 neighbours each side
+                    var start = Math.max(0, centerIdx - range);
+                    var end = Math.min(spans.length, centerIdx + range + 1);
+                    var ticks = 6;        // number of symbol swaps during the burst
+                    var interval = 55;    // ms between swaps
+                    for (var i = start; i < end; i++) {
+                        (function(sp) {
+                            if (sp.dataset.original === ' ') return; // keep spaces
+                            sp.classList.add('corrupting');
+                            var orig = sp.dataset.original;
+                            for (var t = 0; t < ticks; t++) {
+                                (function(t) {
+                                    setTimeout(function() {
+                                        sp.textContent = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
+                                        syncDataText();
+                                    }, t * interval);
+                                })(t);
+                            }
+                            setTimeout(function() {
+                                sp.classList.remove('corrupting');
+                                sp.textContent = orig;
+                                syncDataText();
+                            }, ticks * interval + 30);
+                        })(spans[i]);
+                    }
+                }
+                titleEl.addEventListener('pointerdown', function(e) {
+                    // Locate which span is closest to the click point
+                    var closest = null, closestDist = Infinity;
+                    spans.forEach(function(sp, idx) {
+                        var r = sp.getBoundingClientRect();
+                        var dx = e.clientX - (r.left + r.width / 2);
+                        var dy = e.clientY - (r.top + r.height / 2);
+                        var d = dx * dx + dy * dy;
+                        if (d < closestDist) { closestDist = d; closest = idx; }
+                    });
+                    if (closest !== null) corruptAround(closest);
                 });
                 return;
             }
