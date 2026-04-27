@@ -330,11 +330,6 @@
             position: relative;
             display: inline-block;
             color: var(--text-primary);
-            white-space: nowrap;
-        }
-        .glitch .char {
-            display: inline-block;
-            text-align: center;
         }
         .glitch::before,
         .glitch::after {
@@ -458,13 +453,13 @@
         .click-glitch {
             position: fixed;
             pointer-events: none;
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             transform: translate(-50%, -50%) scale(0);
             z-index: 9999;
-            border: 2px solid currentColor;
-            animation: click-shock-core 0.6s ease-out forwards !important;
+            border: 2px solid rgba(255,255,255,0.95);
+            animation: click-shock-core 0.6s ease-out forwards;
         }
         .click-glitch::before,
         .click-glitch::after {
@@ -473,6 +468,7 @@
             inset: -2px;
             border-radius: 50%;
             border: 2px solid;
+            mix-blend-mode: screen;
             pointer-events: none;
         }
         .click-glitch::before {
@@ -485,17 +481,17 @@
         }
         @keyframes click-shock-core {
             0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 3px; }
-            25%  { transform: translate(-50%, -50%) scale(1.2); opacity: 1; border-width: 2px; }
-            100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; border-width: 1px; }
+            25%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; border-width: 2px; }
+            100% { transform: translate(-50%, -50%) scale(4); opacity: 0; border-width: 1px; }
         }
         @keyframes click-shock-r {
-            0%   { transform: translateX(10px); opacity: 1; }
-            25%  { transform: translateX(6px); opacity: 1; }
+            0%   { transform: translateX(8px); opacity: 1; }
+            25%  { transform: translateX(5px); opacity: 1; }
             100% { transform: translateX(2px); opacity: 0; }
         }
         @keyframes click-shock-c {
-            0%   { transform: translateX(-10px); opacity: 1; }
-            25%  { transform: translateX(-6px); opacity: 1; }
+            0%   { transform: translateX(-8px); opacity: 1; }
+            25%  { transform: translateX(-5px); opacity: 1; }
             100% { transform: translateX(-2px); opacity: 0; }
         }
 
@@ -668,40 +664,26 @@
                     spawnClickGlitch(e.clientX, e.clientY);
                 });
 
-                // Character scrambling — wrap each char in a span with a frozen
-                // width so swapping in glitch symbols doesn't shift the layout.
+                // Character scrambling — periodically replace one char with a glitchy
+                // symbol then restore it, to make the title feel chaotic.
                 var titleEl = document.querySelector('.glitch');
                 var originalText = titleEl.getAttribute('data-text');
                 var scrambleSet = '█▓▒░◇◈╳╋▪▫◢◣◤◥▚▞⌬◉#@*?$%&';
-                titleEl.textContent = '';
-                var spans = [];
-                for (var i = 0; i < originalText.length; i++) {
-                    var s = document.createElement('span');
-                    s.className = 'char';
-                    s.textContent = originalText[i];
-                    s.dataset.original = originalText[i];
-                    titleEl.appendChild(s);
-                    spans.push(s);
-                }
-                requestAnimationFrame(function() {
-                    spans.forEach(function(sp) {
-                        var w = sp.getBoundingClientRect().width;
-                        sp.style.width = w + 'px';
-                    });
-                });
-
-                var scrambleable = spans.filter(function(sp) { return sp.dataset.original !== ' '; });
                 function scrambleOnce() {
-                    if (!scrambleable.length) return;
-                    var sp = scrambleable[Math.floor(Math.random() * scrambleable.length)];
-                    var orig = sp.dataset.original;
-                    sp.textContent = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
-                    titleEl.setAttribute('data-text', spans.map(function(s) { return s.textContent; }).join(''));
-                    var dur = 160 + Math.floor(Math.random() * 140); // 160-300ms
+                    var chars = originalText.split('');
+                    var changes = 1 + Math.floor(Math.random() * 2); // 1 or 2 chars
+                    for (var i = 0; i < changes; i++) {
+                        var idx = Math.floor(Math.random() * chars.length);
+                        if (chars[idx] === ' ') continue;
+                        chars[idx] = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
+                    }
+                    var scrambled = chars.join('');
+                    titleEl.textContent = scrambled;
+                    titleEl.setAttribute('data-text', scrambled);
                     setTimeout(function() {
-                        sp.textContent = orig;
-                        titleEl.setAttribute('data-text', spans.map(function(s) { return s.textContent; }).join(''));
-                    }, dur);
+                        titleEl.textContent = originalText;
+                        titleEl.setAttribute('data-text', originalText);
+                    }, 60 + Math.floor(Math.random() * 100));
                 }
                 function scheduleScramble() {
                     var delay = 700 + Math.random() * 2500; // 0.7-3.2s between flickers
