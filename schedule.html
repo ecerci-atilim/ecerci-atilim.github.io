@@ -380,6 +380,22 @@
             71%, 100% { clip-path: inset(0 0 100% 0); }
         }
 
+        /* Hard shake (used by some heavy/click animations) */
+        .glitch.hard-shaking {
+            animation: glitch-hard-shake 0.45s steps(9, end) forwards !important;
+        }
+        @keyframes glitch-hard-shake {
+            0%   { transform: translate(0, 0); }
+            11%  { transform: translate(-3px, 1px); }
+            22%  { transform: translate(2px, -1px); }
+            33%  { transform: translate(-2px, 0); }
+            44%  { transform: translate(3px, 1px); }
+            55%  { transform: translate(-1px, -2px); }
+            66%  { transform: translate(2px, 0); }
+            77%  { transform: translate(-3px, 1px); }
+            88%  { transform: translate(1px, -1px); }
+            100% { transform: translate(0, 0); }
+        }
         /* 1px subtle shake at the burst points (matches ::before/::after timing) */
         @keyframes glitch-shake {
             0%, 28%, 33%, 67%, 71%, 100% { transform: translate(0, 0); }
@@ -587,7 +603,7 @@
                     var ch = originalText[i];
                     var s = document.createElement('span');
                     s.className = 'char';
-                    s.textContent = (ch === ' ') ? ' ' : ch;
+                    s.textContent = (ch === ' ') ? ' ' : ch;
                     s.dataset.original = s.textContent;
                     titleEl.appendChild(s);
                     spans.push(s);
@@ -607,62 +623,271 @@
 
                 // Ambient scrambler — flickers a random non-space char to a glitch
                 // symbol for a fixed 160ms then restores it.
-                var swappable = spans.filter(function(sp) { return sp.dataset.original !== ' '; });
-                function scrambleOnce() {
-                    if (!swappable.length) return;
-                    var sp = swappable[Math.floor(Math.random() * swappable.length)];
-                    if (sp.classList.contains('corrupting')) return; // skip if already in heavy state
-                    var orig = sp.dataset.original;
-                    sp.textContent = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
-                    syncDataText();
-                    setTimeout(function() {
-                        if (!sp.classList.contains('corrupting')) {
+                var nonSpaceSpans = spans.filter(function(s) { return s.dataset.original !== ' '; });
+                function randomSymbol() {
+                    return scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
+                }
+                function pickSpan() {
+                    var pool = nonSpaceSpans.filter(function(s) { return !s.classList.contains('corrupting'); });
+                    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+                }
+                function neighborhood(idx, range) {
+                    var start = Math.max(0, idx - range);
+                    var end = Math.min(spans.length, idx + range + 1);
+                    var arr = [];
+                    for (var i = start; i < end; i++) arr.push(spans[i]);
+                    return arr.filter(function(s) { return s.dataset.original !== ' '; });
+                }
+                function corruptCycle(targets, ticks, interval) {
+                    targets.forEach(function(sp) {
+                        if (sp.classList.contains('corrupting')) return;
+                        sp.classList.add('corrupting');
+                        var orig = sp.dataset.original;
+                        for (var t = 0; t < ticks; t++) {
+                            (function(t) {
+                                setTimeout(function() {
+                                    sp.textContent = randomSymbol();
+                                    syncDataText();
+                                }, t * interval);
+                            })(t);
+                        }
+                        setTimeout(function() {
+                            sp.classList.remove('corrupting');
                             sp.textContent = orig;
                             syncDataText();
-                        }
+                        }, ticks * interval + 30);
+                    });
+                }
+
+                // LIGHT animations (frequent, subtle)
+                function lightSingleSwap() {
+                    var sp = pickSpan(); if (!sp) return;
+                    var orig = sp.dataset.original;
+                    sp.textContent = randomSymbol(); syncDataText();
+                    setTimeout(function() {
+                        if (!sp.classList.contains('corrupting')) { sp.textContent = orig; syncDataText(); }
                     }, 160);
                 }
-                function scheduleScramble() {
-                    var delay = 700 + Math.random() * 2500;
+                function lightPairSwap() {
+                    var pool = nonSpaceSpans.filter(function(s) { return !s.classList.contains('corrupting'); });
+                    if (pool.length < 2) return;
+                    var a = pool[Math.floor(Math.random() * pool.length)];
+                    var b = pool[Math.floor(Math.random() * pool.length)];
+                    if (a === b) return;
+                    var oa = a.dataset.original, ob = b.dataset.original;
+                    a.textContent = randomSymbol(); b.textContent = randomSymbol(); syncDataText();
                     setTimeout(function() {
-                        scrambleOnce();
-                        scheduleScramble();
-                    }, delay);
+                        if (!a.classList.contains('corrupting')) a.textContent = oa;
+                        if (!b.classList.contains('corrupting')) b.textContent = ob;
+                        syncDataText();
+                    }, 180);
                 }
-                scheduleScramble();
-
-                // Click on the title → heavy corruption around that character:
-                // the clicked char and 1-2 neighbours rapidly cycle through glitch
-                // symbols while shaking with chromatic aberration, then restore.
-                function corruptAround(centerIdx) {
-                    var range = 1 + Math.floor(Math.random() * 2); // 1 or 2 neighbours each side
-                    var start = Math.max(0, centerIdx - range);
-                    var end = Math.min(spans.length, centerIdx + range + 1);
-                    var ticks = 6;        // number of symbol swaps during the burst
-                    var interval = 55;    // ms between swaps
-                    for (var i = start; i < end; i++) {
-                        (function(sp) {
-                            if (sp.dataset.original === ' ') return; // keep spaces
-                            sp.classList.add('corrupting');
-                            var orig = sp.dataset.original;
-                            for (var t = 0; t < ticks; t++) {
-                                (function(t) {
-                                    setTimeout(function() {
-                                        sp.textContent = scrambleSet.charAt(Math.floor(Math.random() * scrambleSet.length));
-                                        syncDataText();
-                                    }, t * interval);
-                                })(t);
-                            }
+                function lightRapidCycle() {
+                    var sp = pickSpan(); if (!sp) return;
+                    var orig = sp.dataset.original;
+                    var ticks = 4;
+                    for (var t = 0; t < ticks; t++) {
+                        (function(t) {
                             setTimeout(function() {
-                                sp.classList.remove('corrupting');
-                                sp.textContent = orig;
+                                if (!sp.classList.contains('corrupting')) { sp.textContent = randomSymbol(); syncDataText(); }
+                            }, t * 50);
+                        })(t);
+                    }
+                    setTimeout(function() {
+                        if (!sp.classList.contains('corrupting')) { sp.textContent = orig; syncDataText(); }
+                    }, ticks * 50 + 30);
+                }
+                function lightVanish() {
+                    var sp = pickSpan(); if (!sp) return;
+                    sp.style.visibility = 'hidden';
+                    setTimeout(function() { sp.style.visibility = ''; }, 110);
+                }
+                function lightShadowPulse() {
+                    var sp = pickSpan(); if (!sp) return;
+                    sp.style.textShadow = '5px 0 #ff3860, -5px 0 #00d1ff';
+                    setTimeout(function() { sp.style.textShadow = ''; }, 150);
+                }
+                function lightShiftJitter() {
+                    var sp = pickSpan(); if (!sp) return;
+                    var dx = (Math.random() * 4 - 2).toFixed(1);
+                    var dy = (Math.random() * 2 - 1).toFixed(1);
+                    sp.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
+                    setTimeout(function() { sp.style.transform = ''; }, 130);
+                }
+                function lightInvertFlash() {
+                    var sp = pickSpan(); if (!sp) return;
+                    sp.style.filter = 'invert(1)';
+                    setTimeout(function() { sp.style.filter = ''; }, 90);
+                }
+                function lightDoubleSwap() {
+                    var sp = pickSpan(); if (!sp) return;
+                    var orig = sp.dataset.original;
+                    sp.textContent = randomSymbol(); syncDataText();
+                    setTimeout(function() {
+                        if (sp.classList.contains('corrupting')) return;
+                        sp.textContent = randomSymbol(); syncDataText();
+                        setTimeout(function() {
+                            if (!sp.classList.contains('corrupting')) { sp.textContent = orig; syncDataText(); }
+                        }, 100);
+                    }, 100);
+                }
+                var lightAnims = [
+                    lightSingleSwap, lightPairSwap, lightRapidCycle, lightVanish,
+                    lightShadowPulse, lightShiftJitter, lightInvertFlash, lightDoubleSwap
+                ];
+
+                // HEAVY animations (rare, intense, automatic)
+                function heavyFullScramble() {
+                    var origs = nonSpaceSpans.map(function(s) { return s.dataset.original; });
+                    nonSpaceSpans.forEach(function(s) {
+                        if (!s.classList.contains('corrupting')) s.textContent = randomSymbol();
+                    });
+                    syncDataText();
+                    setTimeout(function() {
+                        nonSpaceSpans.forEach(function(s, i) {
+                            if (!s.classList.contains('corrupting')) s.textContent = origs[i];
+                        });
+                        syncDataText();
+                    }, 220);
+                }
+                function heavyFullCycle() {
+                    var origs = nonSpaceSpans.map(function(s) { return s.dataset.original; });
+                    var ticks = 5;
+                    for (var t = 0; t < ticks; t++) {
+                        (function(t) {
+                            setTimeout(function() {
+                                nonSpaceSpans.forEach(function(s) {
+                                    if (!s.classList.contains('corrupting')) s.textContent = randomSymbol();
+                                });
                                 syncDataText();
-                            }, ticks * interval + 30);
-                        })(spans[i]);
+                            }, t * 60);
+                        })(t);
+                    }
+                    setTimeout(function() {
+                        nonSpaceSpans.forEach(function(s, i) {
+                            if (!s.classList.contains('corrupting')) s.textContent = origs[i];
+                        });
+                        syncDataText();
+                    }, ticks * 60 + 30);
+                }
+                function heavyWipeAcross() {
+                    nonSpaceSpans.forEach(function(s, i) {
+                        if (s.classList.contains('corrupting')) return;
+                        var orig = s.dataset.original;
+                        setTimeout(function() {
+                            if (!s.classList.contains('corrupting')) { s.textContent = randomSymbol(); syncDataText(); }
+                            setTimeout(function() {
+                                if (!s.classList.contains('corrupting')) { s.textContent = orig; syncDataText(); }
+                            }, 130);
+                        }, i * 40);
+                    });
+                }
+                function heavyShatterChromatic() {
+                    nonSpaceSpans.forEach(function(s) { s.classList.add('corrupting'); });
+                    setTimeout(function() {
+                        nonSpaceSpans.forEach(function(s) { s.classList.remove('corrupting'); });
+                    }, 600);
+                }
+                function heavyMultiCluster() {
+                    for (var k = 0; k < 3; k++) {
+                        (function(k) {
+                            setTimeout(function() {
+                                var idx = Math.floor(Math.random() * spans.length);
+                                corruptCycle(neighborhood(idx, 1), 5, 50);
+                            }, k * 110);
+                        })(k);
                     }
                 }
+                function heavyHardShake() {
+                    titleEl.classList.add('hard-shaking');
+                    setTimeout(function() { titleEl.classList.remove('hard-shaking'); }, 450);
+                    heavyFullScramble();
+                }
+                function heavyPartialFreeze() {
+                    var pool = nonSpaceSpans.filter(function(s) { return !s.classList.contains('corrupting'); }).slice();
+                    var count = Math.max(2, Math.floor(pool.length * 0.5));
+                    var picked = [];
+                    for (var i = 0; i < count && pool.length; i++) {
+                        var idx = Math.floor(Math.random() * pool.length);
+                        picked.push(pool.splice(idx, 1)[0]);
+                    }
+                    var origs = picked.map(function(s) { return s.dataset.original; });
+                    picked.forEach(function(s) { s.textContent = randomSymbol(); });
+                    syncDataText();
+                    setTimeout(function() {
+                        picked.forEach(function(s, i) {
+                            if (!s.classList.contains('corrupting')) s.textContent = origs[i];
+                        });
+                        syncDataText();
+                    }, 700);
+                }
+                function heavyClusterRandom() {
+                    var idx = Math.floor(Math.random() * spans.length);
+                    corruptCycle(neighborhood(idx, 2), 6, 55);
+                }
+                var heavyAnims = [
+                    heavyFullScramble, heavyFullCycle, heavyWipeAcross, heavyShatterChromatic,
+                    heavyMultiCluster, heavyHardShake, heavyPartialFreeze, heavyClusterRandom
+                ];
+
+                // CLICK animations (5 variants, picked at random per click)
+                function clickCluster(idx) {
+                    var range = 1 + Math.floor(Math.random() * 2);
+                    corruptCycle(neighborhood(idx, range), 6, 55);
+                }
+                function clickWave(idx) {
+                    for (var r = 0; r <= 4; r++) {
+                        (function(r) {
+                            setTimeout(function() {
+                                var ring = [];
+                                if (idx - r >= 0 && spans[idx - r].dataset.original !== ' ') ring.push(spans[idx - r]);
+                                if (r > 0 && idx + r < spans.length && spans[idx + r].dataset.original !== ' ') ring.push(spans[idx + r]);
+                                corruptCycle(ring, 4, 50);
+                            }, r * 80);
+                        })(r);
+                    }
+                }
+                function clickFlash(idx) {
+                    corruptCycle(neighborhood(idx, 3), 4, 45);
+                }
+                function clickChain(idx) {
+                    var dir = Math.random() < 0.5 ? -1 : 1;
+                    for (var step = 0; step < 5; step++) {
+                        (function(step) {
+                            setTimeout(function() {
+                                var i = idx + step * dir;
+                                if (i >= 0 && i < spans.length && spans[i].dataset.original !== ' ') {
+                                    corruptCycle([spans[i]], 4, 45);
+                                }
+                            }, step * 70);
+                        })(step);
+                    }
+                }
+                function clickSeize(idx) {
+                    titleEl.classList.add('hard-shaking');
+                    setTimeout(function() { titleEl.classList.remove('hard-shaking'); }, 450);
+                    corruptCycle(nonSpaceSpans, 6, 50);
+                }
+                var clickAnims = [clickCluster, clickWave, clickFlash, clickChain, clickSeize];
+
+                function scheduleLight() {
+                    var delay = 700 + Math.random() * 1800; // 0.7-2.5s
+                    setTimeout(function() {
+                        lightAnims[Math.floor(Math.random() * lightAnims.length)]();
+                        scheduleLight();
+                    }, delay);
+                }
+                function scheduleHeavy() {
+                    var delay = 9000 + Math.random() * 14000; // 9-23s
+                    setTimeout(function() {
+                        heavyAnims[Math.floor(Math.random() * heavyAnims.length)]();
+                        scheduleHeavy();
+                    }, delay);
+                }
+                scheduleLight();
+                scheduleHeavy();
+
                 titleEl.addEventListener('pointerdown', function(e) {
-                    // Locate which span is closest to the click point
                     var closest = null, closestDist = Infinity;
                     spans.forEach(function(sp, idx) {
                         var r = sp.getBoundingClientRect();
@@ -671,22 +896,10 @@
                         var d = dx * dx + dy * dy;
                         if (d < closestDist) { closestDist = d; closest = idx; }
                     });
-                    if (closest !== null) corruptAround(closest);
+                    if (closest !== null) {
+                        clickAnims[Math.floor(Math.random() * clickAnims.length)](closest);
+                    }
                 });
-
-                // Rare auto heavy bursts — same effect as click, but spontaneous,
-                // so the title occasionally "loses signal" without input.
-                function scheduleHeavyBurst() {
-                    var delay = 9000 + Math.random() * 14000; // 9-23s
-                    setTimeout(function() {
-                        if (spans.length) {
-                            var idx = Math.floor(Math.random() * spans.length);
-                            corruptAround(idx);
-                        }
-                        scheduleHeavyBurst();
-                    }, delay);
-                }
-                scheduleHeavyBurst();
                 return;
             }
 
