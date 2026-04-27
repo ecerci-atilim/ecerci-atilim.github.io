@@ -337,14 +337,14 @@
             left: 2px;
             text-shadow: -1px 0 #ff3860;
             clip-path: inset(0 0 100% 0);
-            animation: glitch-r 7s infinite steps(1, end);
+            animation: glitch-r 7s infinite steps(1, end) !important;
         }
         .glitch::after {
             left: -2px;
             text-shadow: 1px 0 #00d1ff;
             clip-path: inset(0 0 100% 0);
-            animation: glitch-c 7s infinite steps(1, end);
-            animation-delay: 0.05s;
+            animation: glitch-c 7s infinite steps(1, end) !important;
+            animation-delay: 0.05s !important;
         }
         /* Most of the cycle is "calm" (fully clipped); short bursts at ~30% and ~70%. */
         @keyframes glitch-r {
@@ -514,6 +514,11 @@
 
             // Leave mode: hide everything, show leave screen
             if (window.scheduleEnabled === false) {
+                var pickerBtn = document.getElementById('theme-picker-btn');
+                var pickerPanel = document.getElementById('theme-picker-panel');
+                if (pickerBtn) pickerBtn.style.display = 'none';
+                if (pickerPanel) pickerPanel.style.display = 'none';
+
                 document.getElementById('back-btn').style.display = 'none';
                 document.getElementById('dashboard-header').style.display = 'none';
                 document.getElementById('table-container').style.display = 'none';
