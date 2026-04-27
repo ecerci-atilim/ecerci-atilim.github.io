@@ -18,6 +18,8 @@
 //   label (shown in the legend) and a color.
 // ─────────────────────────────────────────────────────────
 
+window.scheduleEnabled = false;
+
 window.scheduleCategories = {
     lab:     { label: "Laboratory",   color: "#a78bfa" },  // Purple
     office:  { label: "Office Hours", color: "#00be79" },  // Green
