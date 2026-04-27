@@ -330,6 +330,8 @@
             position: relative;
             display: inline-block;
             color: var(--text-primary);
+            line-height: 1.2;
+            animation: glitch-shake 7s infinite steps(1, end) !important;
         }
         .glitch::before,
         .glitch::after {
@@ -339,114 +341,55 @@
             width: 100%; height: 100%;
             pointer-events: none;
         }
-        .glitch {
-            animation: glitch-shake 22s infinite steps(1, end) !important;
-        }
         .glitch::before {
             left: 2px;
             text-shadow: -1px 0 #ff3860;
             clip-path: inset(0 0 100% 0);
-            animation: glitch-r 22s infinite steps(1, end) !important;
+            animation: glitch-r 7s infinite steps(1, end) !important;
         }
         .glitch::after {
             left: -2px;
             text-shadow: 1px 0 #00d1ff;
             clip-path: inset(0 0 100% 0);
-            animation: glitch-c 22s infinite steps(1, end) !important;
+            animation: glitch-c 7s infinite steps(1, end) !important;
             animation-delay: 0.05s !important;
         }
-        /* 22s sequence: small bursts at 14%, 32%, 78%, 92%; HEAVY meltdown at 50-56% */
+        /* 7s ambient sequence — short calm + small bursts at ~30% and ~70% */
         @keyframes glitch-r {
-            /* calm */
-            0%, 13%   { clip-path: inset(0 0 100% 0); }
-            /* small burst 1 (~14%) */
-            14%       { clip-path: inset(20% 0 65% 0); }
-            14.7%     { clip-path: inset(60% 0 30% 0); }
-            15.4%     { clip-path: inset(0 0 100% 0); }
-            /* calm */
-            16%, 31%  { clip-path: inset(0 0 100% 0); }
-            /* small burst 2 (~32%) */
-            32%       { clip-path: inset(45% 0 40% 0); }
-            32.7%     { clip-path: inset(0 0 100% 0); }
-            33.4%     { clip-path: inset(75% 0 10% 0); }
-            34%, 49%  { clip-path: inset(0 0 100% 0); }
-            /* HEAVY MELTDOWN (50-56%) — rapid chaos */
-            50%       { clip-path: inset(10% 0 80% 0); }
-            50.5%     { clip-path: inset(70% 0 15% 0); }
-            51%       { clip-path: inset(35% 0 50% 0); }
-            51.5%     { clip-path: inset(85% 0 5% 0); }
-            52%       { clip-path: inset(5% 0 90% 0); }
-            52.5%     { clip-path: inset(55% 0 30% 0); }
-            53%       { clip-path: inset(25% 0 65% 0); }
-            53.5%     { clip-path: inset(75% 0 10% 0); }
-            54%       { clip-path: inset(45% 0 45% 0); }
-            54.5%     { clip-path: inset(15% 0 75% 0); }
-            55%       { clip-path: inset(65% 0 20% 0); }
-            55.5%     { clip-path: inset(0 0 100% 0); }
-            56%       { clip-path: inset(40% 0 55% 0); }
-            /* aftershock */
-            57%, 77%  { clip-path: inset(0 0 100% 0); }
-            /* small burst 3 (~78%) */
-            78%       { clip-path: inset(55% 0 35% 0); }
-            78.7%     { clip-path: inset(20% 0 70% 0); }
-            79.4%     { clip-path: inset(0 0 100% 0); }
-            80%, 91%  { clip-path: inset(0 0 100% 0); }
-            /* small burst 4 (~92%) */
-            92%       { clip-path: inset(35% 0 55% 0); }
-            92.7%     { clip-path: inset(0 0 100% 0); }
-            93.4%     { clip-path: inset(70% 0 15% 0); }
-            94%, 100% { clip-path: inset(0 0 100% 0); }
+            0%, 28%   { clip-path: inset(0 0 100% 0); }
+            29%       { clip-path: inset(15% 0 70% 0); }
+            30%       { clip-path: inset(60% 0 25% 0); }
+            31%       { clip-path: inset(0 0 100% 0); }
+            32%       { clip-path: inset(80% 0 5% 0); }
+            33%, 67%  { clip-path: inset(0 0 100% 0); }
+            68%       { clip-path: inset(40% 0 50% 0); }
+            69%       { clip-path: inset(0 0 100% 0); }
+            70%       { clip-path: inset(75% 0 10% 0); }
+            71%, 100% { clip-path: inset(0 0 100% 0); }
         }
         @keyframes glitch-c {
-            0%, 13%   { clip-path: inset(0 0 100% 0); }
-            14%       { clip-path: inset(70% 0 20% 0); }
-            14.7%     { clip-path: inset(15% 0 75% 0); }
-            15.4%     { clip-path: inset(0 0 100% 0); }
-            16%, 31%  { clip-path: inset(0 0 100% 0); }
-            32%       { clip-path: inset(10% 0 80% 0); }
-            32.7%     { clip-path: inset(0 0 100% 0); }
-            33.4%     { clip-path: inset(50% 0 35% 0); }
-            34%, 49%  { clip-path: inset(0 0 100% 0); }
-            /* meltdown */
-            50%       { clip-path: inset(60% 0 25% 0); }
-            50.5%     { clip-path: inset(20% 0 70% 0); }
-            51%       { clip-path: inset(80% 0 10% 0); }
-            51.5%     { clip-path: inset(40% 0 50% 0); }
-            52%       { clip-path: inset(70% 0 15% 0); }
-            52.5%     { clip-path: inset(10% 0 85% 0); }
-            53%       { clip-path: inset(50% 0 35% 0); }
-            53.5%     { clip-path: inset(25% 0 65% 0); }
-            54%       { clip-path: inset(75% 0 10% 0); }
-            54.5%     { clip-path: inset(40% 0 50% 0); }
-            55%       { clip-path: inset(5% 0 90% 0); }
-            55.5%     { clip-path: inset(60% 0 25% 0); }
-            56%       { clip-path: inset(20% 0 70% 0); }
-            57%, 77%  { clip-path: inset(0 0 100% 0); }
-            78%       { clip-path: inset(15% 0 70% 0); }
-            78.7%     { clip-path: inset(50% 0 35% 0); }
-            79.4%     { clip-path: inset(0 0 100% 0); }
-            80%, 91%  { clip-path: inset(0 0 100% 0); }
-            92%       { clip-path: inset(60% 0 25% 0); }
-            92.7%     { clip-path: inset(0 0 100% 0); }
-            93.4%     { clip-path: inset(20% 0 70% 0); }
-            94%, 100% { clip-path: inset(0 0 100% 0); }
+            0%, 28%   { clip-path: inset(0 0 100% 0); }
+            29%       { clip-path: inset(70% 0 20% 0); }
+            30%       { clip-path: inset(20% 0 65% 0); }
+            31%       { clip-path: inset(0 0 100% 0); }
+            32%       { clip-path: inset(50% 0 35% 0); }
+            33%, 67%  { clip-path: inset(0 0 100% 0); }
+            68%       { clip-path: inset(10% 0 80% 0); }
+            69%       { clip-path: inset(0 0 100% 0); }
+            70%       { clip-path: inset(30% 0 55% 0); }
+            71%, 100% { clip-path: inset(0 0 100% 0); }
         }
-        /* Tiny horizontal jitter — only during the heavy meltdown, max 1px */
+
+        /* 1px subtle shake at the burst points (matches ::before/::after timing) */
         @keyframes glitch-shake {
-            0%, 49%, 57%, 100% { transform: translate(0, 0); }
-            50%   { transform: translate(-1px, 0); }
-            50.5% { transform: translate(1px, 0); }
-            51%   { transform: translate(-1px, 0); }
-            51.5% { transform: translate(1px, 0); }
-            52%   { transform: translate(0, -1px); }
-            52.5% { transform: translate(1px, 0); }
-            53%   { transform: translate(-1px, 0); }
-            53.5% { transform: translate(0, 0); }
-            54%   { transform: translate(-1px, 0); }
-            54.5% { transform: translate(1px, 0); }
-            55%   { transform: translate(0, 0); }
-            55.5% { transform: translate(-1px, 0); }
-            56%   { transform: translate(0, 0); }
+            0%, 28%, 33%, 67%, 71%, 100% { transform: translate(0, 0); }
+            29%       { transform: translate(-1px, 0); }
+            30%       { transform: translate(1px, 0); }
+            31%       { transform: translate(0, -1px); }
+            32%       { transform: translate(-1px, 0); }
+            68%       { transform: translate(1px, 0); }
+            69%       { transform: translate(-1px, 1px); }
+            70%       { transform: translate(0, -1px); }
         }
 
         /* Per-char glitch span — used by both ambient scrambler and click corruption */
@@ -454,6 +397,9 @@
             display: inline-block;
             text-align: center;
             position: relative;
+            height: 1.2em;
+            line-height: 1.2;
+            vertical-align: top;
         }
         /* Heavy "data corruption" applied to chars near the click */
         .glitch .char.corrupting {
@@ -727,6 +673,20 @@
                     });
                     if (closest !== null) corruptAround(closest);
                 });
+
+                // Rare auto heavy bursts — same effect as click, but spontaneous,
+                // so the title occasionally "loses signal" without input.
+                function scheduleHeavyBurst() {
+                    var delay = 9000 + Math.random() * 14000; // 9-23s
+                    setTimeout(function() {
+                        if (spans.length) {
+                            var idx = Math.floor(Math.random() * spans.length);
+                            corruptAround(idx);
+                        }
+                        scheduleHeavyBurst();
+                    }, delay);
+                }
+                scheduleHeavyBurst();
                 return;
             }
 
