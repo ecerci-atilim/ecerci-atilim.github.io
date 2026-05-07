@@ -478,7 +478,7 @@
             Error: 'schedule-config.js' file not found or empty. Please check the file.
         </div>
 
-        <!-- Leave Screen (shown when scheduleEnabled = false) -->
+        <!-- Leave Screen (shown when onLeave = true) -->
         <div class="leave-screen" id="leave-screen">
             <div class="leave-title glitch" data-text="Currently on leave">Currently on leave</div>
             <div class="leave-subtitle">The schedule is not available at this time.</div>
@@ -581,7 +581,7 @@
             }
 
             // Leave mode: hide everything, show leave screen
-            if (window.scheduleEnabled === false) {
+            if (window.onLeave === true) {
                 document.body.classList.add('leave-mode');
 
                 var pickerBtn = document.getElementById('theme-picker-btn');
