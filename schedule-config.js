@@ -18,6 +18,7 @@
 //   label (shown in the legend) and a color.
 // ─────────────────────────────────────────────────────────
 
+
 window.onLeave = false;
 
 window.scheduleCategories = {
