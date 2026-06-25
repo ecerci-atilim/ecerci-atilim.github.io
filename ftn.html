@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FTN — Faster-than-Nyquist Signaling</title>
+<meta name="description" content="A decade of research in Faster-than-Nyquist signaling. Higher throughput in the same spectrum. Available for consulting, R&D partnerships, and technology transfer.">
+<meta property="og:title" content="FTN — Faster-than-Nyquist Signaling">
+<meta property="og:description" content="More data through the same spectrum. Ten years of dedicated research.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Tajawal:wght@400;500;700&family=Vazirmatn:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;
+  --bg-2:#0b0f1a;
+  --surface:#0f1422;
+  --surface-2:#141a2b;
+  --border:#1c2438;
+  --border-strong:#2a3550;
+  --text:#e8eef5;
+  --text-dim:#8b96a7;
+  --text-faint:#5a6478;
+  --accent:#00d9ff;
+  --accent-glow:rgba(0,217,255,0.15);
+  --accent-2:#ffb86b;
+  --accent-3:#ff5fa2;
+  --grid:rgba(70,90,130,0.07);
+  --font-display:'Space Grotesk',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --maxw:1240px;
+  --pad:clamp(20px,4vw,48px);
+  --section-pad:clamp(80px,12vh,140px);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-weight:300;
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+html[lang="ar"] body{font-family:'Tajawal',var(--font-body)}
+html[lang="ar"] body{font-weight:400}
+html[lang="fa"] body{font-family:'Vazirmatn',var(--font-body)}
+html[lang="fa"] body{font-weight:400}
+html[lang="zh"] body{font-family:'Noto Sans SC',var(--font-body)}
+
+#ambient{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.55}
+
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px var(--pad);
+  background:linear-gradient(180deg,rgba(6,8,15,0.85) 0%,rgba(6,8,15,0.4) 70%,transparent 100%);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-mark{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:0.16em;
+  color:var(--text);
+  position:relative;
+}
+.brand-mark::after{
+  content:'';position:absolute;top:50%;right:-7px;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 12px var(--accent);
+  transform:translateY(-50%);
+  animation:pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:0.4}50%{opacity:1}}
+.brand-divider{width:1px;height:18px;background:var(--border-strong)}
+html[dir="rtl"] .brand-mark::after{right:auto;left:-7px}
+.brand-tagline{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.2em;
+  color:var(--text-dim);
+  text-transform:uppercase;
+}
+
+.lang-switcher{
+  display:flex;align-items:center;gap:2px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:3px;
+}
+.lang-switcher button{
+  background:transparent;border:none;
+  font-family:var(--font-mono);
+  font-size:11px;font-weight:500;
+  color:var(--text-dim);
+  padding:5px 9px;
+  border-radius:4px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  letter-spacing:0.05em;
+}
+.lang-switcher button:hover{color:var(--text)}
+.lang-switcher button.active{
+  background:var(--surface-2);
+  color:var(--accent);
+}
+
+main{position:relative;z-index:1}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 var(--pad)}
+
+/* HERO */
+.hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:120px var(--pad) 80px;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  opacity:0.7;
+}
+.hero-bg canvas{width:100%;height:100%;display:block}
+.hero-bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center, transparent 0%, var(--bg) 75%);
+  pointer-events:none;
+}
+.hero-content{
+  position:relative;z-index:2;
+  max-width:920px;width:100%;margin:0 auto;
+}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:12px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  letter-spacing:0.32em;
+  color:var(--accent);
+  text-transform:uppercase;
+  margin-bottom:24px;
+}
+.eyebrow::before{
+  content:'';width:32px;height:1px;background:var(--accent);
+  display:inline-block;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(40px,7.5vw,92px);
+  line-height:1.02;
+  letter-spacing:-0.025em;
+  margin-bottom:28px;
+  background:linear-gradient(180deg,var(--text) 0%,#a8b3c5 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+html[lang="ar"] .hero h1, html[lang="fa"] .hero h1{font-weight:700;letter-spacing:0;line-height:1.15}
+html[lang="zh"] .hero h1{letter-spacing:0;line-height:1.15}
+.lede{
+  font-size:clamp(17px,1.7vw,21px);
+  color:var(--text-dim);
+  max-width:680px;
+  margin-bottom:48px;
+  font-weight:300;
+}
+.hero-cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:80px}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 28px;
+  font-family:var(--font-display);
+  font-weight:500;font-size:14px;
+  letter-spacing:0.04em;
+  border-radius:6px;
+  text-decoration:none;
+  cursor:pointer;
+  transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.btn-primary{
+  background:var(--accent);
+  color:#06080f;
+  box-shadow:0 0 30px var(--accent-glow);
+}
+.btn-primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 50px rgba(0,217,255,0.35);
+}
+.btn-ghost{
+  background:transparent;
+  color:var(--text);
+  border-color:var(--border-strong);
+}
+.btn-ghost:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+.btn .arrow{transition:transform 0.25s ease}
+.btn:hover .arrow{transform:translateX(4px)}
+html[dir="rtl"] .btn:hover .arrow{transform:translateX(-4px)}
+html[dir="rtl"] .btn .arrow{transform:scaleX(-1)}
+
+.hero-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  max-width:680px;
+}
+.hero-stat{
+  background:var(--surface);
+  padding:24px 20px;
+}
+.hero-stat strong{
+  display:block;
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:clamp(28px,3.5vw,40px);
+  color:var(--text);
+  margin-bottom:6px;
+  line-height:1;
+}
+.hero-stat strong .accent{color:var(--accent)}
+.hero-stat span{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  line-height:1.4;
+  display:block;
+}
+
+/* SECTION COMMON */
+section.section{
+  padding:var(--section-pad) 0;
+  position:relative;
+}
+.section-meta{
+  display:flex;align-items:center;gap:16px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  margin-bottom:24px;
+}
+.section-meta .num{color:var(--accent)}
+.section-meta .line{flex:1;height:1px;background:var(--border);max-width:80px}
+.section h2{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:clamp(32px,4.5vw,56px);
+  line-height:1.1;
+  letter-spacing:-0.02em;
+  margin-bottom:32px;
+  max-width:880px;
+}
+html[lang="ar"] .section h2, html[lang="fa"] .section h2, html[lang="zh"] .section h2{
+  letter-spacing:0;line-height:1.25;
+}
+.section p.body{
+  font-size:clamp(15px,1.4vw,18px);
+  color:var(--text-dim);
+  max-width:760px;
+  margin-bottom:32px;
+}
+
+/* PROBLEM / SOLUTION */
+.split{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  align-items:start;
+}
+.split .visual{
+  position:sticky;top:120px;
+  aspect-ratio:1/1;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--surface);
+  overflow:hidden;
+  position:relative;
+}
+.split .visual canvas{width:100%;height:100%;display:block}
+.split .visual .corner{
+  position:absolute;
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text-faint);
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+}
+.split .visual .corner.tl{top:14px;left:14px}
+.split .visual .corner.tr{top:14px;right:14px;color:var(--accent)}
+.split .visual .corner.bl{bottom:14px;left:14px}
+.split .visual .corner.br{bottom:14px;right:14px}
+
+.points{
+  list-style:none;
+  display:grid;gap:14px;
+  margin-top:32px;
+}
+.points li{
+  display:flex;gap:14px;align-items:flex-start;
+  padding:14px 16px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  font-size:15px;
+  color:var(--text);
+}
+.points li::before{
+  content:'';flex-shrink:0;
+  width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  margin-top:9px;
+  box-shadow:0 0 10px var(--accent-glow);
+}
+
+/* DEMO */
+.demo-section{
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 50%,var(--bg) 100%);
+}
+.demo-stage{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  margin-top:48px;
+}
+.demo-canvas-wrap{
+  position:relative;
+  background:#04060c;
+  aspect-ratio:21/9;
+  min-height:280px;
+}
+.demo-canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.demo-overlay{
+  position:absolute;top:16px;left:16px;right:16px;
+  display:flex;justify-content:space-between;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  pointer-events:none;
+}
+.demo-overlay .live-dot{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--accent);
+}
+.demo-overlay .live-dot::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--accent);
+  animation:pulse 1.4s ease-in-out infinite;
+}
+.demo-controls{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:1px;
+  background:var(--border);
+  border-top:1px solid var(--border);
+}
+.demo-control{
+  background:var(--surface);
+  padding:24px;
+}
+.demo-control .label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-dim);
+  letter-spacing:0.15em;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.demo-control .value{
+  font-family:var(--font-display);
+  font-size:28px;
+  font-weight:600;
+  color:var(--text);
+}
+.demo-control .value.gain{color:var(--accent)}
+.demo-control .value .unit{font-size:14px;color:var(--text-dim);font-weight:400;margin-left:4px}
+.tau-slider-wrap{padding-top:6px}
+input[type="range"]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:4px;
+  background:var(--border-strong);
+  border-radius:2px;
+  outline:none;cursor:pointer;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--accent);
+  cursor:grab;
+  border:3px solid #06080f;
+  box-shadow:0 0 0 1px var(--accent),0 0 16px var(--accent-glow);
+}
+input[type="range"]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;
+  background:var(--accent);
+  border:3px solid #06080f;
+  cursor:grab;
+}
+.tau-track-labels{
+  display:flex;justify-content:space-between;
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text-faint);
+  margin-top:8px;
+}
+.demo-hint{
+  margin-top:24px;
+  font-family:var(--font-mono);
+  font-size:12px;
+  color:var(--text-faint);
+  text-align:center;
+  letter-spacing:0.05em;
+}
+
+/* CAPABILITIES */
+.cap-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1px;
+  background:var(--border);
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin-top:48px;
+}
+.cap-card{
+  background:var(--surface);
+  padding:36px 32px;
+  position:relative;
+  transition:background 0.3s ease;
+  cursor:default;
+}
+.cap-card:hover{background:var(--surface-2)}
+.cap-card .cap-icon{
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--border-strong);
+  border-radius:8px;
+  margin-bottom:24px;
+  color:var(--accent);
+  background:rgba(0,217,255,0.04);
+}
+.cap-card h3{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:18px;
+  color:var(--text);
+  margin-bottom:12px;
+  letter-spacing:-0.005em;
+}
+.cap-card p{
+  font-size:14px;
+  color:var(--text-dim);
+  line-height:1.65;
+}
+.cap-card .cap-num{
+  position:absolute;top:24px;right:24px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+  letter-spacing:0.1em;
+}
+html[dir="rtl"] .cap-card .cap-num{right:auto;left:24px}
+
+/* APPLICATIONS */
+.app-section{
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg-2) 100%);
+}
+.app-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+  margin-top:48px;
+}
+.app-card{
+  position:relative;
+  padding:28px 24px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:10px;
+  overflow:hidden;
+  transition:all 0.3s ease;
+}
+.app-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at top right,rgba(0,217,255,0.08) 0%,transparent 60%);
+  opacity:0;
+  transition:opacity 0.4s ease;
+}
+.app-card:hover{
+  transform:translateY(-3px);
+  border-color:var(--border-strong);
+}
+.app-card:hover::before{opacity:1}
+.app-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+  position:relative;
+}
+.app-card .app-icon{
+  width:32px;height:32px;
+  color:var(--accent);
+}
+.app-card .app-id{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--text-faint);
+  letter-spacing:0.15em;
+}
+.app-card h3{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:17px;
+  margin-bottom:10px;
+  color:var(--text);
+  position:relative;
+}
+.app-card p{
+  font-size:13.5px;
+  color:var(--text-dim);
+  line-height:1.55;
+  position:relative;
+}
+
+/* ENGAGEMENT */
+.eng-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+  margin-top:48px;
+}
+.eng-card{
+  position:relative;
+  padding:32px 28px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+}
+.eng-card .eng-num{
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--accent);
+  letter-spacing:0.18em;
+  margin-bottom:18px;
+}
+.eng-card h3{
+  font-family:var(--font-display);
+  font-weight:600;
+  font-size:20px;
+  margin-bottom:14px;
+  color:var(--text);
+}
+.eng-card p{
+  font-size:14px;
+  color:var(--text-dim);
+  line-height:1.65;
+}
+
+/* CONTACT */
+.contact-section{
+  position:relative;
+  padding:var(--section-pad) 0;
+  text-align:center;
+  border-top:1px solid var(--border);
+  margin-top:80px;
+}
+.contact-section::before{
+  content:'';position:absolute;left:50%;top:0;
+  width:1px;height:60px;
+  background:linear-gradient(180deg,var(--accent),transparent);
+  transform:translateX(-50%);
+}
+.contact-section h2{margin:0 auto 20px;text-align:center}
+.contact-section .body{margin:0 auto 40px;text-align:center}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px var(--pad);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:16px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  color:var(--text-faint);
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+}
+footer .home-link{
+  color:var(--text-dim);
+  text-decoration:none;
+  border-bottom:1px solid transparent;
+  transition:all 0.2s ease;
+}
+footer .home-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Reveal on scroll */
+.reveal{
+  opacity:0;
+  transform:translateY(28px);
+  transition:opacity 0.8s ease,transform 0.8s cubic-bezier(0.2,0.8,0.2,1);
+}
+.reveal.in{opacity:1;transform:none}
+
+/* RTL adjustments */
+html[dir="rtl"] .eyebrow::before{margin-left:0;margin-right:0}
+html[dir="rtl"] .section-meta .line{}
+
+/* Responsive */
+@media (max-width:920px){
+  .split{grid-template-columns:1fr;gap:48px}
+  .split .visual{position:relative;top:0;max-width:520px;margin:0 auto}
+  .demo-controls{grid-template-columns:1fr 1fr}
+  .hero-stats{grid-template-columns:1fr;max-width:400px}
+}
+@media (max-width:560px){
+  .topbar{padding:14px var(--pad)}
+  .brand-tagline{display:none}
+  .lang-switcher button{padding:5px 7px;font-size:10px}
+  .demo-controls{grid-template-columns:1fr}
+  .hero{padding-top:100px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="ambient"></canvas>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">FTN</span>
+    <span class="brand-divider"></span>
+    <span class="brand-tagline" data-i18n="brand.tagline">Signaling Research</span>
+  </div>
+  <nav class="lang-switcher" aria-label="Language">
+    <button data-lang="en" class="active">EN</button>
+    <button data-lang="tr">TR</button>
+    <button data-lang="de">DE</button>
+    <button data-lang="fr">FR</button>
+    <button data-lang="ar">العربية</button>
+    <button data-lang="fa">فارسی</button>
+    <button data-lang="zh">中文</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <canvas id="hero-canvas"></canvas>
+    </div>
+    <div class="hero-content">
+      <div class="eyebrow" data-i18n="hero.eyebrow">BEYOND THE NYQUIST LIMIT</div>
+      <h1 data-i18n="hero.title">Faster-than-Nyquist Signaling</h1>
+      <p class="lede" data-i18n="hero.lede">More data through the same spectrum. A decade of dedicated research, ready for deployment.</p>
+      <div class="hero-cta">
+        <a href="#demo" class="btn btn-primary"><span data-i18n="hero.cta1">Explore the Technology</span><span class="arrow">→</span></a>
+        <a href="#engage" class="btn btn-ghost"><span data-i18n="hero.cta2">How We Work</span></a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong><span class="accent">10</span>+</strong>
+          <span data-i18n="hero.stat1">Years of focused research</span>
+        </div>
+        <div class="hero-stat">
+          <strong><span class="accent">+40</span>%</strong>
+          <span data-i18n="hero.stat2">Throughput at τ = 0.7</span>
+        </div>
+        <div class="hero-stat">
+          <strong>0<span class="accent"> Hz</span></strong>
+          <span data-i18n="hero.stat3">Extra bandwidth required</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">01</span><span class="line"></span><span data-i18n="problem.label">The Challenge</span></div>
+        <h2 data-i18n="problem.title">Spectrum is finite. Demand is not.</h2>
+      </div>
+      <div class="split">
+        <div class="reveal">
+          <p class="body" data-i18n="problem.body">Mobile, satellite, and defense networks share a single fundamental constraint: bandwidth. As traffic grows exponentially, regulators auction scarce spectrum at record prices, and operators race to extract every bit of capacity from each Hertz they own. For decades, the Nyquist rate set the ceiling on what was possible. That ceiling was never absolute.</p>
+          <p class="body" data-i18n="problem.body2">Faster-than-Nyquist signaling rewrites the rules — without exceeding the spectrum mask, without changing the transmit pulse, and without touching the regulator's allocation.</p>
+        </div>
+        <div class="visual reveal">
+          <span class="corner tl">SPECTRUM</span>
+          <span class="corner tr">● LIVE</span>
+          <span class="corner bl" data-i18n="visual.bw_label">BANDWIDTH</span>
+          <span class="corner br" data-i18n="visual.unchanged">UNCHANGED</span>
+          <canvas id="spectrum-canvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOLUTION -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">02</span><span class="line"></span><span data-i18n="solution.label">The Approach</span></div>
+        <h2 data-i18n="solution.title">Pack symbols closer. Recover them smarter.</h2>
+      </div>
+      <div class="split">
+        <div class="visual reveal">
+          <span class="corner tl">τ &lt; 1</span>
+          <span class="corner tr">FTN MODE</span>
+          <span class="corner bl" data-i18n="visual.symbols">SYMBOLS</span>
+          <span class="corner br" data-i18n="visual.compressed">COMPRESSED</span>
+          <canvas id="solution-canvas"></canvas>
+        </div>
+        <div class="reveal">
+          <p class="body" data-i18n="solution.body">FTN signaling transmits symbols faster than the Nyquist criterion permits, deliberately introducing controlled inter-symbol interference. The transmitter is unchanged in form — only the symbol period shrinks by a factor τ. The complexity moves to the receiver, where modern detection algorithms recover the data with negligible loss. The reward: higher throughput in the same bandwidth, and improved spectral efficiency without changing the modulation, the bandwidth, or the regulatory mask.</p>
+          <ul class="points">
+            <li data-i18n="solution.point1">No additional spectrum required</li>
+            <li data-i18n="solution.point2">Compatible with existing pulse shapes</li>
+            <li data-i18n="solution.point3">Adaptable to current air interfaces</li>
+            <li data-i18n="solution.point4">Scalable from baseband to mmWave</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO -->
+  <section class="section demo-section" id="demo">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">03</span><span class="line"></span><span data-i18n="demo.label">Interactive</span></div>
+        <h2 data-i18n="demo.title">See it in action</h2>
+        <p class="body" data-i18n="demo.body">Move the slider to compress the symbol period. The bandwidth stays fixed; the throughput rises.</p>
+      </div>
+      <div class="demo-stage reveal">
+        <div class="demo-canvas-wrap">
+          <div class="demo-overlay">
+            <span data-i18n="demo.title_ts">TIME DOMAIN — SYMBOL STREAM</span>
+            <span class="live-dot" data-i18n="demo.live">LIVE</span>
+          </div>
+          <canvas id="demo-canvas"></canvas>
+        </div>
+        <div class="demo-controls">
+          <div class="demo-control tau-slider-wrap">
+            <div class="label" data-i18n="demo.tau_label">Compression factor τ</div>
+            <div class="value" id="tau-value">0.85</div>
+            <input type="range" min="0.6" max="1" step="0.01" value="0.85" id="tau-slider">
+            <div class="tau-track-labels">
+              <span>0.60</span><span>0.80</span><span>1.00</span>
+            </div>
+          </div>
+          <div class="demo-control">
+            <div class="label" data-i18n="demo.gain_label">Throughput gain</div>
+            <div class="value gain" id="gain-value">+18%</div>
+          </div>
+          <div class="demo-control">
+            <div class="label" data-i18n="demo.bw_label">Bandwidth</div>
+            <div class="value"><span id="bw-value">1.00</span><span class="unit">×</span></div>
+          </div>
+          <div class="demo-control">
+            <div class="label" data-i18n="demo.eff_label">Spectral efficiency</div>
+            <div class="value gain"><span id="eff-value">+18%</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="demo-hint" data-i18n="demo.hint">τ = 1 corresponds to Nyquist signaling. τ &lt; 1 packs more symbols into the same time window.</p>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section class="section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">04</span><span class="line"></span><span data-i18n="cap.label">Capabilities</span></div>
+        <h2 data-i18n="cap.title">What we deliver</h2>
+        <p class="body" data-i18n="cap.subtitle">Ten years of focused research, distilled into engineering deliverables.</p>
+      </div>
+      <div class="cap-grid reveal">
+        <div class="cap-card">
+          <div class="cap-num">/01</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12c2.5 0 2.5-6 5-6s2.5 12 5 12 2.5-6 5-6h3"/></svg></div>
+          <h3 data-i18n="cap1.title">Algorithm Design</h3>
+          <p data-i18n="cap1.body">Modulation, pulse shaping, and time-frequency packing optimized for your performance and complexity targets.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">/02</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h4v6H4zM10 5h4v14h-4zM16 11h4v4h-4z"/></svg></div>
+          <h3 data-i18n="cap2.title">Receiver Architectures</h3>
+          <p data-i18n="cap2.body">Equalization, turbo detection, sphere decoding, and reduced-state algorithms tuned for FTN-induced interference.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">/03</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg></div>
+          <h3 data-i18n="cap3.title">Channel Estimation</h3>
+          <p data-i18n="cap3.body">Pilot design and joint detection-estimation strategies that remain robust under aggressive symbol packing.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">/04</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9zM4 9h2M4 15h2M18 9h2M18 15h2M9 4v2M15 4v2M9 18v2M15 18v2"/></svg></div>
+          <h3 data-i18n="cap4.title">Hardware Implementation</h3>
+          <p data-i18n="cap4.body">Low-complexity variants engineered for FPGA, ASIC, and software-defined radio platforms.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">/05</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20V8M9 20V4M15 20v-8M21 20V12"/></svg></div>
+          <h3 data-i18n="cap5.title">Performance Analysis</h3>
+          <p data-i18n="cap5.body">BER simulations, capacity bounds, and link-level studies grounded in publication-grade rigor.</p>
+        </div>
+        <div class="cap-card">
+          <div class="cap-num">/06</div>
+          <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14M5 6h14M5 18h14"/><circle cx="9" cy="6" r="1.5" fill="currentColor"/><circle cx="15" cy="12" r="1.5" fill="currentColor"/><circle cx="11" cy="18" r="1.5" fill="currentColor"/></svg></div>
+          <h3 data-i18n="cap6.title">System Integration</h3>
+          <p data-i18n="cap6.body">End-to-end FTN system design that fits within your existing standard, frame structure, and frontend.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPLICATIONS -->
+  <section class="section app-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">05</span><span class="line"></span><span data-i18n="app.label">Applications</span></div>
+        <h2 data-i18n="app.title">Where FTN delivers</h2>
+      </div>
+      <div class="app-grid reveal">
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12.55a11 11 0 0114 0M8.5 16.5a6 6 0 017 0M2 8.82a15 15 0 0120 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+            <span class="app-id">A.01</span>
+          </div>
+          <h3 data-i18n="app1.title">5G &amp; 6G Networks</h3>
+          <p data-i18n="app1.body">Capacity densification on premium licensed spectrum.</p>
+        </div>
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 19.07a10 10 0 010-14.14M16.24 7.76a6 6 0 010 8.48M7.76 16.24a6 6 0 010-8.48"/></svg>
+            <span class="app-id">A.02</span>
+          </div>
+          <h3 data-i18n="app2.title">Satellite Links</h3>
+          <p data-i18n="app2.body">Maximum bits per Hertz on geostationary, MEO, and LEO links.</p>
+        </div>
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L4 6v6c0 5 3.5 9.5 8 10 4.5-.5 8-5 8-10V6l-8-4z"/></svg>
+            <span class="app-id">A.03</span>
+          </div>
+          <h3 data-i18n="app3.title">Defense Communications</h3>
+          <p data-i18n="app3.body">Tactical links where bandwidth is contested or constrained.</p>
+        </div>
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><path d="M8 6h8M6 8v8M18 8v8M8 18h8M7.5 7.5l3 3M16.5 7.5l-3 3M7.5 16.5l3-3M16.5 16.5l-3-3"/></svg>
+            <span class="app-id">A.04</span>
+          </div>
+          <h3 data-i18n="app4.title">IoT &amp; M2M</h3>
+          <p data-i18n="app4.body">Dense, low-power networks operating in shared spectrum.</p>
+        </div>
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M7 21h10M12 18v3"/></svg>
+            <span class="app-id">A.05</span>
+          </div>
+          <h3 data-i18n="app5.title">Broadcasting</h3>
+          <p data-i18n="app5.body">Higher resolution and more channels in legacy broadcast bands.</p>
+        </div>
+        <div class="app-card">
+          <div class="app-card-head">
+            <svg class="app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 21V8l4-3 6 3 4-2v15M9 21V12M15 21v-9"/></svg>
+            <span class="app-id">A.06</span>
+          </div>
+          <h3 data-i18n="app6.title">Microwave Backhaul</h3>
+          <p data-i18n="app6.body">Increased throughput between sites without new licenses.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENGAGEMENT -->
+  <section class="section" id="engage">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-meta"><span class="num">06</span><span class="line"></span><span data-i18n="eng.label">Engagement</span></div>
+        <h2 data-i18n="eng.title">How we work with you</h2>
+      </div>
+      <div class="eng-grid reveal">
+        <div class="eng-card">
+          <div class="eng-num">M.01</div>
+          <h3 data-i18n="eng1.title">Consulting</h3>
+          <p data-i18n="eng1.body">Feasibility analysis, design reviews, and technical advisory tailored to your project.</p>
+        </div>
+        <div class="eng-card">
+          <div class="eng-num">M.02</div>
+          <h3 data-i18n="eng2.title">R&amp;D Partnership</h3>
+          <p data-i18n="eng2.body">Joint development programs combining your domain expertise with our FTN know-how.</p>
+        </div>
+        <div class="eng-card">
+          <div class="eng-num">M.03</div>
+          <h3 data-i18n="eng3.title">Technology Transfer</h3>
+          <p data-i18n="eng3.body">Licensable IP, simulation toolchains, and the documentation to put them to work.</p>
+        </div>
+        <div class="eng-card">
+          <div class="eng-num">M.04</div>
+          <h3 data-i18n="eng4.title">Custom Development</h3>
+          <p data-i18n="eng4.body">Bespoke systems engineered around your standard, your hardware, and your constraints.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section" id="contact">
+    <div class="container reveal">
+      <div class="section-meta" style="justify-content:center"><span class="num">07</span><span data-i18n="contact.label">Get In Touch</span></div>
+      <h2 data-i18n="contact.title">Ready to transmit faster?</h2>
+      <p class="body" data-i18n="contact.body">Tell us about your spectrum challenge. We respond within two working days.</p>
+      <a href="mailto:contact@example.com" class="btn btn-primary"><span data-i18n="contact.cta">Get in Touch</span><span class="arrow">→</span></a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span data-i18n="footer.copy">© FTN Signaling Research</span>
+  <a href="index.html" class="home-link" data-i18n="footer.home">← Back to Homepage</a>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// i18n
+// ─────────────────────────────────────────────────────────
+const I18N = {
+  en: {
+    'brand.tagline':'Signaling Research',
+    'hero.eyebrow':'BEYOND THE NYQUIST LIMIT',
+    'hero.title':'Faster-than-Nyquist Signaling',
+    'hero.lede':'More data through the same spectrum. A decade of dedicated research, ready for deployment.',
+    'hero.cta1':'Explore the Technology',
+    'hero.cta2':'How We Work',
+    'hero.stat1':'Years of focused research',
+    'hero.stat2':'Throughput at τ = 0.7',
+    'hero.stat3':'Extra bandwidth required',
+    'problem.label':'The Challenge',
+    'problem.title':'Spectrum is finite. Demand is not.',
+    'problem.body':'Mobile, satellite, and defense networks share a single fundamental constraint: bandwidth. As traffic grows exponentially, regulators auction scarce spectrum at record prices, and operators race to extract every bit of capacity from each Hertz they own. For decades, the Nyquist rate set the ceiling on what was possible. That ceiling was never absolute.',
+    'problem.body2':'Faster-than-Nyquist signaling rewrites the rules — without exceeding the spectrum mask, without changing the transmit pulse, and without touching the regulator\'s allocation.',
+    'visual.bw_label':'BANDWIDTH','visual.unchanged':'UNCHANGED','visual.symbols':'SYMBOLS','visual.compressed':'COMPRESSED',
+    'solution.label':'The Approach',
+    'solution.title':'Pack symbols closer. Recover them smarter.',
+    'solution.body':'FTN signaling transmits symbols faster than the Nyquist criterion permits, deliberately introducing controlled inter-symbol interference. The transmitter is unchanged in form — only the symbol period shrinks by a factor τ. The complexity moves to the receiver, where modern detection algorithms recover the data with negligible loss. The reward: higher throughput in the same bandwidth, and improved spectral efficiency without changing the modulation, the bandwidth, or the regulatory mask.',
+    'solution.point1':'No additional spectrum required',
+    'solution.point2':'Compatible with existing pulse shapes',
+    'solution.point3':'Adaptable to current air interfaces',
+    'solution.point4':'Scalable from baseband to mmWave',
+    'demo.label':'Interactive',
+    'demo.title':'See it in action',
+    'demo.body':'Move the slider to compress the symbol period. The bandwidth stays fixed; the throughput rises.',
+    'demo.title_ts':'TIME DOMAIN — SYMBOL STREAM',
+    'demo.live':'LIVE',
+    'demo.tau_label':'Compression factor τ',
+    'demo.gain_label':'Throughput gain',
+    'demo.bw_label':'Bandwidth',
+    'demo.eff_label':'Spectral efficiency',
+    'demo.hint':'τ = 1 corresponds to Nyquist signaling. τ < 1 packs more symbols into the same time window.',
+    'cap.label':'Capabilities','cap.title':'What we deliver','cap.subtitle':'Ten years of focused research, distilled into engineering deliverables.',
+    'cap1.title':'Algorithm Design','cap1.body':'Modulation, pulse shaping, and time-frequency packing optimized for your performance and complexity targets.',
+    'cap2.title':'Receiver Architectures','cap2.body':'Equalization, turbo detection, sphere decoding, and reduced-state algorithms tuned for FTN-induced interference.',
+    'cap3.title':'Channel Estimation','cap3.body':'Pilot design and joint detection-estimation strategies that remain robust under aggressive symbol packing.',
+    'cap4.title':'Hardware Implementation','cap4.body':'Low-complexity variants engineered for FPGA, ASIC, and software-defined radio platforms.',
+    'cap5.title':'Performance Analysis','cap5.body':'BER simulations, capacity bounds, and link-level studies grounded in publication-grade rigor.',
+    'cap6.title':'System Integration','cap6.body':'End-to-end FTN system design that fits within your existing standard, frame structure, and frontend.',
+    'app.label':'Applications','app.title':'Where FTN delivers',
+    'app1.title':'5G & 6G Networks','app1.body':'Capacity densification on premium licensed spectrum.',
+    'app2.title':'Satellite Links','app2.body':'Maximum bits per Hertz on geostationary, MEO, and LEO links.',
+    'app3.title':'Defense Communications','app3.body':'Tactical links where bandwidth is contested or constrained.',
+    'app4.title':'IoT & M2M','app4.body':'Dense, low-power networks operating in shared spectrum.',
+    'app5.title':'Broadcasting','app5.body':'Higher resolution and more channels in legacy broadcast bands.',
+    'app6.title':'Microwave Backhaul','app6.body':'Increased throughput between sites without new licenses.',
+    'eng.label':'Engagement','eng.title':'How we work with you',
+    'eng1.title':'Consulting','eng1.body':'Feasibility analysis, design reviews, and technical advisory tailored to your project.',
+    'eng2.title':'R&D Partnership','eng2.body':'Joint development programs combining your domain expertise with our FTN know-how.',
+    'eng3.title':'Technology Transfer','eng3.body':'Licensable IP, simulation toolchains, and the documentation to put them to work.',
+    'eng4.title':'Custom Development','eng4.body':'Bespoke systems engineered around your standard, your hardware, and your constraints.',
+    'contact.label':'Get In Touch','contact.title':'Ready to transmit faster?','contact.body':'Tell us about your spectrum challenge. We respond within two working days.','contact.cta':'Get in Touch',
+    'footer.copy':'© FTN Signaling Research','footer.home':'← Back to Homepage'
+  },
+  tr: {
+    'brand.tagline':'Sinyalleşme Araştırması',
+    'hero.eyebrow':'NYQUIST SINIRININ ÖTESİNDE',
+    'hero.title':'Faster-than-Nyquist Sinyalleşmesi',
+    'hero.lede':'Aynı spektrumdan daha fazla veri. On yıllık birikimli araştırma, sahaya hazır.',
+    'hero.cta1':'Teknolojiyi İncele',
+    'hero.cta2':'Çalışma Modelimiz',
+    'hero.stat1':'Yıllık odaklı araştırma',
+    'hero.stat2':'τ = 0.7\'de veri hacmi kazancı',
+    'hero.stat3':'Ek bant genişliği gereksinimi',
+    'problem.label':'Mesele',
+    'problem.title':'Spektrum sınırlı. Talep ise sınırsız.',
+    'problem.body':'Mobil, uydu ve savunma haberleşme ağları tek bir temel kısıtı paylaşır: bant genişliği. Veri trafiği üstel olarak büyürken regülatörler kıt spektrumu rekor fiyatlarla satıyor; operatörler her bir Hertz\'ten daha fazla kapasite çıkarmak için yarışıyor. Onlarca yıldır Nyquist hızı, mümkün olanın tavanı sayıldı. Oysa o tavan hiçbir zaman mutlak değildi.',
+    'problem.body2':'Faster-than-Nyquist sinyalleşmesi kuralları yeniden yazıyor — spektrum maskesini aşmadan, gönderim darbesini değiştirmeden ve regülatörün tahsisine dokunmadan.',
+    'visual.bw_label':'BANT GENİŞLİĞİ','visual.unchanged':'DEĞİŞMEDİ','visual.symbols':'SEMBOLLER','visual.compressed':'SIKIŞTIRILDI',
+    'solution.label':'Yaklaşım',
+    'solution.title':'Sembolleri sıkıştır. Akıllı çöz.',
+    'solution.body':'FTN, Nyquist kriterinin izin verdiğinden daha hızlı sembol gönderir; bu, kontrollü bir sembol-arası girişim yaratır. Verici tarafında biçim aynıdır — sadece sembol periyodu τ kat daraltılır. Karmaşıklık, modern algılama algoritmalarıyla veriyi neredeyse kayıpsız geri kazanan alıcıya taşınır. Sonuç: aynı bant genişliğinde daha yüksek veri hacmi ve modülasyonu, bant genişliğini veya regülasyon maskesini değiştirmeden iyileşmiş spektral verimlilik.',
+    'solution.point1':'Ek spektrum gerektirmez',
+    'solution.point2':'Mevcut darbe biçimleriyle uyumlu',
+    'solution.point3':'Mevcut hava arayüzlerine uyarlanabilir',
+    'solution.point4':'Temel banttan mmWave\'e ölçeklenebilir',
+    'demo.label':'İnteraktif',
+    'demo.title':'Çalışırken görün',
+    'demo.body':'Kaydırıcı ile sembol periyodunu sıkıştırın. Bant genişliği sabit kalır, veri hacmi artar.',
+    'demo.title_ts':'ZAMAN DÜZLEMİ — SEMBOL AKIŞI',
+    'demo.live':'CANLI',
+    'demo.tau_label':'Sıkıştırma faktörü τ',
+    'demo.gain_label':'Veri hacmi kazancı',
+    'demo.bw_label':'Bant genişliği',
+    'demo.eff_label':'Spektral verimlilik',
+    'demo.hint':'τ = 1 Nyquist sinyalleşmesine karşılık gelir. τ < 1 aynı zaman penceresine daha fazla sembol sıkıştırır.',
+    'cap.label':'Yetkinlikler','cap.title':'Sunduklarımız','cap.subtitle':'On yıllık odaklı araştırma, mühendislik çıktılarına dönüştürülmüş halde.',
+    'cap1.title':'Algoritma Tasarımı','cap1.body':'Performans ve karmaşıklık hedeflerinize göre optimize edilmiş modülasyon, darbe şekillendirme ve zaman-frekans paketleme.',
+    'cap2.title':'Alıcı Mimarileri','cap2.body':'FTN kaynaklı girişime göre ayarlanmış denkleştirici, turbo algılama, küre dekoder ve azaltılmış durum algoritmaları.',
+    'cap3.title':'Kanal Kestirimi','cap3.body':'Yoğun sembol paketleme altında dahi sağlam kalan pilot tasarımı ve ortak algılama-kestirim stratejileri.',
+    'cap4.title':'Donanım Uygulaması','cap4.body':'FPGA, ASIC ve yazılım tanımlı radyo platformları için tasarlanmış düşük karmaşıklıklı varyantlar.',
+    'cap5.title':'Performans Analizi','cap5.body':'Yayın düzeyinde titizlikle yapılan BER simülasyonları, kapasite sınırları ve bağlantı seviyesi çalışmaları.',
+    'cap6.title':'Sistem Entegrasyonu','cap6.body':'Mevcut standartınıza, çerçeve yapınıza ve önyüzünüze oturan uçtan uca FTN sistem tasarımı.',
+    'app.label':'Uygulamalar','app.title':'FTN nerede değer üretir',
+    'app1.title':'5G ve 6G Ağları','app1.body':'Lisanslı premium spektrumda kapasite yoğunlaştırma.',
+    'app2.title':'Uydu Hatları','app2.body':'GEO, MEO ve LEO hatlarda Hertz başına maksimum bit.',
+    'app3.title':'Savunma Haberleşmesi','app3.body':'Bant genişliğinin kısıtlı veya rekabet altında olduğu taktik hatlar.',
+    'app4.title':'IoT ve M2M','app4.body':'Paylaşımlı spektrumda çalışan yoğun, düşük güçlü ağlar.',
+    'app5.title':'Yayıncılık','app5.body':'Mevcut yayın bantlarında daha yüksek çözünürlük ve daha fazla kanal.',
+    'app6.title':'Mikrodalga Backhaul','app6.body':'Yeni lisans almadan saha arası taşıma kapasitesini artırın.',
+    'eng.label':'Çalışma Modeli','eng.title':'Sizinle nasıl çalışırız',
+    'eng1.title':'Danışmanlık','eng1.body':'Projenize özel fizibilite analizi, tasarım gözden geçirme ve teknik danışmanlık.',
+    'eng2.title':'Ar-Ge Ortaklığı','eng2.body':'Sizin alan uzmanlığınızı bizim FTN bilgi birikimimizle birleştiren ortak geliştirme programları.',
+    'eng3.title':'Teknoloji Transferi','eng3.body':'Lisanslanabilir fikri mülkiyet, simülasyon zincirleri ve onları işe sokacak dokümantasyon.',
+    'eng4.title':'Özel Geliştirme','eng4.body':'Standardınıza, donanımınıza ve kısıtlarınıza göre özel olarak tasarlanmış sistemler.',
+    'contact.label':'İletişim','contact.title':'Daha hızlı iletmeye hazır mısınız?','contact.body':'Spektrum probleminizi anlatın. İki iş günü içinde dönüş yaparız.','contact.cta':'İletişime Geç',
+    'footer.copy':'© FTN Sinyalleşme Araştırması','footer.home':'← Ana Sayfaya Dön'
+  },
+  de: {
+    'brand.tagline':'Signalisierungsforschung',
+    'hero.eyebrow':'JENSEITS DER NYQUIST-GRENZE',
+    'hero.title':'Faster-than-Nyquist Signalisierung',
+    'hero.lede':'Mehr Daten im selben Spektrum. Ein Jahrzehnt fokussierter Forschung, einsatzbereit.',
+    'hero.cta1':'Technologie entdecken',
+    'hero.cta2':'Unsere Arbeitsweise',
+    'hero.stat1':'Jahre fokussierte Forschung',
+    'hero.stat2':'Durchsatz bei τ = 0,7',
+    'hero.stat3':'Zusätzliche Bandbreite',
+    'problem.label':'Die Herausforderung',
+    'problem.title':'Spektrum ist endlich. Nachfrage ist es nicht.',
+    'problem.body':'Mobil-, Satelliten- und Verteidigungsnetze teilen eine einzige fundamentale Beschränkung: Bandbreite. Während der Verkehr exponentiell wächst, versteigern Regulierer knappes Spektrum zu Rekordpreisen, und Betreiber ringen um jedes Bit Kapazität pro Hertz. Jahrzehntelang setzte die Nyquist-Rate die Obergrenze des Möglichen. Diese Obergrenze war nie absolut.',
+    'problem.body2':'Faster-than-Nyquist-Signalisierung schreibt die Regeln neu — ohne die Spektrumsmaske zu überschreiten, ohne den Sendeimpuls zu ändern und ohne die Zuteilung des Regulierers anzutasten.',
+    'visual.bw_label':'BANDBREITE','visual.unchanged':'UNVERÄNDERT','visual.symbols':'SYMBOLE','visual.compressed':'KOMPRIMIERT',
+    'solution.label':'Der Ansatz',
+    'solution.title':'Symbole dichter packen. Klüger zurückgewinnen.',
+    'solution.body':'FTN sendet Symbole schneller, als das Nyquist-Kriterium erlaubt, und erzeugt dabei eine kontrollierte Intersymbolinterferenz. Der Sender bleibt formal unverändert — nur die Symboldauer wird um den Faktor τ verkürzt. Die Komplexität verlagert sich in den Empfänger, wo moderne Detektionsalgorithmen die Daten mit vernachlässigbarem Verlust zurückgewinnen. Das Ergebnis: höherer Durchsatz in derselben Bandbreite und verbesserte spektrale Effizienz, ohne Modulation, Bandbreite oder regulatorische Maske zu ändern.',
+    'solution.point1':'Kein zusätzliches Spektrum erforderlich',
+    'solution.point2':'Kompatibel mit bestehenden Pulsformen',
+    'solution.point3':'Anpassbar an aktuelle Luftschnittstellen',
+    'solution.point4':'Skalierbar von Basisband bis mmWave',
+    'demo.label':'Interaktiv',
+    'demo.title':'In Aktion sehen',
+    'demo.body':'Bewegen Sie den Schieberegler, um die Symboldauer zu verkürzen. Die Bandbreite bleibt konstant, der Durchsatz steigt.',
+    'demo.title_ts':'ZEITBEREICH — SYMBOLSTROM',
+    'demo.live':'LIVE',
+    'demo.tau_label':'Kompressionsfaktor τ',
+    'demo.gain_label':'Durchsatzgewinn',
+    'demo.bw_label':'Bandbreite',
+    'demo.eff_label':'Spektrale Effizienz',
+    'demo.hint':'τ = 1 entspricht Nyquist-Signalisierung. τ < 1 packt mehr Symbole in dasselbe Zeitfenster.',
+    'cap.label':'Leistungen','cap.title':'Was wir liefern','cap.subtitle':'Zehn Jahre fokussierte Forschung, destilliert zu Engineering-Ergebnissen.',
+    'cap1.title':'Algorithmenentwurf','cap1.body':'Modulation, Pulsformung und Zeit-Frequenz-Packung, optimiert auf Ihre Leistungs- und Komplexitätsziele.',
+    'cap2.title':'Empfängerarchitekturen','cap2.body':'Entzerrung, Turbo-Detektion, Sphere-Decoding und reduzierte Zustandsalgorithmen, abgestimmt auf FTN-bedingte Interferenz.',
+    'cap3.title':'Kanalschätzung','cap3.body':'Pilot-Design und gemeinsame Detektions-Schätzungs-Strategien, die auch unter aggressiver Symbolpackung robust bleiben.',
+    'cap4.title':'Hardware-Implementierung','cap4.body':'Komplexitätsarme Varianten für FPGA, ASIC und Software Defined Radio.',
+    'cap5.title':'Performance-Analyse','cap5.body':'BER-Simulationen, Kapazitätsgrenzen und Link-Level-Studien auf publikationsreifem Niveau.',
+    'cap6.title':'Systemintegration','cap6.body':'End-to-End-FTN-Systemdesign, das in Ihren bestehenden Standard, Ihre Rahmenstruktur und Ihr Frontend passt.',
+    'app.label':'Anwendungen','app.title':'Wo FTN Wert schafft',
+    'app1.title':'5G &amp; 6G Netze','app1.body':'Kapazitätsverdichtung auf wertvollem lizenziertem Spektrum.',
+    'app2.title':'Satellitenverbindungen','app2.body':'Maximale Bits pro Hertz auf GEO-, MEO- und LEO-Strecken.',
+    'app3.title':'Verteidigungskommunikation','app3.body':'Taktische Verbindungen, bei denen Bandbreite umkämpft oder begrenzt ist.',
+    'app4.title':'IoT &amp; M2M','app4.body':'Dichte, energiearme Netze in geteiltem Spektrum.',
+    'app5.title':'Rundfunk','app5.body':'Höhere Auflösung und mehr Kanäle in bestehenden Rundfunkbändern.',
+    'app6.title':'Mikrowellen-Backhaul','app6.body':'Mehr Durchsatz zwischen Standorten ohne neue Lizenzen.',
+    'eng.label':'Zusammenarbeit','eng.title':'Wie wir mit Ihnen arbeiten',
+    'eng1.title':'Beratung','eng1.body':'Machbarkeitsanalysen, Design-Reviews und technische Beratung, zugeschnitten auf Ihr Projekt.',
+    'eng2.title':'F&amp;E-Partnerschaft','eng2.body':'Gemeinsame Entwicklungsprogramme, die Ihre Domänenexpertise mit unserem FTN-Know-how verbinden.',
+    'eng3.title':'Technologietransfer','eng3.body':'Lizenzierbare Schutzrechte, Simulationsketten und die Dokumentation, um sie produktiv einzusetzen.',
+    'eng4.title':'Maßgeschneiderte Entwicklung','eng4.body':'Systeme, entwickelt rund um Ihren Standard, Ihre Hardware und Ihre Anforderungen.',
+    'contact.label':'Kontakt','contact.title':'Bereit, schneller zu senden?','contact.body':'Erzählen Sie uns von Ihrer Spektrum-Herausforderung. Wir antworten innerhalb von zwei Werktagen.','contact.cta':'Kontakt aufnehmen',
+    'footer.copy':'© FTN Signalisierungsforschung','footer.home':'← Zur Startseite'
+  },
+  fr: {
+    'brand.tagline':'Recherche en signalisation',
+    'hero.eyebrow':'AU-DELÀ DE LA LIMITE DE NYQUIST',
+    'hero.title':'Signalisation Faster-than-Nyquist',
+    'hero.lede':'Plus de données dans le même spectre. Une décennie de recherche dédiée, prête à être déployée.',
+    'hero.cta1':'Découvrir la technologie',
+    'hero.cta2':'Notre approche',
+    'hero.stat1':'Années de recherche concentrée',
+    'hero.stat2':'Débit à τ = 0,7',
+    'hero.stat3':'Bande passante supplémentaire',
+    'problem.label':'Le défi',
+    'problem.title':'Le spectre est fini. La demande, non.',
+    'problem.body':'Les réseaux mobiles, satellitaires et de défense partagent une seule contrainte fondamentale : la bande passante. Le trafic croît de façon exponentielle, les régulateurs vendent aux enchères un spectre rare à des prix records, et les opérateurs s\'efforcent d\'extraire chaque bit de capacité par Hertz. Pendant des décennies, le débit de Nyquist a fixé le plafond du possible. Ce plafond n\'a jamais été absolu.',
+    'problem.body2':'La signalisation Faster-than-Nyquist réécrit les règles — sans dépasser le masque spectral, sans modifier l\'impulsion d\'émission et sans toucher à l\'allocation du régulateur.',
+    'visual.bw_label':'BANDE PASSANTE','visual.unchanged':'INCHANGÉE','visual.symbols':'SYMBOLES','visual.compressed':'COMPRIMÉS',
+    'solution.label':'L\'approche',
+    'solution.title':'Compresser les symboles. Les récupérer plus intelligemment.',
+    'solution.body':'La signalisation FTN transmet les symboles plus vite que ne l\'autorise le critère de Nyquist, introduisant délibérément une interférence inter-symboles contrôlée. L\'émetteur ne change pas de forme — seule la période symbole se contracte d\'un facteur τ. La complexité se déplace vers le récepteur, où des algorithmes de détection modernes récupèrent les données avec une perte négligeable. Le gain : un débit plus élevé dans la même bande passante, et une efficacité spectrale améliorée, sans modifier la modulation, la bande passante ni le masque réglementaire.',
+    'solution.point1':'Aucun spectre supplémentaire requis',
+    'solution.point2':'Compatible avec les formes d\'impulsion existantes',
+    'solution.point3':'Adaptable aux interfaces radio actuelles',
+    'solution.point4':'Évolutif de la bande de base à l\'onde millimétrique',
+    'demo.label':'Interactif',
+    'demo.title':'Voir en action',
+    'demo.body':'Déplacez le curseur pour comprimer la période symbole. La bande passante reste fixe, le débit augmente.',
+    'demo.title_ts':'DOMAINE TEMPOREL — FLUX DE SYMBOLES',
+    'demo.live':'EN DIRECT',
+    'demo.tau_label':'Facteur de compression τ',
+    'demo.gain_label':'Gain de débit',
+    'demo.bw_label':'Bande passante',
+    'demo.eff_label':'Efficacité spectrale',
+    'demo.hint':'τ = 1 correspond à la signalisation de Nyquist. τ < 1 compresse plus de symboles dans la même fenêtre temporelle.',
+    'cap.label':'Capacités','cap.title':'Ce que nous livrons','cap.subtitle':'Dix ans de recherche concentrée, distillés en livrables d\'ingénierie.',
+    'cap1.title':'Conception d\'algorithmes','cap1.body':'Modulation, mise en forme d\'impulsion et compactage temps-fréquence, optimisés pour vos cibles de performance et de complexité.',
+    'cap2.title':'Architectures de récepteur','cap2.body':'Égalisation, détection turbo, décodage par sphères et algorithmes à états réduits, accordés à l\'interférence induite par FTN.',
+    'cap3.title':'Estimation de canal','cap3.body':'Conception de pilotes et stratégies de détection-estimation conjointes, robustes même sous compactage agressif.',
+    'cap4.title':'Mise en œuvre matérielle','cap4.body':'Variantes à faible complexité conçues pour FPGA, ASIC et plateformes radio logicielles.',
+    'cap5.title':'Analyse de performance','cap5.body':'Simulations BER, bornes de capacité et études au niveau lien, avec une rigueur digne de publication.',
+    'cap6.title':'Intégration système','cap6.body':'Conception de système FTN de bout en bout, adaptée à votre standard, votre structure de trame et votre frontal.',
+    'app.label':'Applications','app.title':'Où FTN apporte de la valeur',
+    'app1.title':'Réseaux 5G &amp; 6G','app1.body':'Densification de capacité sur spectre licencié premium.',
+    'app2.title':'Liaisons satellitaires','app2.body':'Maximum de bits par Hertz sur les liaisons GEO, MEO et LEO.',
+    'app3.title':'Communications de défense','app3.body':'Liaisons tactiques où la bande passante est contestée ou contrainte.',
+    'app4.title':'IoT et M2M','app4.body':'Réseaux denses et basse consommation en spectre partagé.',
+    'app5.title':'Diffusion','app5.body':'Plus haute résolution et davantage de canaux dans les bandes de diffusion existantes.',
+    'app6.title':'Backhaul micro-ondes','app6.body':'Débit accru entre sites sans nouvelles licences.',
+    'eng.label':'Engagement','eng.title':'Comment nous travaillons avec vous',
+    'eng1.title':'Conseil','eng1.body':'Études de faisabilité, revues de conception et conseil technique sur mesure pour votre projet.',
+    'eng2.title':'Partenariat R&D','eng2.body':'Programmes de développement conjoints alliant votre expertise sectorielle à notre savoir-faire FTN.',
+    'eng3.title':'Transfert de technologie','eng3.body':'Propriété intellectuelle licenciable, chaînes de simulation et documentation pour les exploiter.',
+    'eng4.title':'Développement sur mesure','eng4.body':'Systèmes conçus autour de votre standard, votre matériel et vos contraintes.',
+    'contact.label':'Contact','contact.title':'Prêt à transmettre plus vite ?','contact.body':'Parlez-nous de votre défi spectral. Nous répondons sous deux jours ouvrés.','contact.cta':'Nous contacter',
+    'footer.copy':'© FTN — Recherche en signalisation','footer.home':'← Retour à l\'accueil'
+  },
+  ar: {
+    'brand.tagline':'أبحاث الإشارات',
+    'hero.eyebrow':'ما وراء حد نايكويست',
+    'hero.title':'إشارات أسرع من نايكويست',
+    'hero.lede':'بيانات أكثر عبر الطيف نفسه. عقد من الأبحاث المتخصصة، جاهز للتطبيق.',
+    'hero.cta1':'اكتشف التقنية',
+    'hero.cta2':'كيف نعمل',
+    'hero.stat1':'سنوات من البحث المركَّز',
+    'hero.stat2':'إنتاجية عند τ = ٠٫٧',
+    'hero.stat3':'حاجة إلى عرض حزمة إضافي',
+    'problem.label':'التحدي',
+    'problem.title':'الطيف محدود. والطلب ليس كذلك.',
+    'problem.body':'تشترك شبكات الاتصالات المتنقلة والقمرية والدفاعية في قيد جوهري واحد: عرض الحزمة. ومع تنامي حركة البيانات أُسّياً، تطرح هيئات التنظيم الطيف النادر بأسعار قياسية، ويتسابق المشغّلون لاستخراج كل بت ممكن من كل هرتز. لعقود طويلة وضع معدل نايكويست سقفاً لما يمكن تحقيقه. لكن هذا السقف لم يكن مطلقاً قط.',
+    'problem.body2':'تعيد إشارات أسرع من نايكويست كتابة القواعد — دون تجاوز قناع الطيف، ودون تعديل نبضة الإرسال، ودون المساس بتوزيع الجهة المنظِّمة.',
+    'visual.bw_label':'عرض الحزمة','visual.unchanged':'دون تغيير','visual.symbols':'الرموز','visual.compressed':'مضغوطة',
+    'solution.label':'النهج',
+    'solution.title':'ضغط أكبر للرموز. استرجاع أذكى لها.',
+    'solution.body':'ترسل تقنية FTN الرموز بسرعة تتجاوز ما يسمح به معيار نايكويست، مُحدِثةً تداخلاً متحكَّماً به بين الرموز. يبقى المرسِل دون تغيير في صورته — وحدها مدة الرمز تُختصر بعامل τ. أما التعقيد فينتقل إلى المستقبِل، حيث تستعيد خوارزميات الكشف الحديثة البيانات بفقد لا يكاد يُذكر. النتيجة: إنتاجية أعلى ضمن العرض ذاته، وكفاءة طيفية محسَّنة دون تغيير في التضمين أو عرض الحزمة أو القناع التنظيمي.',
+    'solution.point1':'لا حاجة إلى طيف إضافي',
+    'solution.point2':'متوافقة مع أشكال النبضات القائمة',
+    'solution.point3':'قابلة للتكييف مع واجهات الراديو الحالية',
+    'solution.point4':'قابلة للتوسعة من النطاق الأساسي إلى الموجات المليمترية',
+    'demo.label':'تفاعلي',
+    'demo.title':'شاهدها أثناء العمل',
+    'demo.body':'حرّك المؤشّر لضغط مدة الرمز. يبقى عرض الحزمة ثابتاً وترتفع الإنتاجية.',
+    'demo.title_ts':'المجال الزمني — تيار الرموز',
+    'demo.live':'مباشر',
+    'demo.tau_label':'عامل الضغط τ',
+    'demo.gain_label':'الزيادة في الإنتاجية',
+    'demo.bw_label':'عرض الحزمة',
+    'demo.eff_label':'الكفاءة الطيفية',
+    'demo.hint':'τ = 1 يقابل إشارات نايكويست. عند τ < 1 تُحشَر رموز أكثر داخل النافذة الزمنية ذاتها.',
+    'cap.label':'القدرات','cap.title':'ما نقدّمه','cap.subtitle':'عشر سنوات من البحث المركَّز، مكثَّفة في مخرجات هندسية.',
+    'cap1.title':'تصميم الخوارزميات','cap1.body':'تضمين وتشكيل نبضات وحَزم زمني-ترددي مُحسَّن وفق أهداف الأداء والتعقيد لديكم.',
+    'cap2.title':'بنى المستقبِل','cap2.body':'موازنة، كشف توربو، فك ترميز كروي وخوارزميات حالات مختزلة، مضبوطة للتداخل الناجم عن FTN.',
+    'cap3.title':'تقدير القناة','cap3.body':'تصميم الإشارات التجريبية واستراتيجيات كشف-تقدير مشتركة تحافظ على متانتها تحت ضغط رموز عالٍ.',
+    'cap4.title':'التنفيذ على العتاد','cap4.body':'إصدارات منخفضة التعقيد لمنصات FPGA وASIC والراديو المعرَّف برمجياً.',
+    'cap5.title':'تحليل الأداء','cap5.body':'محاكاة BER وحدود السعة ودراسات على مستوى الوصلة بمعايير علمية صارمة.',
+    'cap6.title':'تكامل الأنظمة','cap6.body':'تصميم منظومات FTN من طرف إلى طرف يندمج مع معياركم وبنية الإطار والواجهة الأمامية لديكم.',
+    'app.label':'التطبيقات','app.title':'حيث تُحدث FTN فرقاً',
+    'app1.title':'شبكات الجيلين الخامس والسادس','app1.body':'تكثيف السعة على الطيف المُرخَّص الثمين.',
+    'app2.title':'الروابط القمرية','app2.body':'أقصى عدد من البتّات لكل هرتز على روابط GEO وMEO وLEO.',
+    'app3.title':'اتصالات الدفاع','app3.body':'روابط تكتيكية حيث يكون عرض الحزمة متنازَعاً عليه أو مقيَّداً.',
+    'app4.title':'إنترنت الأشياء وM2M','app4.body':'شبكات كثيفة منخفضة الطاقة تعمل في طيف مشترك.',
+    'app5.title':'البث','app5.body':'دقة أعلى وقنوات أكثر ضمن نطاقات البث القائمة.',
+    'app6.title':'النقل بالميكروويف','app6.body':'إنتاجية أعلى بين المواقع دون الحاجة إلى تراخيص جديدة.',
+    'eng.label':'نموذج التعاون','eng.title':'كيف نعمل معكم',
+    'eng1.title':'الاستشارات','eng1.body':'دراسات جدوى ومراجعات تصميم واستشارات تقنية مصمَّمة خصيصاً لمشروعكم.',
+    'eng2.title':'شراكة بحث وتطوير','eng2.body':'برامج تطوير مشترك تجمع خبرتكم القطاعية بمعرفتنا في FTN.',
+    'eng3.title':'نقل التقنية','eng3.body':'حقوق ملكية فكرية قابلة للترخيص، وسلاسل محاكاة، والوثائق اللازمة لتشغيلها.',
+    'eng4.title':'تطوير مخصَّص','eng4.body':'منظومات مصمَّمة وفق معياركم وعتادكم وقيودكم.',
+    'contact.label':'تواصل معنا','contact.title':'هل أنتم جاهزون للإرسال أسرع؟','contact.body':'حدّثونا عن تحدّيكم في الطيف. نردّ خلال يومَي عمل.','contact.cta':'تواصلوا معنا',
+    'footer.copy':'© أبحاث إشارات FTN','footer.home':'← العودة إلى الصفحة الرئيسية'
+  },
+  fa: {
+    'brand.tagline':'پژوهش سیگنال‌دهی',
+    'hero.eyebrow':'فراتر از حد نایکوئیست',
+    'hero.title':'سیگنال‌دهی سریع‌تر از نایکوئیست',
+    'hero.lede':'داده‌های بیشتر در همان طیف. یک دهه پژوهش متمرکز، آمادهٔ به‌کارگیری.',
+    'hero.cta1':'کاوش فناوری',
+    'hero.cta2':'شیوهٔ همکاری',
+    'hero.stat1':'سال پژوهش متمرکز',
+    'hero.stat2':'گذردهی در τ = ۰٫۷',
+    'hero.stat3':'پهنای باند افزوده',
+    'problem.label':'چالش',
+    'problem.title':'طیف محدود است. تقاضا نه.',
+    'problem.body':'شبکه‌های موبایل، ماهواره‌ای و دفاعی همگی یک محدودیت بنیادین مشترک دارند: پهنای باند. در حالی‌که ترافیک به‌صورت نمایی رشد می‌کند، تنظیم‌گرها طیف کمیاب را با قیمت‌های رکوردشکن به مزایده می‌گذارند و اپراتورها برای استخراج هر بیت ظرفیت از هر هرتز رقابت می‌کنند. ده‌ها سال نرخ نایکوئیست سقف ممکن تلقی می‌شد؛ اما این سقف هرگز مطلق نبود.',
+    'problem.body2':'سیگنال‌دهی سریع‌تر از نایکوئیست قواعد را بازنویسی می‌کند — بی‌آن‌که از ماسک طیفی فراتر رود، بدون تغییر پالس فرستنده و بدون دست‌بردن در تخصیص تنظیم‌گر.',
+    'visual.bw_label':'پهنای باند','visual.unchanged':'بدون تغییر','visual.symbols':'نمادها','visual.compressed':'فشرده‌شده',
+    'solution.label':'رویکرد',
+    'solution.title':'نمادها را فشرده‌تر بفرست. هوشمندانه بازیابی کن.',
+    'solution.body':'FTN نمادها را سریع‌تر از حد مجاز نایکوئیست ارسال می‌کند و عمداً تداخل بین‌نمادی کنترل‌شده‌ای پدید می‌آورد. شکل فرستنده تغییر نمی‌کند — تنها دورهٔ نماد به ضریب τ کوتاه می‌شود. پیچیدگی به گیرنده منتقل می‌شود، جایی که الگوریتم‌های آشکارسازی مدرن داده را با اتلاف ناچیز بازیابی می‌کنند. نتیجه: گذردهی بالاتر در همان پهنای باند و بهره‌وری طیفی بهبودیافته بدون تغییر در مدولاسیون، پهنای باند یا ماسک تنظیم‌گری.',
+    'solution.point1':'نیازی به طیف افزوده نیست',
+    'solution.point2':'سازگار با شکل‌های پالس موجود',
+    'solution.point3':'قابل تطبیق با رابط‌های هوایی فعلی',
+    'solution.point4':'مقیاس‌پذیر از باند پایه تا موج میلی‌متری',
+    'demo.label':'تعاملی',
+    'demo.title':'در عمل ببینید',
+    'demo.body':'لغزنده را حرکت دهید تا دورهٔ نماد فشرده شود. پهنای باند ثابت می‌ماند و گذردهی افزایش می‌یابد.',
+    'demo.title_ts':'حوزهٔ زمان — جریان نمادها',
+    'demo.live':'زنده',
+    'demo.tau_label':'ضریب فشرده‌سازی τ',
+    'demo.gain_label':'افزایش گذردهی',
+    'demo.bw_label':'پهنای باند',
+    'demo.eff_label':'بهره‌وری طیفی',
+    'demo.hint':'τ = ۱ معادل سیگنال‌دهی نایکوئیست است. در τ < ۱ نمادهای بیشتری در همان پنجرهٔ زمانی فشرده می‌شوند.',
+    'cap.label':'توانمندی‌ها','cap.title':'آنچه ارائه می‌دهیم','cap.subtitle':'ده سال پژوهش متمرکز، تقطیر شده در خروجی‌های مهندسی.',
+    'cap1.title':'طراحی الگوریتم','cap1.body':'مدولاسیون، شکل‌دهی پالس و بسته‌بندی زمان-فرکانس، بهینه‌شده برای اهداف عملکرد و پیچیدگی شما.',
+    'cap2.title':'معماری گیرنده','cap2.body':'برابرسازی، آشکارسازی توربو، رمزگشایی کروی و الگوریتم‌های با حالت کاهش‌یافته، تنظیم‌شده برای تداخل ناشی از FTN.',
+    'cap3.title':'تخمین کانال','cap3.body':'طراحی پایلوت و راهبردهای آشکارسازی-تخمین مشترک که تحت بسته‌بندی شدید نماد استوار می‌مانند.',
+    'cap4.title':'پیاده‌سازی سخت‌افزاری','cap4.body':'گونه‌های کم‌پیچیدگی برای پلتفرم‌های FPGA، ASIC و رادیوی نرم‌افزار-تعریف.',
+    'cap5.title':'تحلیل عملکرد','cap5.body':'شبیه‌سازی BER، کران‌های ظرفیت و مطالعات سطح لینک با دقت در حد مقالات.',
+    'cap6.title':'یکپارچه‌سازی سامانه','cap6.body':'طراحی سامانهٔ FTN انتها به انتها که با استاندارد، ساختار قاب و فرانت‌اند موجود شما هم‌خوان باشد.',
+    'app.label':'کاربردها','app.title':'جایی که FTN ارزش می‌آفریند',
+    'app1.title':'شبکه‌های 5G و 6G','app1.body':'افزایش ظرفیت روی طیف لیسانسی با ارزش بالا.',
+    'app2.title':'لینک‌های ماهواره‌ای','app2.body':'بیشینهٔ بیت بر هرتز روی لینک‌های GEO، MEO و LEO.',
+    'app3.title':'ارتباطات دفاعی','app3.body':'لینک‌های تاکتیکی در شرایطی که پهنای باند مورد رقابت یا محدود است.',
+    'app4.title':'IoT و M2M','app4.body':'شبکه‌های متراکم کم‌مصرف در طیف مشترک.',
+    'app5.title':'پخش رادیویی-تلویزیونی','app5.body':'وضوح بالاتر و کانال‌های بیشتر در نوارهای پخش موجود.',
+    'app6.title':'بک‌هال مایکروویو','app6.body':'افزایش گذردهی میان سایت‌ها بدون نیاز به مجوزهای جدید.',
+    'eng.label':'مدل همکاری','eng.title':'چگونه با شما کار می‌کنیم',
+    'eng1.title':'مشاوره','eng1.body':'تحلیل امکان‌سنجی، بازبینی طراحی و مشاورهٔ فنی متناسب با پروژهٔ شما.',
+    'eng2.title':'مشارکت پژوهش و توسعه','eng2.body':'برنامه‌های توسعهٔ مشترک که تخصص حوزه‌ای شما را با دانش ما در FTN ترکیب می‌کنند.',
+    'eng3.title':'انتقال فناوری','eng3.body':'مالکیت فکری قابل لیسانس، زنجیره‌های شبیه‌سازی و مستندات لازم برای به‌کارگیری.',
+    'eng4.title':'توسعهٔ سفارشی','eng4.body':'سامانه‌های طراحی‌شده پیرامون استاندارد، سخت‌افزار و محدودیت‌های شما.',
+    'contact.label':'تماس','contact.title':'آیا برای ارسال سریع‌تر آماده‌اید؟','contact.body':'دربارهٔ چالش طیفی خود به ما بگویید. ظرف دو روز کاری پاسخ می‌دهیم.','contact.cta':'با ما در تماس باشید',
+    'footer.copy':'© پژوهش سیگنال‌دهی FTN','footer.home':'← بازگشت به صفحهٔ اصلی'
+  },
+  zh: {
+    'brand.tagline':'信号研究',
+    'hero.eyebrow':'超越奈奎斯特极限',
+    'hero.title':'超奈奎斯特信令',
+    'hero.lede':'同一频谱传输更多数据。十年专注研究，可立即落地。',
+    'hero.cta1':'探索技术',
+    'hero.cta2':'合作方式',
+    'hero.stat1':'年的专注研究',
+    'hero.stat2':'τ = 0.7 时的吞吐量',
+    'hero.stat3':'额外带宽需求',
+    'problem.label':'挑战',
+    'problem.title':'频谱有限,需求无限。',
+    'problem.body':'移动、卫星与国防通信网络都受同一根本约束:带宽。在数据流量呈指数增长的同时,监管机构以创纪录的价格拍卖稀缺频谱,运营商竞相从每一赫兹中榨取每一比特。数十年来,奈奎斯特速率被视为所能达到的上限,但这一上限从未是绝对的。',
+    'problem.body2':'超奈奎斯特信令重写了规则——不超越频谱模板,不改变发射脉冲,也不动用监管机构的频谱分配。',
+    'visual.bw_label':'带宽','visual.unchanged':'不变','visual.symbols':'符号','visual.compressed':'已压缩',
+    'solution.label':'方法',
+    'solution.title':'符号更密。还原更智能。',
+    'solution.body':'FTN 信令以超出奈奎斯特准则允许的速率发送符号,故意引入受控的符号间干扰。发射端的形态保持不变——只是符号周期被压缩为原来的 τ 倍。复杂度被转移到接收端,现代检测算法以可忽略的损失还原数据。回报是:在同一带宽内获得更高吞吐量,在不改变调制、带宽或监管模板的前提下提升频谱效率。',
+    'solution.point1':'无需任何额外频谱',
+    'solution.point2':'兼容现有脉冲形状',
+    'solution.point3':'可适配现行空中接口',
+    'solution.point4':'从基带到毫米波均可扩展',
+    'demo.label':'交互演示',
+    'demo.title':'实时观察',
+    'demo.body':'拖动滑块压缩符号周期。带宽不变,吞吐量上升。',
+    'demo.title_ts':'时域 — 符号流',
+    'demo.live':'实时',
+    'demo.tau_label':'压缩因子 τ',
+    'demo.gain_label':'吞吐量增益',
+    'demo.bw_label':'带宽',
+    'demo.eff_label':'频谱效率',
+    'demo.hint':'τ = 1 对应奈奎斯特信令。τ < 1 时,同一时间窗口内可容纳更多符号。',
+    'cap.label':'能力','cap.title':'我们能交付什么','cap.subtitle':'十年专注研究,凝结为可交付的工程成果。',
+    'cap1.title':'算法设计','cap1.body':'根据您的性能与复杂度目标,定制调制、脉冲整形与时频打包方案。',
+    'cap2.title':'接收机架构','cap2.body':'针对 FTN 引入的干扰,定制均衡、Turbo 检测、球面译码与降阶状态算法。',
+    'cap3.title':'信道估计','cap3.body':'导频设计与联合检测-估计策略,在高强度符号打包下依然稳健。',
+    'cap4.title':'硬件实现','cap4.body':'面向 FPGA、ASIC 与软件无线电平台的低复杂度变体。',
+    'cap5.title':'性能分析','cap5.body':'达到论文级严谨度的 BER 仿真、容量界与链路级研究。',
+    'cap6.title':'系统集成','cap6.body':'与您现有标准、帧结构与前端兼容的端到端 FTN 系统设计。',
+    'app.label':'应用领域','app.title':'FTN 创造价值的场景',
+    'app1.title':'5G 与 6G 网络','app1.body':'在高价值授权频谱上实现容量加密。',
+    'app2.title':'卫星链路','app2.body':'在 GEO、MEO 与 LEO 链路上实现每赫兹最大比特数。',
+    'app3.title':'国防通信','app3.body':'带宽受限或竞争激烈的战术链路。',
+    'app4.title':'物联网与 M2M','app4.body':'共享频谱中的高密度低功耗网络。',
+    'app5.title':'广播','app5.body':'在现有广播频段提供更高分辨率与更多频道。',
+    'app6.title':'微波回传','app6.body':'无需新许可即可提升站点间吞吐量。',
+    'eng.label':'合作模式','eng.title':'我们如何与您合作',
+    'eng1.title':'咨询','eng1.body':'为您的项目量身定制可行性分析、设计评审与技术顾问服务。',
+    'eng2.title':'研发合作','eng2.body':'结合您的领域专长与我们的 FTN 经验,共同开展研发计划。',
+    'eng3.title':'技术转让','eng3.body':'可授权的知识产权、仿真工具链以及让其落地的全套文档。',
+    'eng4.title':'定制开发','eng4.body':'围绕您的标准、硬件与约束定制的专属系统。',
+    'contact.label':'联系','contact.title':'准备好提速发送了吗?','contact.body':'告诉我们您的频谱挑战,我们将在两个工作日内回复。','contact.cta':'联系我们',
+    'footer.copy':'© FTN 信号研究','footer.home':'← 返回主页'
+  }
+};
+
+const RTL_LANGS = ['ar','fa'];
+
+function setLang(lang){
+  if(!I18N[lang]) lang='en';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = RTL_LANGS.includes(lang) ? 'rtl' : 'ltr';
+  const dict = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(dict[key] !== undefined){
+      if(el.children.length === 0 || el.tagName === 'P' || el.tagName === 'LI' || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.tagName === 'SPAN' || el.tagName === 'DIV'){
+        el.textContent = dict[key];
+      }
+    }
+  });
+  document.querySelectorAll('.lang-switcher button').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  try{ localStorage.setItem('ftn-lang', lang); }catch(e){}
+}
+
+document.querySelectorAll('.lang-switcher button').forEach(btn=>{
+  btn.addEventListener('click', ()=> setLang(btn.dataset.lang));
+});
+
+(function initLang(){
+  let saved=null;
+  try{ saved = localStorage.getItem('ftn-lang'); }catch(e){}
+  if(saved && I18N[saved]){ setLang(saved); return; }
+  const nav = (navigator.language || 'en').toLowerCase();
+  const map = {'tr':'tr','de':'de','fr':'fr','ar':'ar','fa':'fa','zh':'zh','en':'en'};
+  for(const k in map){ if(nav.startsWith(k)){ setLang(map[k]); return; } }
+  setLang('en');
+})();
+
+// ─────────────────────────────────────────────────────────
+// Reveal on scroll
+// ─────────────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      observer.unobserve(e.target);
+    }
+  });
+},{threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ─────────────────────────────────────────────────────────
+// Canvas helpers
+// ─────────────────────────────────────────────────────────
+function setupCanvas(c){
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = c.getBoundingClientRect();
+  c.width = rect.width * dpr;
+  c.height = rect.height * dpr;
+  const ctx = c.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return {ctx, w: rect.width, h: rect.height};
+}
+
+// Raised-cosine (root-raised-cosine approx) pulse
+function rcPulse(t, T, beta){
+  if(t === 0) return 1;
+  if(beta > 0 && Math.abs(t) === T/(2*beta)){
+    return (Math.PI/4) * (Math.sin(Math.PI/(2*beta)) / (Math.PI/(2*beta)));
+  }
+  const num = Math.sin(Math.PI*t/T) * Math.cos(Math.PI*beta*t/T);
+  const den = (Math.PI*t/T) * (1 - Math.pow(2*beta*t/T, 2));
+  if(Math.abs(den) < 1e-9) return 0;
+  return num/den;
+}
+
+// ─────────────────────────────────────────────────────────
+// Ambient background — slow moving sine waves
+// ─────────────────────────────────────────────────────────
+(function ambient(){
+  const c = document.getElementById('ambient');
+  let st = setupCanvas(c);
+  let raf, t0=0;
+  function resize(){ c.style.width=window.innerWidth+'px'; c.style.height=window.innerHeight+'px'; st=setupCanvas(c);}
+  window.addEventListener('resize', resize);
+  resize();
+  function frame(ts){
+    if(!t0) t0=ts;
+    const t = (ts - t0)/1000;
+    const {ctx,w,h} = st;
+    ctx.clearRect(0,0,w,h);
+    // grid
+    ctx.strokeStyle = 'rgba(70,90,130,0.06)';
+    ctx.lineWidth = 1;
+    const gs = 60;
+    for(let x=0; x<w; x+=gs){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for(let y=0; y<h; y+=gs){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    // soft moving wave
+    for(let layer=0; layer<3; layer++){
+      const baseY = h*0.5;
+      const amp = 50 + layer*22;
+      const freq = 0.0018 + layer*0.0007;
+      const speed = 0.24 + layer*0.07;
+      const phase = t*speed;
+      ctx.beginPath();
+      for(let x=0; x<=w; x+=3){
+        const y = baseY
+          + Math.sin(x*freq + phase)*amp
+          + Math.sin(x*freq*1.7 + phase*1.3)*amp*0.4;
+        if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.strokeStyle = `rgba(0,217,255,${0.04 - layer*0.012})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+})();
+
+// ─────────────────────────────────────────────────────────
+// Hero canvas — animated symbol stream sliding leftward
+// ─────────────────────────────────────────────────────────
+(function hero(){
+  const c = document.getElementById('hero-canvas');
+  if(!c) return;
+  let st = setupCanvas(c);
+  let symbols = [];  // {a:±1, x:position}
+  let scrollX = 0;
+  const T = 38;        // pixel per symbol period (Nyquist)
+  const tau = 0.78;    // FTN compression factor
+  const beta = 0.3;
+  const symSpacing = T*tau;
+  const span = 14;     // pulse extends ±span * T
+
+  function resize(){
+    const parent = c.parentElement;
+    c.style.width = parent.clientWidth+'px';
+    c.style.height = parent.clientHeight+'px';
+    st = setupCanvas(c);
+    initSymbols();
+  }
+  function initSymbols(){
+    symbols = [];
+    const need = Math.ceil(st.w/symSpacing) + 30;
+    for(let i=0; i<need; i++){
+      symbols.push({a: Math.random()<0.5?1:-1, idx:i});
+    }
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  let lastT = 0;
+  function frame(ts){
+    if(!lastT) lastT = ts;
+    const dt = (ts - lastT)/1000;
+    lastT = ts;
+    scrollX += dt * 28; // speed in px/sec
+
+    const {ctx,w,h} = st;
+    ctx.clearRect(0,0,w,h);
+    const baseY = h*0.5;
+    const amp = Math.min(h*0.32, 110);
+
+    // Spawn new symbols as we scroll
+    while(scrollX > symSpacing){
+      scrollX -= symSpacing;
+      symbols.shift();
+      symbols.push({a: Math.random()<0.5?1:-1, idx: symbols[symbols.length-1].idx + 1});
+    }
+
+    // Draw the summed waveform
+    ctx.beginPath();
+    for(let px=0; px<=w; px+=2){
+      let v = 0;
+      const tx = px + scrollX;
+      // Find which symbols can contribute
+      for(let k=0; k<symbols.length; k++){
+        const cx = k*symSpacing;
+        const dist = tx - cx;
+        if(Math.abs(dist) > span*T) continue;
+        v += symbols[k].a * rcPulse(dist, T, beta);
+      }
+      const y = baseY - v * amp * 0.42;
+      if(px===0) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+    }
+    // Glow pass
+    ctx.shadowColor = 'rgba(0,217,255,0.7)';
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = 'rgba(0,217,255,0.85)';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Symbol tick marks
+    for(let k=0; k<symbols.length; k++){
+      const x = k*symSpacing - scrollX;
+      if(x < -8 || x > w+8) continue;
+      const a = symbols[k].a;
+      ctx.fillStyle = a>0 ? 'rgba(0,217,255,0.55)' : 'rgba(255,95,162,0.55)';
+      ctx.fillRect(x-1, baseY-2, 2, 4);
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ─────────────────────────────────────────────────────────
+// Spectrum canvas (problem section) — shows fixed spectrum
+// ─────────────────────────────────────────────────────────
+(function spectrum(){
+  const c = document.getElementById('spectrum-canvas');
+  if(!c) return;
+  let st;
+  function resize(){
+    c.style.width = c.parentElement.clientWidth+'px';
+    c.style.height = c.parentElement.clientHeight+'px';
+    st = setupCanvas(c);
+    draw();
+  }
+  function draw(){
+    const {ctx,w,h} = st;
+    ctx.clearRect(0,0,w,h);
+    const cx = w/2, baseY = h*0.78, peakY = h*0.18;
+    // Axes
+    ctx.strokeStyle = 'rgba(70,90,130,0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(w,baseY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,h*0.06); ctx.lineTo(cx,h*0.94); ctx.stroke();
+    // Spectrum (root-raised-cosine-like brick + slope)
+    const bw = w*0.28;
+    const beta = 0.25;
+    function spec(f){
+      const a = Math.abs(f);
+      const fp = bw*(1-beta)/2;
+      const fs = bw*(1+beta)/2;
+      if(a <= fp) return 1;
+      if(a >= fs) return 0;
+      return 0.5*(1 + Math.cos(Math.PI*(a-fp)/(fs-fp)));
+    }
+    // Filled
+    const grad = ctx.createLinearGradient(0,peakY,0,baseY);
+    grad.addColorStop(0, 'rgba(0,217,255,0.55)');
+    grad.addColorStop(1, 'rgba(0,217,255,0.05)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(0,baseY);
+    for(let x=0; x<=w; x+=2){
+      const f = x - cx;
+      const y = baseY - spec(f)*(baseY-peakY);
+      ctx.lineTo(x,y);
+    }
+    ctx.lineTo(w,baseY);
+    ctx.closePath();
+    ctx.fill();
+    // Outline
+    ctx.beginPath();
+    for(let x=0; x<=w; x+=1){
+      const f = x - cx;
+      const y = baseY - spec(f)*(baseY-peakY);
+      if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle = 'rgba(0,217,255,0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.shadowColor = 'rgba(0,217,255,0.6)'; ctx.shadowBlur = 12;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Bandwidth label markers
+    ctx.strokeStyle = 'rgba(255,184,107,0.5)';
+    ctx.setLineDash([4,4]);
+    const fp = bw*(1-beta)/2;
+    [cx-fp, cx+fp].forEach(x=>{
+      ctx.beginPath(); ctx.moveTo(x,peakY); ctx.lineTo(x,baseY); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    // Frequency axis label
+    ctx.fillStyle = 'rgba(139,150,167,0.7)';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillText('f', w-12, baseY-6);
+    ctx.fillText('|H(f)|', cx+8, h*0.12);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+})();
+
+// ─────────────────────────────────────────────────────────
+// Solution canvas (solution section) — shows packed symbols
+// ─────────────────────────────────────────────────────────
+(function solution(){
+  const c = document.getElementById('solution-canvas');
+  if(!c) return;
+  let st;
+  let scrollX = 0;
+  const T = 32, tau = 0.7, beta = 0.3;
+  let symbols = [];
+  function resize(){
+    c.style.width = c.parentElement.clientWidth+'px';
+    c.style.height = c.parentElement.clientHeight+'px';
+    st = setupCanvas(c);
+    initSymbols();
+  }
+  function initSymbols(){
+    symbols = [];
+    const symSpacing = T*tau;
+    const need = Math.ceil(st.w/symSpacing) + 20;
+    for(let i=0; i<need; i++) symbols.push({a: Math.random()<0.5?1:-1, idx:i});
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  let lastT = 0;
+  function frame(ts){
+    if(!lastT) lastT = ts;
+    const dt = (ts-lastT)/1000;
+    lastT = ts;
+    scrollX += dt * 18;
+    const symSpacing = T*tau;
+    while(scrollX > symSpacing){
+      scrollX -= symSpacing;
+      symbols.shift();
+      symbols.push({a: Math.random()<0.5?1:-1});
+    }
+
+    const {ctx,w,h} = st;
+    ctx.clearRect(0,0,w,h);
+
+    // Top row — Nyquist (reference, gray)
+    drawRow(ctx, w, h*0.30, h*0.18, T, 1.0, beta, symbols, scrollX*0.55, 'rgba(120,135,160,0.55)', 'rgba(120,135,160,0.0)');
+    // Bottom row — FTN (cyan)
+    drawRow(ctx, w, h*0.72, h*0.22, T, tau, beta, symbols, scrollX, 'rgba(0,217,255,0.95)', 'rgba(0,217,255,0.55)');
+
+    // Labels
+    ctx.fillStyle = 'rgba(120,135,160,0.7)';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillText('NYQUIST  τ=1.0', 14, h*0.30 - h*0.18*0.42 - 8);
+    ctx.fillStyle = 'rgba(0,217,255,0.85)';
+    ctx.fillText('FTN  τ=0.7', 14, h*0.72 - h*0.22*0.42 - 8);
+
+    requestAnimationFrame(frame);
+  }
+  function drawRow(ctx, w, baseY, amp, T, tau, beta, syms, scrollX, stroke, glow){
+    const symSpacing = T*tau;
+    const span = 12;
+    ctx.beginPath();
+    for(let px=0; px<=w; px+=2){
+      let v=0;
+      const tx = px + scrollX;
+      for(let k=0; k<syms.length; k++){
+        const cx = k*symSpacing;
+        const d = tx - cx;
+        if(Math.abs(d)>span*T) continue;
+        v += syms[k].a * rcPulse(d, T, beta);
+      }
+      const y = baseY - v*amp*0.42;
+      if(px===0) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+    }
+    if(glow !== 'rgba(0,0,0,0)'){
+      ctx.shadowColor = glow; ctx.shadowBlur = 14;
+    }
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Tick marks
+    for(let k=0; k<syms.length; k++){
+      const x = k*symSpacing - scrollX;
+      if(x<-4||x>w+4) continue;
+      ctx.fillStyle = stroke;
+      ctx.fillRect(x-0.5, baseY-2, 1, 4);
+    }
+  }
+})();
+
+// ─────────────────────────────────────────────────────────
+// Demo canvas — interactive τ slider
+// ─────────────────────────────────────────────────────────
+(function demo(){
+  const c = document.getElementById('demo-canvas');
+  const slider = document.getElementById('tau-slider');
+  const tauVal = document.getElementById('tau-value');
+  const gainVal = document.getElementById('gain-value');
+  const bwVal = document.getElementById('bw-value');
+  const effVal = document.getElementById('eff-value');
+  if(!c || !slider) return;
+  let st;
+  let tau = parseFloat(slider.value);
+  let scrollX = 0;
+  const T = 50, beta = 0.3;
+  let symbols = [];
+
+  function resize(){
+    const wrap = c.parentElement;
+    c.style.width = wrap.clientWidth+'px';
+    c.style.height = wrap.clientHeight+'px';
+    st = setupCanvas(c);
+    initSymbols();
+  }
+  function initSymbols(){
+    symbols = [];
+    const symSpacing = T*tau;
+    const need = Math.ceil(st.w/symSpacing) + 30;
+    for(let i=0; i<need; i++) symbols.push({a: Math.random()<0.5?1:-1});
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function update(){
+    tau = parseFloat(slider.value);
+    tauVal.textContent = tau.toFixed(2);
+    const gain = (1/tau - 1)*100;
+    const sign = gain >= 0 ? '+' : '';
+    gainVal.textContent = sign + gain.toFixed(1) + '%';
+    bwVal.textContent = '1.00';
+    effVal.textContent = sign + gain.toFixed(1) + '%';
+    initSymbols();
+    scrollX = 0;
+  }
+  slider.addEventListener('input', update);
+  update();
+
+  let lastT = 0;
+  function frame(ts){
+    if(!lastT) lastT = ts;
+    const dt = (ts-lastT)/1000;
+    lastT = ts;
+    scrollX += dt * 30;
+    const symSpacing = T*tau;
+    while(scrollX > symSpacing){
+      scrollX -= symSpacing;
+      symbols.shift();
+      symbols.push({a: Math.random()<0.5?1:-1});
+    }
+    const {ctx,w,h} = st;
+    ctx.clearRect(0,0,w,h);
+
+    // Center reference line
+    ctx.strokeStyle = 'rgba(70,90,130,0.18)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
+
+    // Vertical grid every T (one symbol period)
+    ctx.strokeStyle = 'rgba(70,90,130,0.08)';
+    for(let x=-(scrollX%T); x<w; x+=T){
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+    }
+
+    // Individual pulse contributions (faint)
+    const baseY = h*0.5;
+    const amp = h*0.35;
+    const span = 10;
+    ctx.lineWidth = 0.8;
+    for(let k=0; k<symbols.length; k++){
+      const cx = k*symSpacing - scrollX;
+      if(cx<-span*T || cx>w+span*T) continue;
+      ctx.beginPath();
+      for(let px=Math.max(0,cx-span*T); px<=Math.min(w,cx+span*T); px+=3){
+        const d = px - cx;
+        const v = symbols[k].a * rcPulse(d, T, beta);
+        const y = baseY - v*amp*0.35;
+        if(px===Math.max(0,cx-span*T)) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+      }
+      ctx.strokeStyle = symbols[k].a>0 ? 'rgba(0,217,255,0.18)' : 'rgba(255,95,162,0.18)';
+      ctx.stroke();
+    }
+
+    // Sum waveform
+    ctx.beginPath();
+    for(let px=0; px<=w; px+=2){
+      let v=0;
+      const tx = px+scrollX;
+      for(let k=0; k<symbols.length; k++){
+        const cx = k*symSpacing;
+        const d = tx-cx;
+        if(Math.abs(d)>span*T) continue;
+        v += symbols[k].a * rcPulse(d, T, beta);
+      }
+      const y = baseY - v*amp*0.42;
+      if(px===0) ctx.moveTo(px,y); else ctx.lineTo(px,y);
+    }
+    ctx.shadowColor = 'rgba(0,217,255,0.7)';
+    ctx.shadowBlur = 16;
+    ctx.strokeStyle = 'rgba(0,217,255,0.95)';
+    ctx.lineWidth = 1.7;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Symbol position ticks at top
+    for(let k=0; k<symbols.length; k++){
+      const x = k*symSpacing - scrollX;
+      if(x<-4 || x>w+4) continue;
+      ctx.fillStyle = symbols[k].a>0 ? 'rgba(0,217,255,0.7)' : 'rgba(255,95,162,0.7)';
+      ctx.fillRect(x-1, h*0.06, 2, 8);
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
