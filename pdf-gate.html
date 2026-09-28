@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restricted Document — Emre Cerci</title>
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+    <script src="assets/site.js" defer></script>
+
+    <style>
+        .gate { max-width: 420px; margin: 3rem auto 0; }
+        .gate .pin { text-align: center; letter-spacing: 0.3em; font-family: var(--font-mono); font-size: 1.125rem; }
+        .gate .pin::placeholder { letter-spacing: 0.1em; font-family: var(--font-sans); font-size: 0.9375rem; }
+        .gate form { display: grid; gap: 10px; margin-top: 1.25rem; }
+        #error-msg { display: none; margin-top: 12px; }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header class="masthead">
+        <a class="masthead-name" href="index.html">Emre Cerci</a>
+        <div class="masthead-right">
+            <nav class="site-nav" aria-label="Site">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="schedule.html">Schedule</a>
+            </nav>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="gate">
+            <p class="eyebrow">Restricted document</p>
+            <h1>MÜDEK Document</h1>
+            <p class="muted">This document contains personal data protected under KVKK. Enter the access PIN to open it.</p>
+
+            <form id="gate-form" autocomplete="off">
+                <label class="visually-hidden" for="pin-field">Access PIN</label>
+                <input type="password" class="pin" id="pin-field" placeholder="PIN" maxlength="20" autofocus>
+                <button type="submit" class="btn btn--primary" id="submit-btn">Open document</button>
+            </form>
+            <div class="notice notice--error" id="error-msg" role="alert">Incorrect PIN. Please try again.</div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+        <a href="index.html">Home</a>
+    </footer>
+
+</div>
+
+<script>
+    // PIN is stored as base64 for simple obfuscation (not real security).
+    // Default PIN: "mudek" — change this encoded value to update the PIN.
+    var ENCODED_PIN = 'bXVkZWs=';
+
+    var form = document.getElementById('gate-form');
+    var field = document.getElementById('pin-field');
+    var errorMsg = document.getElementById('error-msg');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = field.value.trim();
+        if (!input) return;
+        var ok = false;
+        try { ok = btoa(input) === ENCODED_PIN; } catch (err) { ok = false; }
+        if (ok) {
+            errorMsg.style.display = 'none';
+            window.location.href = 'eemudek0724.pdf';
+        } else {
+            errorMsg.style.display = 'block';
+            field.value = '';
+            field.focus();
+        }
+    });
+</script>
+</body>
+</html>

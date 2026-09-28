@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trellis Path Enumerator — Emre Cerci</title>
+    <meta name="description" content="Enumerates every valid path through an FTN trellis (preamble, message, tail) with τ sequences and peak locations; JSON export.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+    <script src="assets/site.js" defer></script>
+
+    <!-- Include Plotly.js CDN -->
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script> <!-- Use latest Plotly -->
+    <!-- Include MathJax CDN for formulas -->
+    <script>
+        // Configure MathJax before loading it
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']], // Standard delimiters
+            displayMath: [['$$', '$$'], ['\\[', '\\]']] // Standard delimiters
+          },
+          svg: {
+            fontCache: 'global' // Improve rendering speed
+          },
+          options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] // Don't process code blocks
+          }
+        };
+        </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+    <style>
+        .page-head { margin-bottom: 1.25rem; }
+        .intro { color: var(--fg-2); font-size: 0.9375rem; max-width: var(--measure); }
+        .controls { display: flex; flex-wrap: wrap; align-items: end; gap: 12px 18px; padding: 14px 16px; border: 1px solid var(--rule); border-radius: 6px; margin: 1rem 0 10px; }
+        .controls .field { gap: 3px; }
+        .controls input[type="number"] { width: 84px; }
+        .controls .generate-button { margin-left: auto; }
+        .bcjr-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 14px; font-size: 0.875rem; color: var(--fg-2); }
+        #error-message { min-height: 1.4em; font-size: 0.875rem; color: var(--danger); margin: 6px 0 10px; }
+
+        #trellis-container { width: 100%; overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: #fff; padding: 8px; margin-bottom: 1.5rem; min-height: 150px; }
+        svg#trellis-svg { display: block; margin: auto; background: #fff; }
+        .node { fill: #cfe4f7; stroke: #222; stroke-width: 1; } .node:hover { fill: #f0a24b; }
+        .node-start-end { fill: #bfe5c3; stroke-width: 2; stroke: #1e6e55; }
+        .state-label { font-size: 11px; text-anchor: end; dominant-baseline: middle; fill: #222; } .state-label-active { font-weight: bold; }
+        .branch { stroke-width: 1.5; marker-end: url(#arrow); } .branch:hover { stroke-width: 3; }
+        .branch-0 { stroke: #1f5fbf; } .branch-1 { stroke: #c0392b; stroke-dasharray: 4 2; } .branch-preamble, .branch-tail { stroke: #7b3fa0; }
+        .branch-label { font-size: 9px; text-anchor: middle; fill: #777; pointer-events: none; }
+        .time-label { font-size: 10px; text-anchor: middle; fill: #555; }
+        .phase-label { font-size: 12px; font-weight: bold; text-anchor: middle; fill: #111; }
+        .bcjr-value-text { font-size: 9px; font-family: monospace; pointer-events: none; }
+        .bcjr-alpha-text { fill: darkgreen; text-anchor: end; dominant-baseline: central; }
+        .bcjr-beta-text { fill: darkred; text-anchor: start; dominant-baseline: central; }
+
+        .plot-area { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; margin-bottom: 1.5rem; }
+        .plot-box { border: 1px solid var(--rule); border-radius: 6px; padding: 6px; min-height: 250px; background: #fff; }
+        .plot-box h3 { text-align: center; margin: 6px 0 4px; font-size: 0.875rem; color: #333; }
+
+        #formula-container { border: 1px solid var(--rule); border-radius: 6px; padding: 14px 18px; margin-bottom: 1.5rem; background: var(--bg-2); }
+        #formula-container h3 { margin: 0 0 8px; }
+        #formula-container p { margin: 6px 0; line-height: 1.9; font-size: 1rem; }
+
+        #paths-container h2 { font-size: 1.25rem; }
+        #paths-list { font-family: var(--font-mono); font-size: 0.8125rem; white-space: pre-wrap; word-break: break-all; max-height: 420px; overflow-y: auto; border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; background: var(--bg-2); min-height: 30px; }
+        .path-line { margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--rule-2); } .path-line:last-child { border-bottom: none; }
+        .label { display: inline-block; width: 60px; color: var(--fg-3); }
+        .download-section { margin-top: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="page page--wide">
+
+    <header class="masthead">
+        <a class="masthead-name" href="index.html">Emre Cerci</a>
+        <div class="masthead-right">
+            <nav class="site-nav" aria-label="Site">
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="schedule.html">Schedule</a>
+            </nav>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-head">
+            <p class="eyebrow">Demo</p>
+            <h1>Trellis Path Enumerator</h1>
+            <p class="intro">Models $L$ preamble zeros, $N$ message bits and $L$ tail zeros. The symbol spacing $\tau_k$ depends on $b_k, b_{k-1}$ for $k = 2..K_{total}$; peaks follow $p_k = p_{k-1} + \tau_k \cdot f_s$.</p>
+        </div>
+
+        <!-- Main Controls -->
+        <div class="controls">
+            <div class="field"><label for="message-length">N (message bits)</label><input type="number" id="message-length" value="3" min="3" max="10"></div>
+            <div class="field"><label for="memory-length">L (memory)</label><input type="number" id="memory-length" value="2" min="2" max="4"></div>
+            <div class="field"><label for="initial-peak-loc">p<sub>1</sub> (first peak)</label><input type="number" id="initial-peak-loc" value="0" step="any"></div>
+            <button class="btn btn--primary generate-button" onclick="generateTrellisAndPaths()">Generate trellis &amp; list paths</button>
+        </div>
+
+         <!-- BCJR Demo Controls -->
+         <div class="bcjr-controls">
+            <span>M-BCJR demo (N = 3, L = 2 only):</span>
+            <button class="btn btn--sm" id="show-alpha-button" onclick="displayBCJRValues('alpha')" disabled>Show log α</button>
+            <button class="btn btn--sm" id="show-beta-button" onclick="displayBCJRValues('beta')" disabled>Show log β</button>
+            <button class="btn btn--sm" id="clear-bcjr-button" onclick="clearBCJRValues()" disabled>Clear values</button>
+         </div>
+
+        <div id="error-message"></div>
+
+        <!-- Trellis Diagram -->
+        <div id="trellis-container"><svg id="trellis-svg" width="1200" height="400" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+        <!-- Signal Plots -->
+        <div class="plot-area">
+            <div id="plot-tx" class="plot-box"><h3>Transmit Signal (Tx)</h3></div>
+            <div id="plot-rx" class="plot-box"><h3>Received Signal (Rx @ MF Output)</h3></div>
+            <div id="plot-pulse" class="plot-box"><h3>Overall Pulse Shape (g(t))</h3></div>
+        </div>
+
+         <!-- Formulas -->
+        <div id="formula-container">
+            <h3>Key Max-Log-BCJR formulas</h3>
+            <p>State: $s_k$, Previous State: $s'$, Input Bit: $b_k$, Received Sample(s): $y_k$</p>
+            <p>Branch Metric: $\log \gamma_k(s', s) \approx \log P(y_k | s', s) + \log P(b_k)$</p>
+            <p>Forward ($\alpha$): $\log \alpha_k(s) = \max_{s' \to s} \{ \log \alpha_{k-1}(s') + \log \gamma_k(s', s) \}$</p>
+            <p>Backward ($\beta$): $\log \beta_k(s') = \max_{s \mid s' \to s} \{ \log \beta_{k+1}(s) + \log \gamma_{k+1}(s', s) \}$</p> <!-- Corrected beta index -->
+            <p>LLR: $LLR(b_k) = \Lambda_1 - \Lambda_0$, where $\Lambda_i = \max_{s',s | b_k=i} \{ \log \alpha_{k-1}(s') + \log \gamma_k(s', s) + \log \beta_k(s) \}$</p>
+        </div>
+
+        <!-- Path List -->
+        <div id="paths-container">
+            <h2>All valid paths (K<sub>total</sub> = L+N+L = <span id="total-symbols"></span> input symbols)</h2>
+            <div id="paths-list">Click "Generate" to see paths...</div>
+        </div>
+
+        <!-- Download Button -->
+        <div class="download-section">
+             <button class="btn" id="download-button" onclick="downloadPathInfo()" disabled>Download path info (JSON)</button>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+        <a href="index.html">Home</a>
+    </footer>
+
+</div>
+
+    <script>
+        // Global variables
+        let allPaths = [];
+        let currentN = 0; let currentL = 0; let currentP1 = 0;
+        let currentReachable = null;
+        let currentNodePositions = null;
+        const fs = 10;
+        const nodeRadius = 8;
+        console.log("Script loaded.");
+
+        // --- Hardcoded M-BCJR Example Data for N=3, L=2 ---
+        // K_total = L+N+L = 2+3+2 = 7
+        // Assumed input sequence (incl. preamble/tail): b = [0, 0, 1, 1, 0, 0, 0]
+        // States: s0=0, s1=0, s2=0, s3=2, s4=3, s5=1, s6=0, s7=0
+        // --- Actual Pulse Shape Data (g = conv(h,h)) ---
+        const pulseShape_g = [
+            0.0000, 0.0000, 0.0001, 0.0001, 0.0001, 0.0001, 0.0000, -0.0001, -0.0002, -0.0003,
+            -0.0003, -0.0004, -0.0003, -0.0002, 0.0000, 0.0003, 0.0007, 0.0010, 0.0012, 0.0013,
+            0.0012, 0.0008, 0.0001, -0.0007, -0.0017, -0.0028, -0.0036, -0.0041, -0.0041, -0.0034,
+            -0.0019, 0.0003, 0.0032, 0.0064, 0.0096, 0.0124, 0.0143, 0.0148, 0.0137, 0.0107,
+            0.0059, -0.0005, -0.0079, -0.0156, -0.0226, -0.0279, -0.0305, -0.0295, -0.0244, -0.0151,
+            -0.0020, 0.0141, 0.0316, 0.0487, 0.0633, 0.0732, 0.0762, 0.0709, 0.0563, 0.0324,
+            0.0004, -0.0377, -0.0786, -0.1183, -0.1522, -0.1754, -0.1833, -0.1718, -0.1381, -0.0806,
+            0.0002, 0.1024, 0.2220, 0.3535, 0.4899, 0.6237, 0.7470, 0.8521, 0.9324, 0.9828,
+            1.0000, // Peak at index 80
+            0.9828, 0.9324, 0.8521, 0.7470, 0.6237, 0.4899, 0.3535, 0.2220, 0.1024, 0.0002,
+            -0.0806, -0.1381, -0.1718, -0.1833, -0.1754, -0.1522, -0.1183, -0.0786, -0.0377, 0.0004,
+            0.0324, 0.0563, 0.0709, 0.0762, 0.0732, 0.0633, 0.0487, 0.0316, 0.0141, -0.0020,
+            -0.0151, -0.0244, -0.0295, -0.0305, -0.0279, -0.0226, -0.0156, -0.0079, -0.0005, 0.0059,
+            0.0107, 0.0137, 0.0148, 0.0143, 0.0124, 0.0096, 0.0064, 0.0032, 0.0003, -0.0019,
+            -0.0034, -0.0041, -0.0041, -0.0036, -0.0028, -0.0017, -0.0007, 0.0001, 0.0008, 0.0012,
+            0.0013, 0.0012, 0.0010, 0.0007, 0.0003, 0.0000, -0.0002, -0.0003, -0.0004, -0.0003,
+            -0.0003, -0.0002, -0.0001, 0.0000, 0.0001, 0.0001, 0.0001, 0.0001, 0.0000, 0.0000
+        ];
+        const pulseShape_time = Array.from({length: pulseShape_g.length}, (_, i) => i - 80); // Centered time axis (-80 to 80)
+
+        // --- Placeholder Signal Data (Tx/Rx still placeholders) ---
+        const placeholderSignalData = {
+            g_t: pulseShape_g,
+            g_time: pulseShape_time,
+            tx_t: [0,0,0, 0.1,0.5,1,0.5,0.1, 0,0, 0.1,0.5,1,0.5,0.1, 0,0, -0.1,-0.5,-1,-0.5,-0.1, 0,0, -0.1,-0.5,-1,-0.5,-0.1, 0,0, 0.1,0.5,1,0.5,0.1, 0,0,0,0,0,0,0,0,0,0,0,0,0,0], // Placeholder
+            tx_time: Array.from({length: 50}, (_, i) => i),
+            z_t: [0,0,0.1, 0.2,0.4,0.8,1,0.8,0.4,0.2, 0.1,0.1, 0.2,0.4,0.8,1,0.8,0.4,0.2, 0.1, -0.1,-0.2,-0.4,-0.8,-1,-0.8,-0.4,-0.2, -0.1,-0.1, -0.2,-0.4,-0.8,-1,-0.8,-0.4,-0.2, 0.1,0.2,0.4,0.6,0.4,0.2,0.1,0,0,0,0,0,0], // Placeholder
+            z_time: Array.from({length: 50}, (_, i) => i),
+            // True peaks for b=[0,0,1,1,0,0,0] assuming p1=0
+            peaks: [0, 6, 12, 21, 27, 36, 42] // p1 to p7 (K=7 peaks)
+        };
+        const bcjrExampleData = {
+            N: 3, L: 2, totalSteps: 7,
+            logGammas: { /* ... placeholder gammas ... */ },
+            logAlphas: [ /* ... placeholder alphas ... */ ],
+            logBetas: [ /* ... placeholder betas ... */ ],
+            signals: placeholderSignalData // Use actual pulse shape now
+        };
+
+
+        function getStateLabel(stateIndex, L) { return stateIndex.toString(2).padStart(L, '0'); }
+        function findAllPathsDFS(k, currentState, currentPathStates, currentPathInputs, currentPathTaus, reachable, N, L, totalSteps) {
+            currentPathStates.push(currentState); // Add s_k
+
+            if (k === totalSteps) { // Reached final state s_{L+N+L}
+                if (currentState === 0) {
+                    allPaths.push({
+                        states: [...currentPathStates], // Length K_total+1
+                        inputs: [...currentPathInputs], // Length K_total
+                        taus: [...currentPathTaus]      // Length K_total (tau_1..tau_K_total)
+                    });
+                }
+                currentPathStates.pop(); return;
+            }
+
+            if (!(reachable[k + 1] instanceof Set)) { console.error(`DFS Error: reachable[${k + 1}] is not a Set at step k=${k}.`); currentPathStates.pop(); return; }
+
+            // Determine input bit b_{k+1} based on phase
+            let inputBit_b_k_plus_1;
+            if (k < L) { inputBit_b_k_plus_1 = 0; } // Preamble
+            else if (k < L + N) { /* Message phase handled below */ }
+            else { inputBit_b_k_plus_1 = 0; } // Tail
+
+            const possibleInputs = (k >= L && k < L + N) ? [0, 1] : [inputBit_b_k_plus_1];
+
+            for (const inputBit of possibleInputs) { // inputBit is b_{k+1}
+                const nextState = (currentState >> 1) | (inputBit << (L - 1)); // nextState is s_{k+1}
+
+                if (reachable[k + 1].has(nextState)) {
+                    const b_k = (currentState >> (L - 1)) & 1; // MSB of s_k
+                    const tau_k_plus_1 = (inputBit === b_k) ? 0.6 : 0.9; // tau_{k+1}
+
+                    currentPathInputs.push(inputBit);
+                    currentPathTaus.push(tau_k_plus_1);
+                    findAllPathsDFS(k + 1, nextState, currentPathStates, currentPathInputs, currentPathTaus, reachable, N, L, totalSteps);
+                    currentPathInputs.pop();
+                    currentPathTaus.pop();
+                }
+            }
+            currentPathStates.pop();
+        }
+        function downloadPathInfo() {
+            console.log("Download requested.");
+            if (!allPaths || allPaths.length === 0) {
+                alert("No path data available to download. Please generate paths first.");
+                console.warn("Download attempted with no path data.");
+                return;
+            }
+
+            // Create metadata object
+            const metadata = {
+                N: currentN,
+                L: currentL,
+                p1_start: currentP1,
+                fs: fs,
+                total_symbols_K: currentL + currentN + currentL,
+                data_format: {
+                    states: "s_0 to s_K (K+1 elements)",
+                    inputs: "b_1 to b_K (K elements)",
+                    // **** Updated Description ****
+                    taus: "tau_2 to tau_K (K-1 elements)",
+                    peakLocations: "p_1 to p_K (K elements)"
+                }
+            };
+
+            // **** Create a modified paths array for export ****
+            // This excludes the first tau (tau_1) from each path's tau list
+            const exportPaths = allPaths.map(pathData => {
+                return {
+                    states: pathData.states,
+                    inputs: pathData.inputs,
+                    taus: pathData.taus.slice(1), // Exclude the first element (tau_1)
+                    peakLocations: pathData.peakLocations
+                };
+            });
+            console.log("Created modified paths array for export.");
+
+            // Create the final object to be stringified using the modified paths
+            const exportData = {
+                metadata: metadata,
+                paths: exportPaths // Use the modified array
+            };
+
+            // Convert the object to a JSON string with pretty printing
+            let jsonString;
+            try {
+                 jsonString = JSON.stringify(exportData, null, 2); // Indent with 2 spaces
+                 console.log("JSON string created, length:", jsonString.length);
+            } catch (e) {
+                console.error("Error stringifying data to JSON:", e);
+                alert("Error creating JSON data for download.");
+                return;
+            }
+
+            // Create a Blob
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            console.log("Blob created, size:", blob.size);
+
+            // Create a temporary URL
+            const url = URL.createObjectURL(blob);
+            console.log("Blob URL created:", url);
+
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `trellis_paths_N${currentN}_L${currentL}.json`;
+            console.log("Download link created, filename:", link.download);
+
+            // Append link to body (required for Firefox)
+            document.body.appendChild(link);
+
+            // Programmatically click the link to trigger download
+            link.click();
+            console.log("Link clicked.");
+
+            // Clean up: remove link and revoke URL
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log("Cleanup complete.");
+        }
+        function clearBCJRValues() {
+            var svg = document.getElementById('trellis-svg');
+            if (!svg) return;
+            Array.prototype.slice.call(svg.querySelectorAll('.bcjr-value-text')).forEach(function (el) { el.remove(); });
+            var clearBtn = document.getElementById('clear-bcjr-button');
+            if (clearBtn) clearBtn.disabled = true;
+        }
+        function displayBCJRValues(dataType) {
+            // The α/β tables for the demo case are not filled in yet (see bcjrExampleData above),
+            // so this only annotates the trellis when data exists.
+            var values = dataType === 'alpha' ? bcjrExampleData.logAlphas : bcjrExampleData.logBetas;
+            var errorMsg = document.getElementById('error-message');
+            if (!values || !values.length || !currentNodePositions) {
+                if (errorMsg) errorMsg.textContent = 'Demo log ' + (dataType === 'alpha' ? 'α' : 'β') + ' values are not available in this build.';
+                return;
+            }
+            clearBCJRValues();
+            var svg = document.getElementById('trellis-svg');
+            values.forEach(function (row, k) {
+                if (!row) return;
+                Object.keys(row).forEach(function (state) {
+                    var pos = currentNodePositions[k] && currentNodePositions[k][state];
+                    if (!pos) return;
+                    var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    t.setAttribute('x', pos.x + (dataType === 'alpha' ? -nodeRadius - 3 : nodeRadius + 3));
+                    t.setAttribute('y', pos.y - nodeRadius - 2);
+                    t.setAttribute('class', 'bcjr-value-text ' + (dataType === 'alpha' ? 'bcjr-alpha-text' : 'bcjr-beta-text'));
+                    t.textContent = Number(row[state]).toFixed(2);
+                    svg.appendChild(t);
+                });
+            });
+            var clearBtn = document.getElementById('clear-bcjr-button');
+            if (clearBtn) clearBtn.disabled = false;
+        }
+
+        // --- Plotting Function ---
+        function plotSignals() {
+            if (typeof Plotly === 'undefined') { console.warn("Plotly did not load; skipping signal plots."); return; }
+            console.log("Attempting to plot signals...");
+            const plotTxDiv = document.getElementById('plot-tx');
+            const plotRxDiv = document.getElementById('plot-rx');
+            const plotPulseDiv = document.getElementById('plot-pulse');
+
+            // Clear previous plots first
+            if (plotTxDiv) Plotly.purge(plotTxDiv);
+            if (plotRxDiv) Plotly.purge(plotRxDiv);
+            if (plotPulseDiv) Plotly.purge(plotPulseDiv);
+
+            // Check if it's the demo case
+            if (currentN !== bcjrExampleData.N || currentL !== bcjrExampleData.L || !bcjrExampleData.signals) {
+                console.log("Not the demo case or no signal data, skipping plots.");
+                return;
+            }
+
+            const signals = bcjrExampleData.signals;
+            const K_total = currentL + currentN + currentL;
+
+            try {
+                // 1. Plot Tx Signal (Placeholder)
+                const trace_tx = { x: signals.tx_time, y: signals.tx_t, mode: 'lines', name: 'Tx Signal' };
+                const layout_tx = { title: 'Transmit Signal (Placeholder)', xaxis: {title: 'Sample Index'}, yaxis: {title: 'Amplitude', range: [-1.1, 1.1]}, margin: { l: 40, r: 10, t: 40, b: 30 } };
+                if (plotTxDiv) Plotly.newPlot(plotTxDiv, [trace_tx], layout_tx, {responsive: true});
+
+                // 2. Plot Rx Signal (Placeholder) with Peaks
+                const trace_rx = { x: signals.z_time, y: signals.z_t, mode: 'lines', name: 'Rx Signal' };
+                const peak_markers = {
+                    x: [], y: [], mode: 'markers', type: 'scatter', name: 'Peaks (p<sub>k</sub>)',
+                    marker: { color: [], size: 8, symbol: 'circle', line: {width:1, color:'black'} }
+                };
+
+                for (let k = 0; k < signals.peaks.length; k++) { // k = 0..K_total-1, representing p_{k+1}
+                    const peak_time = signals.peaks[k]; // p_{k+1}
+                    const symbol_index = k + 1; // b index (1 to K_total)
+                    const nearest_idx = Math.round(peak_time);
+                    let peak_value = NaN; // Default to NaN if out of bounds
+                    if (nearest_idx >= 0 && nearest_idx < signals.z_t.length) {
+                        peak_value = signals.z_t[nearest_idx];
+                    } else { console.warn(`Peak time ${peak_time} (p_${symbol_index}) is outside z_t range.`); }
+
+                    peak_markers.x.push(peak_time);
+                    peak_markers.y.push(peak_value);
+
+                    if (symbol_index <= currentL) { peak_markers.marker.color.push('purple'); } // Preamble
+                    else if (symbol_index <= currentL + currentN) { peak_markers.marker.color.push('red'); } // Message
+                    else { peak_markers.marker.color.push('purple'); } // Tail
+                }
+
+                const layout_rx = { title: 'Received Signal @ MF Out (Placeholder)', xaxis: {title: 'Sample Index / Time'}, yaxis: {title: 'Amplitude', range: [-1.1, 1.1]}, margin: { l: 40, r: 10, t: 40, b: 30 }, showlegend: true };
+                if (plotRxDiv) Plotly.newPlot(plotRxDiv, [trace_rx, peak_markers], layout_rx, {responsive: true});
+
+
+                // 3. Plot Actual Pulse Shape
+                const trace_pulse = { x: signals.g_time, y: signals.g_t, mode: 'lines', name: 'g(t)' }; // Removed markers for clarity
+                const layout_pulse = { title: 'Overall Pulse Shape g(t) = h(t)*h(-t)', xaxis: {title: 'Sample Index (Relative to Peak)'}, yaxis: {title: 'Amplitude', range: [-0.2, 1.1]}, margin: { l: 40, r: 10, t: 40, b: 30 } };
+                if (plotPulseDiv) Plotly.newPlot(plotPulseDiv, [trace_pulse], layout_pulse, {responsive: true});
+
+                console.log("Plotting successful.");
+
+            } catch (plotError) {
+                console.error("Error during plotting:", plotError);
+                document.getElementById('error-message').textContent = "Error generating plots.";
+            }
+        }
+
+
+        // --- Main function to generate trellis and paths ---
+        function generateTrellisAndPaths() {
+            // ... (rest of the function remains the same as the previous working version) ...
+            // --- It should call plotSignals() after step 8 ---
+             const downloadButton = document.getElementById('download-button'); const showAlphaButton = document.getElementById('show-alpha-button'); const showBetaButton = document.getElementById('show-beta-button'); const clearBCJRButton = document.getElementById('clear-bcjr-button'); if(downloadButton) downloadButton.disabled = true; if(showAlphaButton) showAlphaButton.disabled = true; if(showBetaButton) showBetaButton.disabled = true; if(clearBCJRButton) clearBCJRButton.disabled = true; clearBCJRValues(); try { console.log("generateTrellisAndPaths called."); currentN = parseInt(document.getElementById('message-length').value); currentL = parseInt(document.getElementById('memory-length').value); currentP1 = parseFloat(document.getElementById('initial-peak-loc').value); const errorMsg = document.getElementById('error-message'); const svg = document.getElementById('trellis-svg'); const pathsListDiv = document.getElementById('paths-list'); const totalSymbolsSpan = document.getElementById('total-symbols'); if (!errorMsg || !svg || !pathsListDiv || !totalSymbolsSpan || !downloadButton || !showAlphaButton || !showBetaButton || !clearBCJRButton) { console.error("DOM Error: Could not find required elements."); alert("Error: Page elements missing."); return; } console.log("DOM elements obtained."); svg.innerHTML = ''; pathsListDiv.innerHTML = 'Calculating...'; allPaths = []; errorMsg.textContent = ''; currentReachable = null; currentNodePositions = null; console.log(`Inputs: N=${currentN}, L=${currentL}, p1_start=${currentP1}`); if (isNaN(currentN) || currentN < 3 || currentN > 10) { errorMsg.textContent = "Error: N must be between 3 and 10."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; } if (isNaN(currentL) || currentL < 2 || currentL > 4) { errorMsg.textContent = "Error: L must be between 2 and 4."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; } if (isNaN(currentP1)) { errorMsg.textContent = "Error: Peak Loc (p1) must be a number."; pathsListDiv.innerHTML = ''; console.error(errorMsg.textContent); return; } if (currentL >= 4 && currentN > 8) { errorMsg.textContent = "Warning: L+N+L large, may be slow."; } console.log("Input validation passed."); const totalInputSymbols = currentL + currentN + currentL; const totalSteps = totalInputSymbols; totalSymbolsSpan.textContent = totalInputSymbols; const numStates = 1 << currentL; const nodeRadius = 8; const verticalPadding = 40; const horizontalPadding = 50; const stateLabelOffset = 30; const timeLabelOffset = 25; const svgHeight = (numStates * (nodeRadius * 2 + 15)) + 2 * verticalPadding + timeLabelOffset; const svgWidth = (totalSteps + 1) * (nodeRadius * 2 + 40) + 2 * horizontalPadding + stateLabelOffset; svg.setAttribute('viewBox', `0 0 ${svgWidth} ${svgHeight}`); svg.setAttribute('width', '100%'); svg.setAttribute('height', svgHeight); const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs"); defs.innerHTML = `<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#888" /></marker>`; svg.appendChild(defs); console.log("SVG parameters set."); const nodePositions = []; for (let k_pos = 0; k_pos <= totalSteps; k_pos++) { nodePositions[k_pos] = []; const x = horizontalPadding + stateLabelOffset + k_pos * (svgWidth - 2 * horizontalPadding - stateLabelOffset) / totalSteps; for (let s = 0; s < numStates; s++) { const y = verticalPadding + (numStates === 1 ? (svgHeight - timeLabelOffset) / 2 : s * (svgHeight - 2 * verticalPadding - timeLabelOffset) / (numStates - 1)); if (isNaN(x) || isNaN(y)) { console.error(`Invalid node pos k=${k_pos}, s=${s}`); continue; } nodePositions[k_pos][s] = { x, y }; } } currentNodePositions = nodePositions; console.log("Node positions calculated."); const reachable = Array(totalSteps + 1); reachable[0] = new Set([0]); console.log("Calculating reachable states..."); for (let k = 1; k <= totalSteps; k++) { reachable[k] = new Set(); const inputBits = (k <= currentL) ? [0] : (k <= currentL + currentN) ? [0, 1] : [0]; if (reachable[k - 1] instanceof Set && reachable[k - 1].size > 0) { for (const prevState of reachable[k - 1]) { for (const inputBit of inputBits) { const nextState = (prevState >> 1) | (inputBit << (currentL - 1)); const steps_remaining = totalSteps - k; const max_val = (1 << steps_remaining); if (nextState < max_val || (k === totalSteps && nextState === 0)) { reachable[k].add(nextState); } } } } } currentReachable = reachable; console.log("Reachable states calculation finished."); console.log(`>>> Final reachable[${totalSteps}]:`, reachable[totalSteps]); if (!reachable[totalSteps] || !reachable[totalSteps].has(0) || reachable[totalSteps].size !== 1) { console.warn(`Termination Check Warning: Reachable states at k=${totalSteps}:`, reachable[totalSteps]); const currentError = errorMsg.textContent; const terminationWarning = `Warning: Trellis termination issue. Final state(s): ${reachable[totalSteps] ? Array.from(reachable[totalSteps]).join(',') : 'undefined'}`; errorMsg.textContent = currentError ? `${currentError} ${terminationWarning}` : terminationWarning; } else { console.log("Termination check passed."); } console.log("Starting SVG drawing..."); let svgElementsAdded = 0; for (let s_draw = 0; s_draw < numStates; s_draw++) { try { const label = getStateLabel(s_draw, currentL); const text = document.createElementNS("http://www.w3.org/2000/svg", "text"); const yPos = nodePositions[0]?.[s_draw]?.y; if (isNaN(yPos)) continue; text.setAttribute('x', horizontalPadding + stateLabelOffset - 15); text.setAttribute('y', yPos); text.setAttribute('class', 'state-label'); if (s_draw === 0) text.classList.add('state-label-active'); text.textContent = `${label} (${s_draw})`; svg.appendChild(text); svgElementsAdded++; } catch(e) { console.error("Error drawing state label:", e); }} const timeLabelY = svgHeight - verticalPadding / 2; if (!isNaN(timeLabelY)) { for (let k_draw = 0; k_draw <= totalSteps; k_draw++) { try { const xPos = nodePositions[k_draw]?.[0]?.x; if (isNaN(xPos)) continue; const timeLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); timeLabel.setAttribute('x', xPos); timeLabel.setAttribute('y', timeLabelY); timeLabel.setAttribute('class', 'time-label'); timeLabel.textContent = `k=${k_draw}`; svg.appendChild(timeLabel); svgElementsAdded++; } catch(e) { console.error("Error drawing time label:", e); }} } const phaseLabelY = timeLabelY + 15; if (!isNaN(phaseLabelY)) { if (currentL > 0) { const preamblePhaseLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); const preamblePhaseX = nodePositions[0]?.[0]?.x + (nodePositions[currentL]?.[0]?.x - nodePositions[0]?.[0]?.x) / 2; if(!isNaN(preamblePhaseX)) { preamblePhaseLabel.setAttribute('x', preamblePhaseX); preamblePhaseLabel.setAttribute('y', phaseLabelY); preamblePhaseLabel.setAttribute('class', 'phase-label'); preamblePhaseLabel.textContent = `Preamble (k=1..${currentL})`; svg.appendChild(preamblePhaseLabel); svgElementsAdded++; } } if (currentN > 0) { const msgPhaseLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); const msgPhaseX = nodePositions[currentL]?.[0]?.x + (nodePositions[currentL+currentN]?.[0]?.x - nodePositions[currentL]?.[0]?.x) / 2; if(!isNaN(msgPhaseX)) { msgPhaseLabel.setAttribute('x', msgPhaseX); msgPhaseLabel.setAttribute('y', phaseLabelY); msgPhaseLabel.setAttribute('class', 'phase-label'); msgPhaseLabel.textContent = `Message (k=${currentL+1}..${currentL+currentN})`; svg.appendChild(msgPhaseLabel); svgElementsAdded++; } } if (currentL > 0) { const tailPhaseLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); const tailPhaseX = nodePositions[currentL+currentN]?.[0]?.x + (nodePositions[totalSteps]?.[0]?.x - nodePositions[currentL+currentN]?.[0]?.x) / 2; if(!isNaN(tailPhaseX)) { tailPhaseLabel.setAttribute('x', tailPhaseX); tailPhaseLabel.setAttribute('y', phaseLabelY); tailPhaseLabel.setAttribute('class', 'phase-label'); tailPhaseLabel.textContent = `Tail (k=${currentL+currentN+1}..${totalSteps})`; svg.appendChild(tailPhaseLabel); svgElementsAdded++; } } } for (let k_draw = 1; k_draw <= totalSteps; k_draw++) { if (!(reachable[k_draw-1] instanceof Set) || !(reachable[k_draw] instanceof Set)) { continue; } for (const prevState of reachable[k_draw - 1]) { const inputBits = (k_draw <= currentL) ? [0] : (k_draw <= currentL + currentN) ? [0, 1] : [0]; for (const inputBit of inputBits) { const nextState = (prevState >> 1) | (inputBit << (currentL - 1)); if (reachable[k_draw].has(nextState)) { try { const startPos = nodePositions[k_draw - 1]?.[prevState]; const endPos = nodePositions[k_draw]?.[nextState]; if (!startPos || !endPos || isNaN(startPos.x) || isNaN(startPos.y) || isNaN(endPos.x) || isNaN(endPos.y)) { continue; } const line = document.createElementNS("http://www.w3.org/2000/svg", "line"); line.setAttribute('x1', startPos.x); line.setAttribute('y1', startPos.y); line.setAttribute('x2', endPos.x); line.setAttribute('y2', endPos.y); let branchClass = `branch branch-${inputBit}`; if (k_draw <= currentL) { branchClass += ' branch-preamble'; } else if (k_draw > currentL + currentN) { branchClass += ' branch-tail'; } line.setAttribute('class', branchClass); svg.appendChild(line); svgElementsAdded++; const labelX = startPos.x + (endPos.x - startPos.x) * 0.5; const labelYOffset = (endPos.y - startPos.y) * 0.1; const labelY = startPos.y + (endPos.y - startPos.y) * 0.5 + (inputBit === 0 ? -5 : 5) - labelYOffset; if(!isNaN(labelX) && !isNaN(labelY)) { const branchLabel = document.createElementNS("http://www.w3.org/2000/svg", "text"); branchLabel.setAttribute('x', labelX); branchLabel.setAttribute('y', labelY); branchLabel.setAttribute('class', 'branch-label'); branchLabel.textContent = `${inputBit}`; svg.appendChild(branchLabel); svgElementsAdded++; } } catch(e) { console.error("Error drawing branch:", e); } } } } } for (let k_draw = 0; k_draw <= totalSteps; k_draw++) { if (!(reachable[k_draw] instanceof Set)) { continue; } for (const s of reachable[k_draw]) { try { const pos = nodePositions[k_draw]?.[s]; if (!pos || isNaN(pos.x) || isNaN(pos.y)) { continue; } if (isNaN(nodeRadius) || nodeRadius <= 0) { continue; } const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle"); circle.setAttribute('cx', pos.x); circle.setAttribute('cy', pos.y); circle.setAttribute('r', nodeRadius); let nodeClass = 'node'; if ((k_draw === 0 || k_draw === totalSteps) && s === 0) { nodeClass += ' node-start-end'; } circle.setAttribute('class', nodeClass); svg.appendChild(circle); svgElementsAdded++; } catch(e) { console.error(`Error drawing node at k=${k_draw}, s=${s}:`, e); } } } console.log(`SVG drawing finished. Added approx ${svgElementsAdded} elements.`); console.log("SVG children count after drawing:", svg.children.length); console.log("Calling DFS..."); allPaths = []; findAllPathsDFS(0, 0, [], [], [], reachable, currentN, currentL, totalSteps); console.log(`DFS finished. Found ${allPaths.length} paths.`); console.log("Calculating peak locations..."); allPaths.forEach(pathData => { pathData.peakLocations = [currentP1]; let previousPeak = currentP1; for (let i = 1; i < pathData.taus.length; i++) { const tau_k = pathData.taus[i]; const currentPeak = previousPeak + tau_k * fs; pathData.peakLocations.push(parseFloat(currentPeak.toFixed(4))); previousPeak = currentPeak; } }); console.log("Peak locations calculated."); plotSignals(); console.log("Updating display..."); let pathOutput = ''; try { if (allPaths.length > 0) { pathOutput = `Found ${allPaths.length} possible path(s):\n\n`; allPaths.forEach((pathData, index) => { const displayTaus = pathData.taus.slice(1); pathOutput += `<div class="path-line">`; pathOutput += `${(index + 1).toString().padStart(3, ' ')}:\n`; pathOutput += ` <span class="label">Inputs:</span> [${pathData.inputs.join(', ')}]  (K<sub>total</sub> = ${totalInputSymbols} symbols: b<sub>1</sub>..b<sub>K</sub>)\n`; pathOutput += ` <span class="label">States:</span> ${pathData.states.join(' -> ')}  (K<sub>total</sub>+1 = ${totalInputSymbols+1} states: s<sub>0</sub>..s<sub>K</sub>)\n`; pathOutput += ` <span class="label">Taus:</span>   [${displayTaus.join(', ')}]  (K<sub>total</sub>-1 = ${totalInputSymbols-1} intervals: tau<sub>2</sub>..tau<sub>K</sub>)\n`; pathOutput += ` <span class="label">Peaks:</span>  [${pathData.peakLocations.join(', ')}]  (K<sub>total</sub> = ${totalInputSymbols} locations: p<sub>1</sub>..p<sub>K</sub>)`; pathOutput += `</div>`; }); if(downloadButton) downloadButton.disabled = false; if (currentN === bcjrExampleData.N && currentL === bcjrExampleData.L) { console.log("Enabling BCJR Demo Buttons."); if(showAlphaButton) showAlphaButton.disabled = false; if(showBetaButton) showBetaButton.disabled = false; } else { console.log("N/L do not match BCJR demo, buttons remain disabled."); } } else { pathOutput = "No valid paths found."; console.log("No valid paths found by DFS."); if(downloadButton) downloadButton.disabled = true; if(showAlphaButton) showAlphaButton.disabled = true; if(showBetaButton) showBetaButton.disabled = true; if(clearBCJRButton) clearBCJRButton.disabled = true; } pathsListDiv.innerHTML = pathOutput; console.log("Display updated successfully."); } catch (displayError) { console.error("Error occurred during path formatting or display update:", displayError); pathsListDiv.textContent = "Error displaying paths. Check console."; if(downloadButton) downloadButton.disabled = true; if(showAlphaButton) showAlphaButton.disabled = true; if(showBetaButton) showBetaButton.disabled = true; if(clearBCJRButton) clearBCJRButton.disabled = true; } } catch (error) { console.error("An unexpected error occurred in generateTrellisAndPaths:", error); const errorMsg = document.getElementById('error-message'); if(errorMsg) errorMsg.textContent = "An unexpected error occurred. Check console (F12)."; const pathsListDiv = document.getElementById('paths-list'); if(pathsListDiv) pathsListDiv.innerHTML = ''; const downloadButton = document.getElementById('download-button'); if(downloadButton) downloadButton.disabled = true; const showAlphaButton = document.getElementById('show-alpha-button'); if(showAlphaButton) showAlphaButton.disabled = true; const showBetaButton = document.getElementById('show-beta-button'); if(showBetaButton) showBetaButton.disabled = true; const clearBCJRButton = document.getElementById('clear-bcjr-button'); if(clearBCJRButton) clearBCJRButton.disabled = true; } }
+
+
+        console.log("Setting up window.onload.");
+        window.onload = generateTrellisAndPaths;
+        console.log("window.onload setup complete.");
+    </script>
+
+</body>
+</html>

@@ -192,10 +192,12 @@ main { padding: 2rem 0 0; }
   border-radius: 4px;
   color: var(--fg-3);
   width: 30px; height: 30px;
+  padding: 0;
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer;
   margin: -6px -6px -6px 0;
 }
+.theme-toggle svg { flex-shrink: 0; }
 .theme-toggle:hover { color: var(--fg); border-color: var(--rule); }
 .theme-toggle svg { width: 16px; height: 16px; }
 
