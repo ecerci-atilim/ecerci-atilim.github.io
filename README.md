@@ -66,7 +66,12 @@ Notes:
 shared components (masthead, table-of-contents list, buttons, forms, tables,
 modal). Light is the default; dark follows the system preference and can be
 forced with the toggle in the masthead (stored in `localStorage` as `theme`).
-Fonts are IBM Plex Sans / Serif / Mono from Google Fonts.
+Fonts are IBM Plex Sans / Serif / Mono, self-hosted in `assets/fonts/`
+(SIL OFL 1.1, licence file alongside) — no third-party requests.
+
+The home page also loads `schedule-config.js` and shows one line of live
+availability ("Now: …", "Available until …", "Off duty. Next: …") in Ankara
+time, so the config drives both the schedule page and the home page.
 
 The `legacy/` folder is self-contained: `legacy/index.html` is the old home
 and links only to the old pages. It reads the live `../schedule-config.js`.

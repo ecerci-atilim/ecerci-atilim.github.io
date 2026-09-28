@@ -8,13 +8,22 @@
     <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
+
+    <style>
+        .now { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: -0.5rem 0 1.75rem; font-size: 0.9375rem; color: var(--fg-2); }
+        .now[hidden] { display: none; }
+        .now-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--fg-3); flex-shrink: 0; align-self: center; }
+        .now--free .now-dot { background: var(--accent); }
+        .now--busy .now-dot { background: var(--danger); }
+        .now--break .now-dot, .now--leave .now-dot { background: var(--warm); }
+        .now strong { color: var(--fg); font-weight: 500; }
+        .now a { font-size: 0.875rem; }
+        @media (min-width: 600px) { .now a { margin-left: auto; } }
+    </style>
 </head>
 <body>
 <div class="page">
@@ -38,12 +47,17 @@
             <p class="eyebrow">Research Assistant · PhD Candidate · Telecommunications</p>
             <h1>Emre Cerci</h1>
             <p class="lede">
-                Department of Electrical &amp; Electronics Engineering, Atılım University.
-                I work on efficient algorithms for wireless systems — faster-than-Nyquist
-                signaling and AI-driven demodulation — and keep the tools I share with
-                students and colleagues on this page.
+                Atılım University. I work on efficient algorithms for wireless communication
+                systems — faster-than-Nyquist signaling and AI-driven demodulation. This page
+                collects the tools and resources I share with students and colleagues.
             </p>
         </div>
+
+        <p class="now" id="now-line" hidden>
+            <span class="now-dot" aria-hidden="true"></span>
+            <span id="now-text"></span>
+            <a href="schedule.html" id="now-link">Schedule</a>
+        </p>
 
         <div class="section-head">
             <h2>Tools</h2>
@@ -124,5 +138,80 @@
     </footer>
 
 </div>
+
+<script src="schedule-config.js"></script>
+<script>
+// One line of live availability, computed from schedule-config.js in Ankara time.
+(function () {
+    'use strict';
+    var line = document.getElementById('now-line'), text = document.getElementById('now-text');
+    if (!line || typeof window.scheduleData === 'undefined') return;
+
+    var DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    var LABEL = { monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday' };
+    var START = 8 * 60 + 30, END = 17 * 60 + 30;
+    var fmt = null;
+    try { fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Istanbul', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) {}
+    function nowTR() {
+        if (!fmt) return new Date();
+        var p = {}; fmt.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+        return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+    }
+    function toMin(s) { var p = String(s).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function hm(min) { return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+    function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function events(day) { return ((window.scheduleData || {})[day] || []).slice().sort(function (a, b) { return toMin(a.start) - toMin(b.start); }); }
+    function onLeave(d) { return Array.isArray(window.leaveDays) && window.leaveDays.indexOf(ymd(d)) !== -1; }
+    function set(cls, html) { line.className = 'now ' + cls; text.innerHTML = html; line.hidden = false; }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    function describe(ev) { return '<strong>' + esc(ev.activity) + '</strong>' + (ev.location ? ', ' + esc(ev.location) : ''); }
+
+    // Next event from a given day/minute, scanning up to a week ahead.
+    function nextEvent(now) {
+        for (var off = 0; off < 8; off++) {
+            var d = new Date(now); d.setDate(now.getDate() + off);
+            if (onLeave(d)) continue;
+            var list = events(DAYS[d.getDay()]);
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].category === 'break') continue;
+                if (off === 0 && toMin(list[i].start) <= now.getHours() * 60 + now.getMinutes()) continue;
+                return { ev: list[i], day: DAYS[d.getDay()], today: off === 0, tomorrow: off === 1 };
+            }
+        }
+        return null;
+    }
+
+    function render() {
+        if (window.onLeave === true) { set('now--leave', 'Currently on leave.'); return; }
+        var now = nowTR(), day = DAYS[now.getDay()], min = now.getHours() * 60 + now.getMinutes();
+        var when = function (n) { return n.today ? 'today at ' + hm(toMin(n.ev.start)) : (n.tomorrow ? 'tomorrow' : LABEL[n.day]) + ' at ' + hm(toMin(n.ev.start)); };
+
+        if (onLeave(now)) {
+            var n0 = nextEvent(now);
+            set('now--leave', 'On leave today.' + (n0 ? ' Next: ' + describe(n0.ev) + ', ' + when(n0) + '.' : ''));
+            return;
+        }
+        var list = events(day), current = null, upcoming = null;
+        for (var i = 0; i < list.length; i++) {
+            var s = toMin(list[i].start), e = toMin(list[i].end);
+            if (min >= s && min < e) current = list[i];
+            else if (s > min && !upcoming) upcoming = list[i];
+        }
+        var working = min >= START && min < END && day !== 'sunday' && (day !== 'saturday' || list.length);
+        if (current) {
+            var isBreak = current.category === 'break' || /lunch|break/i.test(current.activity);
+            set(isBreak ? 'now--break' : 'now--busy', 'Now: ' + describe(current) + ' until ' + hm(toMin(current.end)) + '.');
+        } else if (working) {
+            set('now--free', 'Available now' + (upcoming ? ' until ' + hm(toMin(upcoming.start)) + ' (' + esc(upcoming.activity) + ')' : ' for the rest of the day') + '.');
+        } else {
+            var n = nextEvent(now);
+            set('now--off', 'Off duty.' + (n ? ' Next: ' + describe(n.ev) + ', ' + when(n) + '.' : ''));
+        }
+    }
+    render();
+    setInterval(render, 60 * 1000);
+})();
+</script>
 </body>
 </html>
