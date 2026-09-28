@@ -216,9 +216,9 @@
             subsecondsDisplay.style.display = 'none';
         }
     }
-    function formatDateTime(d) { return d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
+    function formatDateTime(d) { return d ? d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '--:--'; }
     function updateRealTimeClock() {
-        realTimeClockDisplay.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        realTimeClockDisplay.textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     function updateExamTimings() {
         if (settings.showExamTimings && actualExamStartTime) {
