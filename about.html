@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — Emre Cerci</title>
+    <meta name="description" content="Emre Cerci, Research Assistant at Atılım University. Wireless communications, faster-than-Nyquist signaling, FPGA design and error-correction codes.">
+    <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+    <script src="assets/site.js" defer></script>
+
+    <style>
+        .about-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+        @media (min-width: 820px) {
+            .about-grid { grid-template-columns: minmax(0, 1fr) 280px; gap: 3rem 4rem; align-items: start; }
+            .about-aside { position: sticky; top: 24px; }
+        }
+        .skills { margin: 0; }
+        .skills > div { display: grid; grid-template-columns: 1fr; gap: 4px 16px; padding: 12px 0; border-top: 1px solid var(--rule); }
+        .skills > div:last-child { border-bottom: 1px solid var(--rule); }
+        @media (min-width: 560px) { .skills > div { grid-template-columns: 180px 1fr; } }
+        .skills dt { font-size: 0.8125rem; color: var(--fg-3); padding-top: 3px; }
+        .skills dd { margin: 0; color: var(--fg-2); font-size: 0.9375rem; }
+        .skills dd b { color: var(--fg); font-weight: 500; }
+        .about-aside .kv > div { grid-template-columns: 1fr; gap: 1px; }
+        .about-aside .kv dt { font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <header class="masthead">
+        <a class="masthead-name" href="index.html">Emre Cerci</a>
+        <div class="masthead-right">
+            <nav class="site-nav" aria-label="Site">
+                <a href="index.html">Home</a>
+                <a href="about.html" aria-current="page">About</a>
+                <a href="schedule.html">Schedule</a>
+            </nav>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-head">
+            <p class="eyebrow">About</p>
+            <h1>Emre Cerci</h1>
+            <p class="lede">Research Assistant &amp; PhD Candidate, Department of Electrical and Electronics Engineering, Atılım University.</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="prose">
+                <p>
+                    I am a research assistant at Atılım University. My research is on efficient
+                    algorithms for wireless communication systems — in particular
+                    <b>faster-than-Nyquist (FTN) signaling</b>, where symbols are transmitted faster
+                    than the Nyquist rate and the resulting inter-symbol interference is handled
+                    at the receiver, and <b>AI-driven demodulation</b> techniques that keep detector
+                    complexity practical.
+                </p>
+                <p>
+                    Alongside research I run laboratories and office hours for undergraduate
+                    courses. This website is the place where I keep the schedulers, timers and
+                    generators I use for those courses, so students and colleagues can reach
+                    them from a single address.
+                </p>
+
+                <div class="section-head"><h2>Skills &amp; Expertise</h2></div>
+                <dl class="skills">
+                    <div>
+                        <dt>Research areas</dt>
+                        <dd><b>Wireless telecommunications</b>, <b>FPGA design</b>, error-correction codes (ECC), OpenAirInterface 5G, VLSI</dd>
+                    </div>
+                    <div>
+                        <dt>Programming</dt>
+                        <dd>C, C++, C#, Java, <b>MATLAB</b>, <b>Python</b>, Verilog HDL, VHDL, LaTeX</dd>
+                    </div>
+                    <div>
+                        <dt>Web</dt>
+                        <dd>HTML5, CSS3, JavaScript, React, Node.js, Django</dd>
+                    </div>
+                    <div>
+                        <dt>Tools &amp; platforms</dt>
+                        <dd>Simulink, Git, Docker, Linux, PetaLinux, Ansys HFSS, AMD Vivado, Altera tools</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <aside class="about-aside">
+                <div class="section-head" style="margin-top:0"><h2>Contact</h2></div>
+                <dl class="kv">
+                    <div><dt>Email</dt><dd><a href="mailto:emre.cerci@atilim.edu.tr">emre.cerci@atilim.edu.tr</a></dd></div>
+                    <div><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">Emre Çerçi</a></dd></div>
+                    <div><dt>GitHub</dt><dd><a href="https://github.com/ecerci-atilim" rel="noopener">ecerci-atilim</a></dd></div>
+                    <div><dt>Office hours</dt><dd><a href="schedule.html">See the weekly schedule</a></dd></div>
+                </dl>
+            </aside>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+        <a href="index.html">Home</a>
+    </footer>
+
+</div>
+</body>
+</html>
