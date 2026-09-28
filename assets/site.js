@@ -18,6 +18,7 @@
     for (var i = 0; i < toggles.length; i++) {
       toggles[i].setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
       toggles[i].setAttribute('title', theme === 'dark' ? 'Light mode' : 'Dark mode');
+      if (!toggles[i].querySelector('svg')) toggles[i].textContent = theme === 'dark' ? 'Light' : 'Dark';
     }
   }
 
@@ -30,6 +31,7 @@
   var toggles = document.querySelectorAll('.theme-toggle');
   for (var i = 0; i < toggles.length; i++) {
     toggles[i].setAttribute('title', current() === 'dark' ? 'Light mode' : 'Dark mode');
+    if (!toggles[i].querySelector('svg')) toggles[i].textContent = current() === 'dark' ? 'Light' : 'Dark';
   }
 
   var y = document.querySelector('[data-year]');

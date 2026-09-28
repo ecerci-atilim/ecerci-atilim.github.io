@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emre Cerci</title>
+    <meta name="description" content="Research Assistant and PhD candidate at Atılım University.">
+    <meta name="robots" content="noindex">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/v2.css">
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+    <script src="assets/site.js" defer></script>
+    <style>
+        .week { margin-bottom: 8px; }
+        @media (max-width: 899px) { .week .tl { --slot-h: 9px; } }
+    </style>
+</head>
+<body>
+<div class="frame">
+
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index-v2.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
+        </div>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index-v2.html" aria-current="page">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule-v2.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule-v2.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <h1 class="visually-hidden">Emre Cerci — home</h1>
+
+        <div class="sec">
+            <h2>This week</h2>
+            <span class="meta" id="week-range"></span>
+        </div>
+        <div class="week"><div class="tl" id="week"></div></div>
+        <div class="legend" id="legend"></div>
+
+        <div class="sec" style="margin-top:56px">
+            <h2>Tools</h2>
+            <span class="meta">For students and colleagues</span>
+        </div>
+        <ul class="tools">
+            <li><a href="schedule-v2.html"><span class="n">Weekly schedule</span><span class="d">Office hours, laboratories and live availability.</span></a></li>
+            <li><a href="timer2.html"><span class="n">Exam timer</span><span class="d">Full-screen countdown for the projector, with a no-leave period.</span></a></li>
+            <li><a href="seating-plan.html"><span class="n">Seating generator</span><span class="d">Exam seating plans from a CSV list; printable attendance and door sheets.</span></a></li>
+            <li><a href="qr-generator.html"><span class="n">QR generator</span><span class="d">URL, text, Wi-Fi and contact codes; PNG download.</span></a></li>
+            <li><a href="mbcjr.html"><span class="n">M-BCJR simulator</span><span class="d">FTN trellis diagram with a noise-free Max-Log-BCJR detector.</span></a></li>
+            <li><a href="mbcjr-new.html"><span class="n">Trellis path enumerator</span><span class="d">Every valid FTN trellis path with τ sequence and peak locations.</span></a></li>
+            <li><a href="https://eebk-mudek.vercel.app" rel="noopener"><span class="n">MÜDEK dashboard</span><span class="d">Accreditation dashboard for the department.<em>external</em></span></a></li>
+            <li><a href="pdf-gate.html"><span class="n">MÜDEK document</span><span class="d">PIN-protected PDF with personal data under KVKK.<em>restricted</em></span></a></li>
+        </ul>
+
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
+    </main>
+
+</div>
+
+<script src="schedule-config.js"></script>
+<script src="assets/v2-schedule.js"></script>
+<script>
+(function () {
+    if (typeof window.scheduleData === 'undefined') return;
+    var week = document.getElementById('week');
+    V2.renderTimeline(week, { compact: true });
+    V2.legend(document.getElementById('legend'));
+    V2.renderStatus(document.getElementById('rail-now'));
+    var n = V2.now(), off = n.getDay() === 0 ? -6 : 1 - n.getDay();
+    var a = new Date(n); a.setDate(n.getDate() + off); var b = new Date(a); b.setDate(a.getDate() + 4);
+    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('week-range').textContent = M[a.getMonth()] + ' ' + a.getDate() + ' – ' + M[b.getMonth()] + ' ' + b.getDate() + ' · Ankara time';
+    setInterval(function () { V2.updatePlayhead(week); V2.renderStatus(document.getElementById('rail-now')); }, 30000);
+})();
+</script>
+</body>
+</html>
