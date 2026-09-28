@@ -11,6 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
@@ -248,12 +249,12 @@
             <div class="page-head" style="margin:0">
                 <p class="eyebrow">Weekly Schedule</p>
                 <h1 id="sched-title">Office hours &amp; laboratories</h1>
-                <p class="lede">Times are local (Ankara, UTC+3). The highlighted slot is what is happening right now.</p>
+                <p class="lede">All times are Ankara time (UTC+3), wherever you are viewing from. The highlighted slot is what is happening right now.</p>
             </div>
-            <div class="live" aria-live="polite">
+            <div class="live">
                 <div class="live-clock tnum" id="clock">--:--:--</div>
                 <div class="live-date" id="date">&nbsp;</div>
-                <div class="status status--off" id="status-badge">Loading…</div>
+                <div class="status status--off" id="status-badge" aria-live="polite">Loading…</div>
             </div>
         </div>
 
@@ -287,6 +288,17 @@
     var SLOT = 30;
     var DEFAULT_START = 8 * 60 + 30, DEFAULT_END = 17 * 60 + 30;
 
+    // "Now" is always Ankara time, so the status is right for someone checking from abroad.
+    var TZ = 'Europe/Istanbul';
+    var tzFmt = null;
+    try { tzFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { tzFmt = null; }
+    function nowTR() {
+        if (!tzFmt) return new Date();
+        var p = {};
+        tzFmt.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+        return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+    }
+
     function toMin(str) { var p = String(str).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
     function pad(n) { return String(n).padStart(2, '0'); }
     function fmt(min) { return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
@@ -316,7 +328,7 @@
     function isLeaveDate(dateStr) { return Array.isArray(window.leaveDays) && window.leaveDays.indexOf(dateStr) !== -1; }
 
     function weekDates() {
-        var now = new Date(), out = {};
+        var now = nowTR(), out = {};
         var dow = now.getDay();
         var offset = dow === 0 ? -6 : 1 - dow;
         for (var i = 0; i < DAYS.length; i++) {
@@ -352,7 +364,7 @@
     function renderTable(dates, days, bounds) {
         var head = document.getElementById('schedule-head');
         var body = document.getElementById('schedule-body');
-        var todayStr = ymd(new Date());
+        var todayStr = ymd(nowTR());
         var h = '<tr><th class="t-col">Time</th>';
         days.forEach(function (d) {
             var date = dates[d];
@@ -395,7 +407,7 @@
     /* ---- Mobile agenda ---- */
     function renderAgenda(dates, days) {
         var el = document.getElementById('agenda');
-        var todayStr = ymd(new Date());
+        var todayStr = ymd(nowTR());
         var html = '';
         days.forEach(function (d) {
             var date = dates[d];
@@ -434,7 +446,7 @@
     /* ---- Live status ---- */
     var lastRenderedDate = null;
     function tick() {
-        var now = new Date();
+        var now = nowTR();
         document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
         document.getElementById('date').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -477,8 +489,8 @@
                 text = 'Available'; cls = 'status--free';
             }
         }
-        badge.className = 'status ' + cls;
-        badge.textContent = text;
+        if (badge.className !== 'status ' + cls) badge.className = 'status ' + cls;
+        if (badge.textContent !== text) badge.textContent = text;
     }
 
     function renderAll() {

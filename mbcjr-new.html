@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
@@ -117,7 +118,7 @@
         <div id="error-message"></div>
 
         <!-- Trellis Diagram -->
-        <div id="trellis-container"><svg id="trellis-svg" width="1200" height="400" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div id="trellis-container" tabindex="0"><svg id="trellis-svg" width="1200" height="400" preserveAspectRatio="xMidYMid meet"></svg></div>
 
         <!-- Signal Plots -->
         <div class="plot-area">
@@ -139,7 +140,7 @@
         <!-- Path List -->
         <div id="paths-container">
             <h2>All valid paths (K<sub>total</sub> = L+N+L = <span id="total-symbols"></span> input symbols)</h2>
-            <div id="paths-list">Click "Generate" to see paths...</div>
+            <div id="paths-list" tabindex="0">Click "Generate" to see paths...</div>
         </div>
 
         <!-- Download Button -->

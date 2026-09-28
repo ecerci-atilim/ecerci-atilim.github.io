@@ -11,13 +11,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
 
     <style>
         html, body { height: 100%; }
-        body { overflow: hidden; }
+        body { overflow: hidden auto; }
         .page { height: 100%; display: flex; flex-direction: column; }
         main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; position: relative; min-height: 0; }
 
@@ -95,9 +96,9 @@
         </div>
     </header>
 
-    <div class="wall-clock" id="realTimeClock" title="Drag to move">00:00:00</div>
-
     <main>
+        <h1 class="visually-hidden">Exam Timer</h1>
+        <div class="wall-clock" id="realTimeClock" title="Drag to move">00:00:00</div>
         <div class="stage">
             <div id="noLeaveMessage" class="notice notice--warn">Students may not leave the room yet.</div>
 

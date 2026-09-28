@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
@@ -91,7 +92,7 @@
         </div>
         <!-- Controls, Trellis, Results, Formulas, All Paths sections -->
          <div class="controls"> <div class="control-group"> <label for="message-length">N:</label> <input type="number" id="message-length" min="1" max="10" value="3" title="Message Length"> </div> <div class="control-group"> <label for="memory-length">L:</label> <input type="number" id="memory-length" min="2" max="4" value="3" title="Memory Length"> </div> <div class="control-group" style="flex-grow: 1; justify-content: center;"> <label for="binary-message" style="min-width: auto;">Message:</label> <input type="text" id="binary-message" placeholder="e.g., 011" title="Message Bits (0 or 1)"> <button id="random-message-button" type="button" title="Generate Random Message">Random</button> </div> <div class="checkbox-container"> <input type="checkbox" id="extend-path" name="extend-path" checked> <label for="extend-path" class="checkbox-label">Show Full Paths</label> </div> <button id="generate-button">Generate & Simulate</button> </div>
-         <div class="diagram-container"> <svg id="trellis-diagram"></svg> <div id="path-popup" class="path-popup"> <div class="path-popup-header"> <div class="path-popup-title">Path Information</div> <button id="close-popup" class="path-popup-close">×</button> </div> <div id="path-popup-content"></div> </div> </div>
+         <div class="diagram-container" tabindex="0"> <svg id="trellis-diagram"></svg> <div id="path-popup" class="path-popup"> <div class="path-popup-header"> <div class="path-popup-title">Path Information</div> <button id="close-popup" class="path-popup-close">×</button> </div> <div id="path-popup-content"></div> </div> </div>
          <div class="results-section"> <h2>Simulation Results (Noise-Free)</h2> <div id="llr-output"> <h3>Calculated LLRs:</h3> <pre>Run simulation...</pre> </div> <div id="plot-area"> <div class="plot-container"> <h4>Rx Signal & True Samples</h4> <canvas id="rxSignalChart"></canvas> </div> <div class="plot-container"> <h4>Overall Channel Pulse Response (v = h * h)</h4> <canvas id="pulseChart"></canvas> </div> </div> </div>
          <div class="results-section"> <h2>Key Formulas</h2> <div id="formula-area"> Loading formulas... </div> </div>
          <div class="results-section"> <h2>All Valid Trellis Paths</h2> <div id="all-paths-list"> <pre>Run simulation...</pre> </div> </div>
