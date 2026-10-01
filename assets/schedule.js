@@ -278,7 +278,7 @@ window.Schedule = (function () {
     // A second tap while it is still glitching: it gets angry.
     var angry = !!block._busy;
     if (angry) block.classList.add('is-angry');
-    var message = angry ? MESSAGE + '!' : MESSAGE;
+    var message = angry ? MESSAGE + '!' : original + '!';
 
     clearInterval(label._timer); clearTimeout(label._hold);
     block._busy = true;
