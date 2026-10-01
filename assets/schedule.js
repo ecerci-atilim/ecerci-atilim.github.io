@@ -163,8 +163,12 @@ window.Schedule = (function () {
   }
   function renderStatus(el) {
     var s = status();
-    el.className = 'rail-now' + (s.cls === 'busy' || s.cls === 'free' || s.cls === 'break' ? ' is-now' : '');
-    el.querySelector('.txt').innerHTML = s.html;
+    var cls = 'rail-now' + (s.cls === 'busy' || s.cls === 'free' || s.cls === 'break' ? ' is-now' : '');
+    var txt = el.querySelector('.txt');
+    if (el.className !== cls) el.className = cls;
+    if (txt.innerHTML !== s.html) txt.innerHTML = s.html;
+    var link = el.querySelector('a');
+    if (link) link.hidden = window.onLeave === true;
   }
   function legend(el) {
     var cats = window.scheduleCategories || {}, h = '';

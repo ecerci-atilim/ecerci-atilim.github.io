@@ -118,7 +118,7 @@ code, kbd { font-family: var(--mono); font-size: 0.875em; background: var(--bg-2
 .content { padding: 28px 20px 64px; max-width: 1240px; min-width: 0; }
 @media (min-width: 900px) {
   .frame { grid-template-columns: 236px minmax(0, 1fr); grid-template-rows: auto; }
-  .rail { position: sticky; top: 0; height: 100vh; padding: 34px 28px 26px; border-bottom: 0; border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 0; }
+  .rail { position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 34px 28px 26px; border-bottom: 0; border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 0; }
   .content { padding: 44px clamp(28px, 4vw, 64px) 80px; }
 }
 

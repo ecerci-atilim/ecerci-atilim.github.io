@@ -41,12 +41,14 @@
     <main class="content">
         <h1 class="visually-hidden">Emre Cerci — home</h1>
 
-        <div class="sec">
-            <h2>This week</h2>
-            <span class="meta" id="week-range"></span>
-        </div>
-        <div class="week"><div class="tl" id="week"></div></div>
-        <div class="legend" id="legend"></div>
+        <section id="this-week">
+            <div class="sec">
+                <h2>This week</h2>
+                <span class="meta" id="week-range"></span>
+            </div>
+            <div class="week"><div class="tl" id="week"></div></div>
+            <div class="legend" id="legend"></div>
+        </section>
 
         <div class="sec" style="margin-top:56px">
             <h2>Tools</h2>
@@ -75,7 +77,9 @@
 <script src="assets/schedule.js"></script>
 <script>
 (function () {
-    if (typeof window.scheduleData === 'undefined') return;
+    var section = document.getElementById('this-week');
+    // On leave the week stays private, just as on the schedule page.
+    if (typeof window.scheduleData === 'undefined' || window.onLeave === true) { section.hidden = true; return; }
     var week = document.getElementById('week');
     Schedule.renderTimeline(week, { compact: true });
     Schedule.legend(document.getElementById('legend'));

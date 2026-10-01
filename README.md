@@ -54,7 +54,7 @@ window.leaveDays = ["2026-11-10"];   // single days off, YYYY-MM-DD
 
 Notes:
 
-- Times are `"H:MM"` or `"HH:MM"`, 24-hour. Events snap to 30-minute rows;
+- Times are `"H:MM"` or `"HH:MM"`, 24-hour. Events are placed to the minute;
   the visible range grows automatically if something starts before 08:30
   or ends after 17:30.
 - Saturday only appears when it has an event or a leave day.
