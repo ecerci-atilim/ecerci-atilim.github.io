@@ -235,3 +235,50 @@ window.Schedule = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();
+
+// Easter egg: tapping a break or a leave day makes it glitch and, for a
+// moment, say what it means.
+(function () {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SYMBOLS = '█▓▒░◇◈╳╋▪▫◢◣◤◥▚▞⌬◉#@*?$%&';
+  var MESSAGE = 'Do not disturb';
+  function sym() { return SYMBOLS.charAt(Math.floor(Math.random() * SYMBOLS.length)); }
+
+  // Morph `from` into `to` over `steps` ticks: characters settle left to right.
+  function morph(el, from, to, steps, done) {
+    var len = Math.max(from.length, to.length), i = 0;
+    el._timer = setInterval(function () {
+      i++;
+      var settled = Math.floor(len * i / steps), out = '';
+      for (var k = 0; k < len; k++) {
+        if (k < settled) out += to.charAt(k);
+        else out += (from.charAt(k) === ' ' && Math.random() < 0.5) ? ' ' : sym();
+      }
+      el.textContent = out.replace(/\s+$/, '');
+      if (i >= steps) { clearInterval(el._timer); el.textContent = to; if (done) done(); }
+    }, 38);
+  }
+
+  document.addEventListener('click', function (e) {
+    var block = e.target.closest('.tl-ev--hatch, .tl-leave');
+    if (!block) return;
+    var label = block.querySelector('strong, span');
+    if (!label) return;
+    if (label.dataset.original === undefined) label.dataset.original = label.textContent;
+    var original = label.dataset.original;
+    clearInterval(label._timer); clearTimeout(label._hold);
+
+    block.classList.remove('is-glitching');
+    void block.offsetWidth; // restart the animation on repeated taps
+    block.classList.add('is-glitching');
+    setTimeout(function () { block.classList.remove('is-glitching'); }, 520);
+
+    morph(label, label.textContent, MESSAGE, 10, function () {
+      label._hold = setTimeout(function () {
+        block.classList.remove('is-glitching'); void block.offsetWidth; block.classList.add('is-glitching');
+        setTimeout(function () { block.classList.remove('is-glitching'); }, 520);
+        morph(label, MESSAGE, original, 10);
+      }, 900);
+    });
+  });
+})();
