@@ -14,14 +14,14 @@
     <script src="assets/site.js" defer></script>
 
     <style>
-        html, body { height: 100%; }
-        body { overflow: hidden auto; }
-        .page { height: 100%; display: flex; flex-direction: column; }
-        main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; position: relative; min-height: 0; }
+        .content { min-height: 100vh; max-width: none; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        @media (max-width: 899px) { .content { min-height: calc(100vh - 160px); } }
+        body.is-fullscreen .frame { display: block; }
+        body.is-fullscreen .rail, body.is-fullscreen .content-foot { display: none !important; }
 
         /* Wall clock (draggable) */
         .wall-clock {
-            position: fixed; top: 76px; right: var(--gutter);
+            position: fixed; top: 24px; right: var(--gutter);
             font-family: var(--font-mono); font-size: 1.125rem; font-weight: 500; letter-spacing: 0.04em;
             font-variant-numeric: tabular-nums;
             padding: 8px 14px; border: 1px solid var(--rule-2); border-radius: 4px; background: var(--bg);
@@ -29,7 +29,7 @@
         }
         .wall-clock:active { cursor: grabbing; }
         @media (max-width: 640px) {
-            .wall-clock { top: auto; bottom: 16px; right: 50%; transform: translateX(50%); }
+            .wall-clock { position: static; order: 2; margin-top: 28px; }
         }
 
         .stage { text-align: center; width: 100%; max-width: 1100px; padding: 0 var(--gutter); }
@@ -77,23 +77,30 @@
     </style>
 </head>
 <body>
-<div class="page">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="schedule.html">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
 
-    <main>
+    <main class="content">
         <h1 class="visually-hidden">Exam Timer</h1>
         <div class="wall-clock" id="realTimeClock" title="Drag to move">00:00:00</div>
         <div class="stage">
@@ -117,6 +124,10 @@
                 <button id="fullscreenBtn" class="btn btn--quiet">Fullscreen</button>
             </div>
         </div>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
     </main>
 
     <div id="settingsModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-title">
@@ -153,6 +164,8 @@
 
 </div>
 
+<script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 <script>
     // --- Elements ---
     const realTimeClockDisplay = document.getElementById('realTimeClock');
@@ -417,6 +430,7 @@
     });
     document.addEventListener('fullscreenchange', () => {
         fullscreenBtn.textContent = document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
+        document.body.classList.toggle('is-fullscreen', !!document.fullscreenElement);
     });
 
     settingsToggleBtn.addEventListener('click', openModal);

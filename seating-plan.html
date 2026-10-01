@@ -72,11 +72,11 @@
                 padding: 0; width: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
             }
 
-            .masthead, .site-footer, .page-head, .controls-grid, .modal-backdrop, #message-area, #stats-panel, .btn, .print-actions {
+            .rail, .content-foot, .page-head, .controls-grid, .modal-backdrop, #message-area, #stats-panel, .btn, .print-actions {
                 display: none !important;
             }
-            .page { max-width: 100%; margin: 0; padding: 0; }
-            main { padding: 0; }
+            .frame { display: block; }
+            .content { max-width: none; margin: 0; padding: 0; }
             .seating-wrapper { page-break-after: always; page-break-inside: avoid; width: 100%; display: flex; flex-direction: column; height: 99vh; margin: 0; }
             .seating-wrapper:last-child { page-break-after: auto; }
             .room-title { display: none; }
@@ -134,23 +134,30 @@
     </style>
 </head>
 <body>
-<div class="page page--wide">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="schedule.html">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
 
-    <main>
+    <main class="content">
         <div class="page-head page-head--row">
             <div>
                 <p class="eyebrow">Tool</p>
@@ -224,12 +231,11 @@
         </div>
 
         <div id="seating-plan-output"></div>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
     </main>
-
-    <footer class="site-footer">
-        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
-        <a href="index.html">Home</a>
-    </footer>
 
 </div>
 
@@ -283,6 +289,8 @@
         </div>
     </div>
 
+<script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 <script>
     // --- 1. DATA ---
     const classroomsDB = [ { id: '1003', name: 'Room 1003', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1009', name: 'Room 1009', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1015', name: 'Room 1015', capacity: 60, examCapacity: 20, cols: 8, rows: 8 }, { id: '1017', name: 'Room 1017', capacity: 63, examCapacity: 24, cols: 6, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1019', name: 'Room 1019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1023', name: 'Room 1023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1024', name: 'Room 1024', capacity: 132, examCapacity: 44, cols: 4, isIrregular: true, colSeats: [11, 11, 11, 11] }, { id: '1025', name: 'Room 1025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1026II', name: 'Room 1026II', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1027', name: 'Room 1027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1029', name: 'Room 1029', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }, { id: '2003', name: 'Room 2003', capacity: 63, examCapacity: 21, cols: 8, rows: 8 }, { id: '2009', name: 'Room 2009', capacity: 63, examCapacity: 24, cols: 8, rows: 8 }, { id: '2015', name: 'Room 2015', capacity: 70, examCapacity: 28, cols: 9, rows: 8 }, { id: '2017', name: 'Room 2017', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '2019', name: 'Room 2019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2023', name: 'Room 2023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2025', name: 'Room 2025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2027', name: 'Room 2027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2029', name: 'Room 2029', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2031', name: 'Room 2031', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2035', name: 'Room 2035', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2043', name: 'Room 2043', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1003', name: 'Room B1003', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1006', name: 'Room B1006', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1007', name: 'Room B1007', capacity: 48, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1008', name: 'Room B1008', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1010', name: 'Room B1010', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1012', name: 'Room B1012', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1014', name: 'Room B1014', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1015', name: 'Room B1015', capacity: 56, examCapacity: 24, cols: 8, rows: 7 }, { id: 'B1017', name: 'Room B1017', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1019', name: 'Room B1019', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1023', name: 'Room B1023', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1025', name: 'Room B1025', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1027', name: 'Room B1027', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1029', name: 'Room B1029', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1033', name: 'Room B1033', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1037', name: 'Room B1037', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }];

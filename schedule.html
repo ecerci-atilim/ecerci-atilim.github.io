@@ -5,93 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Schedule - Emre Cerci</title>
     <meta name="description" content="Weekly schedule of Emre Cerci: office hours, laboratories and live availability.">
-    <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
-
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
-
     <style>
-        /* ---- Header: title + live status ---- */
-        .sched-head { display: grid; gap: 18px 32px; margin-bottom: 1.5rem; }
-        @media (min-width: 760px) { .sched-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; } }
-        .live { display: grid; grid-template-columns: auto 1fr; gap: 2px 14px; align-items: center; }
-        .live-clock { font-family: var(--font-mono); font-size: 1.75rem; font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; grid-row: span 2; letter-spacing: 0.01em; }
-        .live-date { font-size: 0.875rem; color: var(--fg-2); }
-        .status { display: inline-flex; align-items: center; gap: 7px; font-size: 0.8125rem; font-weight: 500; padding: 3px 9px 3px 7px; border: 1px solid var(--rule-2); border-radius: 4px; width: max-content; }
-        .status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-        .status--free  { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
-        .status--busy  { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
-        .status--break { color: var(--warm); border-color: color-mix(in srgb, var(--warm) 50%, transparent); }
-        .status--off   { color: var(--fg-3); }
-        .status--leave { color: var(--warm); border-color: color-mix(in srgb, var(--warm) 50%, transparent); }
-
-        /* ---- Desktop table ---- */
-        .sched-table-wrap { display: none; }
-        .sched-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 0.875rem; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
-        .sched-table th { font-family: var(--font-sans); font-size: 0.875rem; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--fg); padding: 10px 8px 8px; background: var(--bg-2); border-bottom: 1px solid var(--rule-2); border-right: 1px solid var(--rule); text-align: left; }
-        .sched-table th small { display: block; font-family: var(--font-mono); font-size: 0.6875rem; font-weight: 400; color: var(--fg-3); margin-top: 1px; letter-spacing: 0.04em; }
-        .sched-table th:last-child, .sched-table td:last-child { border-right: 0; }
-        .sched-table th.is-today { box-shadow: inset 0 -2px 0 var(--warm); }
-        .sched-table th.is-today small { color: var(--warm); }
-        .sched-table th.t-col { width: 86px; }
-        .sched-table td { height: 40px; padding: 0; border-bottom: 1px solid var(--rule); border-right: 1px solid var(--rule); vertical-align: top; }
-        .sched-table tr:last-child td { border-bottom: 0; }
-        .sched-table td.t-col { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--fg-3); padding: 6px 8px; white-space: nowrap; background: var(--bg-2); font-variant-numeric: tabular-nums; }
-        .sched-table td.t-col.on-hour { color: var(--fg-2); }
-        .sched-table td.is-today { background: color-mix(in srgb, var(--warm) 5%, transparent); }
-        .sched-table td.is-now { box-shadow: inset 0 0 0 2px var(--accent); }
-        .sched-table td.ev { background: color-mix(in srgb, var(--c) 16%, var(--bg)); box-shadow: inset 3px 0 0 var(--c); padding: 7px 9px 7px 11px; }
-        .sched-table td.ev.is-now { box-shadow: inset 3px 0 0 var(--c), inset 0 0 0 2px var(--accent); }
-        .ev-title { display: block; font-weight: 500; line-height: 1.3; color: var(--fg); }
-        .ev-time { display: block; font-family: var(--font-mono); font-size: 0.6875rem; color: var(--fg-2); margin-top: 3px; font-variant-numeric: tabular-nums; }
-        .ev-loc { display: block; font-size: 0.75rem; color: var(--fg-2); margin-top: 2px; }
-        .sched-table td.leave { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--warm) 14%, transparent) 0 4px, transparent 4px 10px); }
-        .sched-table td.leave .leave-lbl { display: block; padding: 8px 9px; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm); }
-
-        /* ---- Mobile agenda ---- */
-        .agenda { display: grid; gap: 18px; }
-        .day { border-top: 1px solid var(--rule-2); padding-top: 8px; }
-        .day-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
-        .day-name { font-weight: 600; }
-        .day-date { font-family: var(--font-mono); font-size: 0.75rem; color: var(--fg-3); letter-spacing: 0.04em; }
-        .day.is-today .day-date { color: var(--warm); }
-        .day-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-        .day-ev { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1px 14px; padding: 9px 10px 9px 12px; border-radius: 4px; background: color-mix(in srgb, var(--c) 14%, var(--bg)); box-shadow: inset 3px 0 0 var(--c); font-size: 0.9375rem; }
-        .day-ev.is-now { box-shadow: inset 3px 0 0 var(--c), 0 0 0 2px var(--accent); }
-        .day-ev .ev-time { grid-column: 1; grid-row: 1 / span 2; align-self: start; margin: 3px 0 0; font-size: 0.75rem; }
-        .day-ev .ev-title { grid-column: 2; font-size: 0.9375rem; }
-        .day-ev .ev-loc { grid-column: 2; margin-top: 0; }
-        .day-empty { font-size: 0.875rem; color: var(--fg-3); padding: 4px 0 6px; }
-        .day-leave { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm); padding: 8px 10px; border-radius: 4px; background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--warm) 14%, transparent) 0 4px, transparent 4px 10px); }
-
-        @media (min-width: 760px) {
-            .sched-table-wrap { display: block; }
-            .agenda { display: none; }
-        }
-
-        /* ---- Legend ---- */
-        .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font-size: 0.8125rem; color: var(--fg-2); }
-        .legend span { display: inline-flex; align-items: center; gap: 7px; }
-        .legend i { width: 10px; height: 10px; border-radius: 2px; background: var(--c); display: inline-block; }
-        .legend i.i-leave { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--warm) 50%, transparent) 0 2px, transparent 2px 5px); border: 1px solid var(--warm); }
-        .legend i.i-now { background: transparent; box-shadow: inset 0 0 0 2px var(--accent); }
-
-        #error-banner { display: none; }
-
-        /* ---- Leave mode (onLeave = true): dark full screen with the glitch title ---- */
-        body.leave-mode { --text-primary: #ECEAE4; --text-secondary: #8E8B84; background: #0C0C0E; color: var(--text-primary); }
-        body.leave-mode .masthead, body.leave-mode .site-footer, body.leave-mode main > :not(#leave-screen) { display: none !important; }
-        body.leave-mode, body.leave-mode * { cursor: default !important; user-select: none; -webkit-user-select: none; }
-        .leave-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; text-align: center; }
-        .leave-screen > * { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .leave-screen.active > * { opacity: 1; transform: translateY(0); }
-        .leave-screen > :nth-child(1) { transition-delay: 0.1s; }
-        .leave-screen > :nth-child(2) { transition-delay: 0.3s; }
-        .leave-title { font-family: var(--font-sans); font-size: 2rem; font-weight: 600; color: var(--text-primary); margin-bottom: 8px; }
-        .leave-subtitle { font-size: 1rem; color: var(--text-secondary); }
+        .tl-wrap { display: none; }
+        @media (min-width: 760px) { .tl-wrap { display: block; } .agenda { display: none; } }
+        .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px 32px; flex-wrap: wrap; margin-bottom: 26px; }
+        .clock { font-family: var(--mono); font-size: 13px; color: var(--fg-3); font-variant-numeric: tabular-nums; }
+        .clock b { color: var(--fg); font-weight: 500; }
+        @media print { .tl-wrap { display: block !important; } .agenda, .rail, .content-foot { display: none !important; } .frame { display: block; } }
                 /* Glitch effect */
         .glitch {
             position: relative;
@@ -206,306 +130,67 @@
             90%  { transform: translate(1px, 0);     text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
             100% { transform: translate(0, 0);       text-shadow: 2px 0 #ff3860, -2px 0 #00d1ff; }
         }
-
-        @media print {
-            .sched-table-wrap { display: block !important; }
-            .agenda, .live { display: none !important; }
-            .sched-table td.is-today, .sched-table td.is-now { background: none; box-shadow: none; }
-            .sched-table th.is-today { box-shadow: none; }
-        }
     </style>
 </head>
 <body>
-<div class="page page--wide">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="schedule.html" aria-current="page">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
-
-    <main>
-        <div id="error-banner" class="notice notice--error">
-            <strong>schedule-config.js</strong> could not be loaded. Check that the file exists next to this page.
-        </div>
-
-        <div class="leave-screen" id="leave-screen">
-            <div class="leave-title glitch" data-text="Currently on leave">Currently on leave</div>
-            <div class="leave-subtitle">The schedule is not available at this time.</div>
-        </div>
-
-        <div class="sched-head" id="sched-head">
-            <div class="page-head" style="margin:0">
-                <p class="eyebrow">Weekly Schedule</p>
-                <h1 id="sched-title">Office hours &amp; laboratories</h1>
-                <p class="lede">All times are Ankara time (UTC+3), wherever you are viewing from. The highlighted slot is what is happening right now.</p>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html" aria-current="page">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now" aria-live="polite"><span class="dot" aria-hidden="true"></span><span class="txt">…</span></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
             </div>
-            <div class="live">
-                <div class="live-clock tnum" id="clock">--:--:--</div>
-                <div class="live-date" id="date">&nbsp;</div>
-                <div class="status status--off" id="status-badge" aria-live="polite">Loading…</div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="head">
+            <div>
+                <h1 class="page-title">Weekly schedule</h1>
+                <p class="lede" style="margin:0">Office hours and laboratories. All times are Ankara time (UTC+3); the red line is now.</p>
             </div>
+            <div class="clock" id="clock"></div>
         </div>
 
-        <div class="sched-table-wrap" id="table-container">
-            <table class="sched-table" id="sched-table">
-                <thead id="schedule-head"></thead>
-                <tbody id="schedule-body"></tbody>
-            </table>
-        </div>
-
+        <div class="tl-wrap"><div class="tl" id="tl"></div></div>
         <div class="agenda" id="agenda"></div>
+        <div class="legend" id="legend"></div>
 
-        <div class="legend" id="schedule-legend"></div>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="index.html">Home</a></span>
+        </footer>
     </main>
-
-    <footer class="site-footer">
-        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
-        <a href="index.html">Home</a>
-    </footer>
 
 </div>
 
+<div class="leave-screen" id="leave-screen">
+    <div class="leave-title glitch" data-text="Currently on leave">Currently on leave</div>
+    <div class="leave-subtitle">The schedule is not available at this time.</div>
+</div>
+
 <script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 <script>
 (function () {
-    'use strict';
-
-    var DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    var DAY_LABEL = { monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday' };
-    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    var SLOT = 30;
-    var DEFAULT_START = 8 * 60 + 30, DEFAULT_END = 17 * 60 + 30;
-
-    // "Now" is always Ankara time, so the status is right for someone checking from abroad.
-    var TZ = 'Europe/Istanbul';
-    var tzFmt = null;
-    try { tzFmt = new Intl.DateTimeFormat('en-GB', { timeZone: TZ, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { tzFmt = null; }
-    function nowTR() {
-        if (!tzFmt) return new Date();
-        var p = {};
-        tzFmt.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
-        return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
-    }
-
-    function toMin(str) { var p = String(str).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function fmt(min) { return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
-    function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-
-    function catColor(cat) {
-        var c = window.scheduleCategories && window.scheduleCategories[cat];
-        return c && c.color ? c.color : '#94a3b8';
-    }
-    function eventsOn(day) {
-        var list = (window.scheduleData && window.scheduleData[day]) || [];
-        return list.slice().sort(function (a, b) { return toMin(a.start) - toMin(b.start); });
-    }
-    function eventAt(day, minutes) {
-        var list = eventsOn(day);
-        for (var i = 0; i < list.length; i++) {
-            if (minutes >= toMin(list[i].start) && minutes < toMin(list[i].end)) return list[i];
-        }
-        return null;
-    }
-    function eventStartingAt(day, minutes) {
-        var list = eventsOn(day);
-        for (var i = 0; i < list.length; i++) if (toMin(list[i].start) === minutes) return list[i];
-        return null;
-    }
-    function isLeaveDate(dateStr) { return Array.isArray(window.leaveDays) && window.leaveDays.indexOf(dateStr) !== -1; }
-
-    function weekDates() {
-        var now = nowTR(), out = {};
-        var dow = now.getDay();
-        var offset = dow === 0 ? -6 : 1 - dow;
-        for (var i = 0; i < DAYS.length; i++) {
-            var d = new Date(now); d.setDate(now.getDate() + offset + i);
-            out[DAYS[i]] = d;
-        }
-        return out;
-    }
-    function visibleDays(dates) {
-        // Saturday only appears when it actually has something on it.
-        return DAYS.filter(function (d) {
-            if (d !== 'saturday') return true;
-            return eventsOn(d).length > 0 || isLeaveDate(ymd(dates[d]));
-        });
-    }
-    function timeBounds(days) {
-        var start = DEFAULT_START, end = DEFAULT_END;
-        days.forEach(function (d) {
-            eventsOn(d).forEach(function (ev) {
-                start = Math.min(start, Math.floor(toMin(ev.start) / SLOT) * SLOT);
-                end = Math.max(end, Math.ceil(toMin(ev.end) / SLOT) * SLOT);
-            });
-        });
-        return { start: start, end: end };
-    }
-    function eventHtml(ev) {
-        return '<span class="ev-title">' + esc(ev.activity) + '</span>' +
-               '<span class="ev-time">' + fmt(toMin(ev.start)) + '–' + fmt(toMin(ev.end)) + '</span>' +
-               (ev.location ? '<span class="ev-loc">' + esc(ev.location) + '</span>' : '');
-    }
-
-    /* ---- Desktop table ---- */
-    function renderTable(dates, days, bounds) {
-        var head = document.getElementById('schedule-head');
-        var body = document.getElementById('schedule-body');
-        var todayStr = ymd(nowTR());
-        var h = '<tr><th class="t-col">Time</th>';
-        days.forEach(function (d) {
-            var date = dates[d];
-            var today = ymd(date) === todayStr;
-            h += '<th' + (today ? ' class="is-today"' : '') + '>' + DAY_LABEL[d] + '<small>' + MONTHS[date.getMonth()] + ' ' + date.getDate() + (today ? ' · today' : '') + '</small></th>';
-        });
-        head.innerHTML = h + '</tr>';
-
-        var skip = {}; days.forEach(function (d) { skip[d] = 0; });
-        var rows = '';
-        for (var t = bounds.start; t < bounds.end; t += SLOT) {
-            rows += '<tr><td class="t-col' + (t % 60 === 0 ? ' on-hour' : '') + '">' + fmt(t) + '</td>';
-            days.forEach(function (d) {
-                if (skip[d] > 0) { skip[d]--; return; }
-                var date = dates[d];
-                var today = ymd(date) === todayStr;
-                var cls = ['slot'];
-                if (today) cls.push('is-today');
-                var attrs = ' id="' + d + '-' + fmt(t).replace(':', '') + '"';
-                if (isLeaveDate(ymd(date))) {
-                    cls.push('leave');
-                    rows += '<td class="' + cls.join(' ') + '"' + attrs + '>' + (t === bounds.start ? '<span class="leave-lbl">On leave</span>' : '') + '</td>';
-                    return;
-                }
-                var ev = eventStartingAt(d, t);
-                if (ev) {
-                    var span = Math.max(1, Math.ceil((toMin(ev.end) - toMin(ev.start)) / SLOT));
-                    if (span > 1) skip[d] = span - 1;
-                    cls.push('ev');
-                    rows += '<td class="' + cls.join(' ') + '"' + attrs + (span > 1 ? ' rowspan="' + span + '"' : '') + ' style="--c:' + catColor(ev.category) + '">' + eventHtml(ev) + '</td>';
-                } else {
-                    rows += '<td class="' + cls.join(' ') + '"' + attrs + '></td>';
-                }
-            });
-            rows += '</tr>';
-        }
-        body.innerHTML = rows;
-    }
-
-    /* ---- Mobile agenda ---- */
-    function renderAgenda(dates, days) {
-        var el = document.getElementById('agenda');
-        var todayStr = ymd(nowTR());
-        var html = '';
-        days.forEach(function (d) {
-            var date = dates[d];
-            var today = ymd(date) === todayStr;
-            html += '<section class="day' + (today ? ' is-today' : '') + '" id="day-' + d + '">';
-            html += '<div class="day-head"><span class="day-name">' + DAY_LABEL[d] + '</span><span class="day-date">' + MONTHS[date.getMonth()] + ' ' + date.getDate() + (today ? ' · TODAY' : '') + '</span></div>';
-            if (isLeaveDate(ymd(date))) {
-                html += '<div class="day-leave">On leave</div>';
-            } else {
-                var list = eventsOn(d);
-                if (!list.length) {
-                    html += '<div class="day-empty">No scheduled events.</div>';
-                } else {
-                    html += '<ul class="day-list">';
-                    list.forEach(function (ev) {
-                        html += '<li class="day-ev" data-day="' + d + '" data-start="' + toMin(ev.start) + '" data-end="' + toMin(ev.end) + '" style="--c:' + catColor(ev.category) + '">' + eventHtml(ev) + '</li>';
-                    });
-                    html += '</ul>';
-                }
-            }
-            html += '</section>';
-        });
-        el.innerHTML = html;
-    }
-
-    function renderLegend() {
-        var cats = window.scheduleCategories || {};
-        var html = '';
-        Object.keys(cats).forEach(function (k) {
-            html += '<span style="--c:' + catColor(k) + '"><i></i>' + esc(cats[k].label || k) + '</span>';
-        });
-        html += '<span><i class="i-leave"></i>On leave</span><span><i class="i-now"></i>Now</span>';
-        document.getElementById('schedule-legend').innerHTML = html;
-    }
-
-    /* ---- Live status ---- */
-    var lastRenderedDate = null;
-    function tick() {
-        var now = nowTR();
-        document.getElementById('clock').textContent = now.toLocaleTimeString('en-GB');
-        document.getElementById('date').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-
-        // Re-render at midnight so "today" moves.
-        var today = ymd(now);
-        if (lastRenderedDate !== today) { renderAll(); lastRenderedDate = today; }
-
-        var dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
-        var nowMin = now.getHours() * 60 + now.getMinutes();
-        var badge = document.getElementById('status-badge');
-
-        Array.prototype.forEach.call(document.querySelectorAll('.is-now'), function (el) { el.classList.remove('is-now'); });
-
-        var text, cls;
-        if (isLeaveDate(today)) {
-            text = 'On leave'; cls = 'status--leave';
-        } else if (dayName === 'sunday' || (dayName === 'saturday' && !eventsOn('saturday').length)) {
-            text = 'Off duty'; cls = 'status--off';
-        } else if (nowMin < DEFAULT_START || nowMin >= DEFAULT_END) {
-            text = 'Off duty'; cls = 'status--off';
-        } else {
-            var slotMin = Math.floor(nowMin / SLOT) * SLOT;
-            var cell = document.getElementById(dayName + '-' + fmt(slotMin).replace(':', ''));
-            if (!cell) {
-                // The slot may be covered by a rowspan: find the event cell that starts earlier.
-                var ev0 = eventAt(dayName, nowMin);
-                if (ev0) cell = document.getElementById(dayName + '-' + fmt(Math.floor(toMin(ev0.start) / SLOT) * SLOT).replace(':', ''));
-            }
-            if (cell) cell.classList.add('is-now');
-            Array.prototype.forEach.call(document.querySelectorAll('.day-ev[data-day="' + dayName + '"]'), function (li) {
-                if (nowMin >= +li.dataset.start && nowMin < +li.dataset.end) li.classList.add('is-now');
-            });
-
-            var ev = eventAt(dayName, nowMin);
-            if (ev) {
-                var isBreak = ev.category === 'break' || /lunch|break/i.test(ev.activity);
-                text = ev.activity + (ev.location ? ' · ' + ev.location : '');
-                cls = isBreak ? 'status--break' : 'status--busy';
-            } else {
-                text = 'Available'; cls = 'status--free';
-            }
-        }
-        if (badge.className !== 'status ' + cls) badge.className = 'status ' + cls;
-        if (badge.textContent !== text) badge.textContent = text;
-    }
-
-    function renderAll() {
-        var dates = weekDates();
-        var days = visibleDays(dates);
-        var bounds = timeBounds(days);
-        renderTable(dates, days, bounds);
-        renderAgenda(dates, days);
-        renderLegend();
-    }
-
-    /* ---- Leave mode ---- */
-    function enterLeaveMode() {
+    if (typeof window.scheduleData === 'undefined') return;
+    if (window.onLeave === true) {
         document.body.classList.add('leave-mode');
         var ls = document.getElementById('leave-screen');
-        ls.style.display = 'flex';
         requestAnimationFrame(function () { ls.classList.add('active'); });
-
                         // Build per-char spans with frozen widths so symbol swaps don't
                 // shift the title's layout (Outfit isn't monospace).
                 var titleEl = document.querySelector('.glitch');
@@ -828,19 +513,18 @@
                         clickAnims[Math.floor(Math.random() * clickAnims.length)](closest);
                     }
                 });
+        return;
     }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof window.scheduleData === 'undefined') {
-            document.getElementById('error-banner').style.display = 'block';
-            document.getElementById('sched-head').style.display = 'none';
-            return;
-        }
-        if (window.onLeave === true) { enterLeaveMode(); return; }
-        if (!window.scheduleCategories) window.scheduleCategories = { default: { label: 'Event', color: '#94a3b8' } };
-        tick();
-        setInterval(tick, 1000);
-    });
+    var tl = document.getElementById('tl'), ag = document.getElementById('agenda'), rn = document.getElementById('rail-now');
+    Schedule.renderTimeline(tl);
+    Schedule.renderAgenda(ag);
+    Schedule.legend(document.getElementById('legend'));
+    function tick() {
+        var n = Schedule.now();
+        document.getElementById('clock').innerHTML = n.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · <b>' + n.toLocaleTimeString('en-GB') + '</b>';
+    }
+    tick(); setInterval(tick, 1000);
+    setInterval(function () { Schedule.updatePlayhead(tl); Schedule.renderAgenda(ag); }, 30000);
 })();
 </script>
 </body>

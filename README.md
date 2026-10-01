@@ -8,7 +8,7 @@ deploys `main` through `.github/workflows/static.yml`.
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | Home: short intro, list of tools, contact links |
+| `index.html` | Home: this week's timetable, then the list of tools |
 | `about.html` | Bio, skills, contact |
 | `schedule.html` | Weekly schedule (reads `schedule-config.js`) |
 | `schedule-config.js` | **The only file to edit each term** — see below |
@@ -19,13 +19,15 @@ deploys `main` through `.github/workflows/static.yml`.
 | `mbcjr-new.html` | Trellis path enumerator with JSON export |
 | `pdf-gate.html` | PIN gate in front of `eemudek0724.pdf` |
 | `ftn.html` | Standalone FTN portfolio page (own design, multilingual) |
-| `assets/site.css`, `assets/site.js` | Shared design system and theme toggle |
+| `assets/site.css`, `assets/site.js` | Shared stylesheet and theme toggle |
+| `assets/schedule.js` | Reads `schedule-config.js`: timetable, playhead, rail status |
 | `legacy/` | Frozen copy of the previous design (glassmorphism + `theme.js`), untouched |
 | `matlab/` | BER simulation scripts |
 
 Every page except `ftn.html` and `legacy/*` links `assets/site.css` and
-carries the same masthead. There is no templating, so a nav change means
-editing each page's `<header class="masthead">` block.
+carries the same left rail (`<aside class="rail">`): name, navigation, live
+status, contact links, theme toggle. There is no templating, so a change to
+the rail means editing that block on each page.
 
 ## Editing the schedule
 
@@ -62,16 +64,20 @@ Notes:
 
 ## Design
 
-`assets/site.css` holds the design tokens (colours, type, spacing) and the
-shared components (masthead, table-of-contents list, buttons, forms, tables,
-modal). Light is the default; dark follows the system preference and can be
-forced with the toggle in the masthead (stored in `localStorage` as `theme`).
-Fonts are IBM Plex Sans / Serif / Mono, self-hosted in `assets/fonts/`
-(SIL OFL 1.1, licence file alongside) — no third-party requests.
+The organising idea is the time axis. A left rail is the spine of every
+page; the home page opens with the week itself; the schedule is a 30-minute
+ruler. One accent colour, "now" red, is reserved for the present moment (the
+playhead line, today's date, the status dot) and for errors. Categories are
+monochrome — solid, outline, hatched — whatever colours the config lists.
+No icons, gradients, shadows or chips.
 
-The home page also loads `schedule-config.js` and shows one line of live
-availability ("Now: …", "Available until …", "Off duty. Next: …") in Ankara
-time, so the config drives both the schedule page and the home page.
+`assets/site.css` holds the tokens and all components (rail, timeline,
+buttons, forms, panels, modal). Light is the default; dark follows the
+system and can be forced with the toggle in the rail (stored in
+`localStorage` as `theme`). Fonts are self-hosted in `assets/fonts/`
+(SIL OFL 1.1): Newsreader for headings, IBM Plex Sans and Mono for the rest.
+The site makes no third-party requests except the libraries the QR and
+M-BCJR tools load from jsDelivr / Plotly.
 
-The `legacy/` folder is self-contained: `legacy/index.html` is the old home
-and links only to the old pages. It reads the live `../schedule-config.js`.
+`legacy/` holds the previous glassmorphism design, self-contained and
+untouched; `legacy/index.html` is its home page.

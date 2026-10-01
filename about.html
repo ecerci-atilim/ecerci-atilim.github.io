@@ -14,97 +14,91 @@
     <script src="assets/site.js" defer></script>
 
     <style>
-        .about-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
-        @media (min-width: 820px) {
-            .about-grid { grid-template-columns: minmax(0, 1fr) 280px; gap: 3rem 4rem; align-items: start; }
-            .about-aside { position: sticky; top: 24px; }
-        }
-        .skills { margin: 0; }
-        .skills > div { display: grid; grid-template-columns: 1fr; gap: 4px 16px; padding: 12px 0; border-top: 1px solid var(--rule); }
-        .skills > div:last-child { border-bottom: 1px solid var(--rule); }
+        .skills { margin: 0 0 8px; border-top: 1px solid var(--fg); }
+        .skills > div { display: grid; grid-template-columns: 1fr; gap: 2px 20px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
         @media (min-width: 560px) { .skills > div { grid-template-columns: 180px 1fr; } }
-        .skills dt { font-size: 0.8125rem; color: var(--fg-3); padding-top: 3px; }
-        .skills dd { margin: 0; color: var(--fg-2); font-size: 0.9375rem; }
-        .skills dd b { color: var(--fg); font-weight: 500; }
-        .about-aside .kv > div { grid-template-columns: 1fr; gap: 1px; }
-        .about-aside .kv dt { font-size: 0.75rem; }
+        .skills dt { font-size: 13px; color: var(--fg-3); padding-top: 2px; }
+        .skills dd { margin: 0; color: var(--fg-2); font-size: 14.5px; }
+        .kv { border-top: 1px solid var(--fg); }
+        .kv > div { grid-template-columns: 180px 1fr; }
+        .kv dt { font-size: 13px; }
     </style>
 </head>
 <body>
-<div class="page">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html">Home</a>
-                <a href="about.html" aria-current="page">About</a>
-                <a href="schedule.html">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
-
-    <main>
-        <div class="page-head">
-            <p class="eyebrow">About</p>
-            <h1>Emre Cerci</h1>
-            <p class="lede">Research Assistant &amp; PhD Candidate, Atılım University.</p>
-        </div>
-
-        <div class="about-grid">
-            <div class="prose">
-                <p>
-                    I am a research assistant at Atılım University. I work on efficient
-                    algorithms for wireless communication systems, in particular
-                    faster-than-Nyquist (FTN) signaling and
-                    demodulation techniques.
-                </p>
-                <p>
-                    This website is a central hub for the tools, schedulers and resources
-                    I share with my students and colleagues.
-                </p>
-
-                <div class="section-head"><h2>Skills &amp; Expertise</h2></div>
-                <dl class="skills">
-                    <div>
-                        <dt>Research areas</dt>
-                        <dd>Wireless telecommunications, FPGA design, error-correction codes (ECC), OpenAirInterface 5G, VLSI</dd>
-                    </div>
-                    <div>
-                        <dt>Programming</dt>
-                        <dd>C, C++, C#, Java, MATLAB, Python, Verilog HDL, VHDL, LaTeX</dd>
-                    </div>
-                    <div>
-                        <dt>Web</dt>
-                        <dd>HTML5, CSS3, JavaScript, React, Node.js, Django</dd>
-                    </div>
-                    <div>
-                        <dt>Tools &amp; platforms</dt>
-                        <dd>Simulink, Git, Docker, Linux, PetaLinux, Ansys HFSS, AMD Vivado, Altera tools</dd>
-                    </div>
-                </dl>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html" aria-current="page">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
             </div>
-
-            <aside class="about-aside">
-                <div class="section-head" style="margin-top:0"><h2>Contact</h2></div>
-                <dl class="kv">
-                    <div><dt>Email</dt><dd><a href="mailto:emre.cerci@atilim.edu.tr">emre.cerci@atilim.edu.tr</a></dd></div>
-                    <div><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">Emre Çerçi</a></dd></div>
-                    <div><dt>GitHub</dt><dd><a href="https://github.com/ecerci-atilim" rel="noopener">ecerci-atilim</a></dd></div>
-                    <div><dt>Office hours</dt><dd><a href="schedule.html">See the weekly schedule</a></dd></div>
-                </dl>
-            </aside>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
         </div>
+    </aside>
+
+    <main class="content">
+        <h1 class="page-title">About</h1>
+        <div class="prose">
+            <p class="lede" style="margin-bottom:16px">Research Assistant &amp; PhD Candidate, Atılım University.</p>
+            <p>
+                I am a research assistant at Atılım University. I work on efficient
+                algorithms for wireless communication systems, in particular
+                faster-than-Nyquist (FTN) signaling and
+                demodulation techniques.
+            </p>
+            <p>
+                This website is a central hub for the tools, schedulers and resources
+                I share with my students and colleagues.
+            </p>
+
+            <div class="sec" style="margin-top:44px"><h2>Skills &amp; expertise</h2></div>
+        <dl class="skills">
+            <div>
+                <dt>Research areas</dt>
+                <dd>Wireless telecommunications, FPGA design, error-correction codes (ECC), OpenAirInterface 5G, VLSI</dd>
+            </div>
+            <div>
+                <dt>Programming</dt>
+                <dd>C, C++, C#, Java, MATLAB, Python, Verilog HDL, VHDL, LaTeX</dd>
+            </div>
+            <div>
+                <dt>Web</dt>
+                <dd>HTML5, CSS3, JavaScript, React, Node.js, Django</dd>
+            </div>
+            <div>
+                <dt>Tools &amp; platforms</dt>
+                <dd>Simulink, Git, Docker, Linux, PetaLinux, Ansys HFSS, AMD Vivado, Altera tools</dd>
+            </div>
+        </dl>
+
+            <div class="sec" style="margin-top:44px"><h2>Contact</h2></div>
+            <dl class="kv">
+                <div><dt>Email</dt><dd><a href="mailto:emre.cerci@atilim.edu.tr">emre.cerci@atilim.edu.tr</a></dd></div>
+                <div><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">Emre Çerçi</a></dd></div>
+                <div><dt>GitHub</dt><dd><a href="https://github.com/ecerci-atilim" rel="noopener">ecerci-atilim</a></dd></div>
+                <div><dt>Office hours</dt><dd><a href="schedule.html">Weekly schedule</a></dd></div>
+            </dl>
+        </div>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
     </main>
 
-    <footer class="site-footer">
-        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
-        <a href="index.html">Home</a>
-    </footer>
-
 </div>
+<script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 </body>
 </html>

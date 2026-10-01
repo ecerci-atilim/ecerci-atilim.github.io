@@ -1,6 +1,6 @@
-/* v2 prototype — reads schedule-config.js and renders the timeline, the agenda,
+/* Reads schedule-config.js and renders the timeline, the agenda,
    the playhead and the one-line status. Everything is Ankara time. */
-window.V2 = (function () {
+window.Schedule = (function () {
   'use strict';
 
   var DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -174,4 +174,15 @@ window.V2 = (function () {
   }
 
   return { now: now, renderTimeline: renderTimeline, updatePlayhead: updatePlayhead, renderAgenda: renderAgenda, renderStatus: renderStatus, legend: legend, status: status };
+})();
+
+// Every page carries the rail; keep its one-line status current.
+(function () {
+  function run() {
+    var el = document.getElementById('rail-now');
+    if (!el || typeof window.scheduleData === 'undefined') return;
+    Schedule.renderStatus(el);
+    setInterval(function () { Schedule.renderStatus(el); }, 30000);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();

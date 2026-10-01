@@ -22,23 +22,30 @@
     </style>
 </head>
 <body>
-<div class="page">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html">Home</a>
-                <a href="about.html">About</a>
-                <a href="schedule.html">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
 
-    <main>
+    <main class="content">
         <div class="gate">
             <p class="eyebrow">Restricted document</p>
             <h1>MÜDEK Document</h1>
@@ -51,15 +58,16 @@
             </form>
             <div class="notice notice--error" id="error-msg" role="alert">Incorrect PIN. Please try again.</div>
         </div>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
     </main>
-
-    <footer class="site-footer">
-        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
-        <a href="index.html">Home</a>
-    </footer>
 
 </div>
 
+<script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 <script>
     // PIN is stored as base64 for simple obfuscation (not real security).
     // Default PIN: "mudek" — change this encoded value to update the PIN.

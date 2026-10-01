@@ -5,212 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Emre Cerci</title>
     <meta name="description" content="Research Assistant and PhD candidate at Atılım University.">
-    <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
-
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/site.css">
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
-
     <style>
-        .now { margin: -0.5rem 0 1.75rem; font-size: 0.9375rem; color: var(--fg-2); line-height: 1.55; }
-        .now[hidden] { display: none; }
-        .now-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--fg-3); margin-right: 9px; vertical-align: 1px; }
-        .now--free .now-dot { background: var(--accent); }
-        .now--busy .now-dot { background: var(--danger); }
-        .now--break .now-dot, .now--leave .now-dot { background: var(--warm); }
-        .now strong { color: var(--fg); font-weight: 500; }
-        .now a { margin-left: 8px; white-space: nowrap; }
+        .week { margin-bottom: 8px; }
+        @media (max-width: 899px) { .week .tl { --slot-h: 9px; } }
     </style>
 </head>
-<body>
-<div class="page">
+<body class="home">
+<div class="frame">
 
-    <header class="masthead">
-        <a class="masthead-name" href="index.html">Emre Cerci</a>
-        <div class="masthead-right">
-            <nav class="site-nav" aria-label="Site">
-                <a href="index.html" aria-current="page">Home</a>
-                <a href="about.html">About</a>
-                <a href="schedule.html">Schedule</a>
-            </nav>
-            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
-                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>
-            </button>
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
         </div>
-    </header>
-
-    <main>
-        <div class="page-head">
-            <p class="eyebrow">Research Assistant · PhD Candidate · Telecommunications</p>
-            <h1>Emre Cerci</h1>
-            <p class="lede">
-                I work on efficient algorithms for wireless communication
-                systems: faster-than-Nyquist (FTN) signaling and a range of
-                demodulation techniques. This page
-                collects the tools and resources I share with students and colleagues.
-            </p>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html" aria-current="page">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
         </div>
+    </aside>
 
-        <p class="now" id="now-line" hidden>
-            <span class="now-dot" aria-hidden="true"></span>
-            <span id="now-text"></span>
-            <a href="schedule.html" id="now-link">Full schedule →</a>
-        </p>
+    <main class="content">
+        <h1 class="visually-hidden">Emre Cerci — home</h1>
 
-        <div class="section-head">
+        <div class="sec">
+            <h2>This week</h2>
+            <span class="meta" id="week-range"></span>
+        </div>
+        <div class="week"><div class="tl" id="week"></div></div>
+        <div class="legend" id="legend"></div>
+
+        <div class="sec" style="margin-top:56px">
             <h2>Tools</h2>
-            <span class="eyebrow">For students &amp; colleagues</span>
+            <span class="meta">For students and colleagues</span>
         </div>
-        <ol class="toc">
-            <li>
-                <a href="schedule.html">
-                    <span class="toc-name">Weekly Schedule</span>
-                    <span class="toc-desc">Office hours, laboratories and live availability for the current term.</span>
-                    <span class="toc-tag tag tag--accent">Info</span>
-                </a>
-            </li>
-            <li>
-                <a href="timer2.html">
-                    <span class="toc-name">Exam Timer</span>
-                    <span class="toc-desc">Full-screen countdown for the projector, with a no-leave period and adjustable time.</span>
-                    <span class="toc-tag tag">Tool</span>
-                </a>
-            </li>
-            <li>
-                <a href="seating-plan.html">
-                    <span class="toc-name">Seating Generator</span>
-                    <span class="toc-desc">Exam seating plans from a CSV list across classrooms; printable attendance and door sheets.</span>
-                    <span class="toc-tag tag">Tool</span>
-                </a>
-            </li>
-            <li>
-                <a href="qr-generator.html">
-                    <span class="toc-name">QR Generator</span>
-                    <span class="toc-desc">URL, text, Wi-Fi and contact codes with colour and size options; PNG download.</span>
-                    <span class="toc-tag tag">Tool</span>
-                </a>
-            </li>
-            <li>
-                <a href="mbcjr.html">
-                    <span class="toc-name">M-BCJR Simulator</span>
-                    <span class="toc-desc">Interactive FTN trellis diagram with a noise-free Max-Log-BCJR detector and signal plots.</span>
-                    <span class="toc-tag tag">Demo</span>
-                </a>
-            </li>
-            <li>
-                <a href="mbcjr-new.html">
-                    <span class="toc-name">Trellis Path Enumerator</span>
-                    <span class="toc-desc">Every valid path through the FTN trellis with its τ sequence and peak locations; JSON export.</span>
-                    <span class="toc-tag tag">Demo</span>
-                </a>
-            </li>
-            <li>
-                <a href="https://eebk-mudek.vercel.app" rel="noopener">
-                    <span class="toc-name">MÜDEK Dashboard</span>
-                    <span class="toc-desc">Accreditation dashboard for the department (external site).</span>
-                    <span class="toc-tag tag">External</span>
-                </a>
-            </li>
-            <li>
-                <a href="pdf-gate.html">
-                    <span class="toc-name">MÜDEK Document</span>
-                    <span class="toc-desc">PIN-protected PDF containing personal data under KVKK.</span>
-                    <span class="toc-tag tag tag--warm">Restricted</span>
-                </a>
-            </li>
-        </ol>
+        <ul class="tools">
+            <li><a href="schedule.html"><span class="n">Weekly schedule</span><span class="d">Office hours, laboratories and live availability.</span></a></li>
+            <li><a href="timer2.html"><span class="n">Exam timer</span><span class="d">Full-screen countdown for the projector, with a no-leave period.</span></a></li>
+            <li><a href="seating-plan.html"><span class="n">Seating generator</span><span class="d">Exam seating plans from a CSV list; printable attendance and door sheets.</span></a></li>
+            <li><a href="qr-generator.html"><span class="n">QR generator</span><span class="d">URL, text, Wi-Fi and contact codes; PNG download.</span></a></li>
+            <li><a href="mbcjr.html"><span class="n">M-BCJR simulator</span><span class="d">FTN trellis diagram with a noise-free Max-Log-BCJR detector.</span></a></li>
+            <li><a href="mbcjr-new.html"><span class="n">Trellis path enumerator</span><span class="d">Every valid FTN trellis path with τ sequence and peak locations.</span></a></li>
+            <li><a href="https://eebk-mudek.vercel.app" rel="noopener"><span class="n">MÜDEK dashboard</span><span class="d">Accreditation dashboard for the department.<em>external</em></span></a></li>
+            <li><a href="pdf-gate.html"><span class="n">MÜDEK document</span><span class="d">PIN-protected PDF with personal data under KVKK.<em>restricted</em></span></a></li>
+        </ul>
 
-        <div class="section-head">
-            <h2>Elsewhere</h2>
-        </div>
-        <dl class="kv">
-            <div><dt>Email</dt><dd><a href="mailto:emre.cerci@atilim.edu.tr">emre.cerci@atilim.edu.tr</a></dd></div>
-            <div><dt>GitHub</dt><dd><a href="https://github.com/ecerci-atilim?tab=repositories" rel="noopener">github.com/ecerci-atilim</a></dd></div>
-            <div><dt>LinkedIn</dt><dd><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">Emre Çerçi</a></dd></div>
-        </dl>
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
     </main>
-
-    <footer class="site-footer">
-        <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
-        <a href="legacy/index.html">Previous design</a>
-    </footer>
 
 </div>
 
 <script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
 <script>
-// One line of live availability, computed from schedule-config.js in Ankara time.
 (function () {
-    'use strict';
-    var line = document.getElementById('now-line'), text = document.getElementById('now-text');
-    if (!line || typeof window.scheduleData === 'undefined') return;
-
-    var DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    var LABEL = { monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday' };
-    var START = 8 * 60 + 30, END = 17 * 60 + 30;
-    var fmt = null;
-    try { fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Istanbul', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch (e) {}
-    function nowTR() {
-        if (!fmt) return new Date();
-        var p = {}; fmt.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
-        return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
-    }
-    function toMin(s) { var p = String(s).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function hm(min) { return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
-    function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-    function events(day) { return ((window.scheduleData || {})[day] || []).slice().sort(function (a, b) { return toMin(a.start) - toMin(b.start); }); }
-    function onLeave(d) { return Array.isArray(window.leaveDays) && window.leaveDays.indexOf(ymd(d)) !== -1; }
-    function set(cls, html) { line.className = 'now ' + cls; text.innerHTML = html; line.hidden = false; }
-    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-    function describe(ev) { return '<strong>' + esc(ev.activity) + '</strong>' + (ev.location ? ', ' + esc(ev.location) : ''); }
-
-    // Next event from a given day/minute, scanning up to a week ahead.
-    function nextEvent(now) {
-        for (var off = 0; off < 8; off++) {
-            var d = new Date(now); d.setDate(now.getDate() + off);
-            if (onLeave(d)) continue;
-            var list = events(DAYS[d.getDay()]);
-            for (var i = 0; i < list.length; i++) {
-                if (list[i].category === 'break') continue;
-                if (off === 0 && toMin(list[i].start) <= now.getHours() * 60 + now.getMinutes()) continue;
-                return { ev: list[i], day: DAYS[d.getDay()], today: off === 0, tomorrow: off === 1 };
-            }
-        }
-        return null;
-    }
-
-    function render() {
-        if (window.onLeave === true) { set('now--leave', 'Currently on leave.'); return; }
-        var now = nowTR(), day = DAYS[now.getDay()], min = now.getHours() * 60 + now.getMinutes();
-        var when = function (n) { return n.today ? 'today at ' + hm(toMin(n.ev.start)) : (n.tomorrow ? 'tomorrow' : LABEL[n.day]) + ' at ' + hm(toMin(n.ev.start)); };
-
-        if (onLeave(now)) {
-            var n0 = nextEvent(now);
-            set('now--leave', 'On leave today.' + (n0 ? ' Next: ' + describe(n0.ev) + ', ' + when(n0) + '.' : ''));
-            return;
-        }
-        var list = events(day), current = null, upcoming = null;
-        for (var i = 0; i < list.length; i++) {
-            var s = toMin(list[i].start), e = toMin(list[i].end);
-            if (min >= s && min < e) current = list[i];
-            else if (s > min && !upcoming) upcoming = list[i];
-        }
-        var working = min >= START && min < END && day !== 'sunday' && (day !== 'saturday' || list.length);
-        if (current) {
-            var isBreak = current.category === 'break' || /lunch|break/i.test(current.activity);
-            set(isBreak ? 'now--break' : 'now--busy', 'Now: ' + describe(current) + ' until ' + hm(toMin(current.end)) + '.');
-        } else if (working) {
-            set('now--free', 'Available now' + (upcoming ? ' until ' + hm(toMin(upcoming.start)) + ' (' + esc(upcoming.activity) + ')' : ' for the rest of the day') + '.');
-        } else {
-            var n = nextEvent(now);
-            set('now--off', 'Off duty.' + (n ? ' Next: ' + describe(n.ev) + ', ' + when(n) + '.' : ''));
-        }
-    }
-    render();
-    setInterval(render, 60 * 1000);
+    if (typeof window.scheduleData === 'undefined') return;
+    var week = document.getElementById('week');
+    Schedule.renderTimeline(week, { compact: true });
+    Schedule.legend(document.getElementById('legend'));
+    var n = Schedule.now(), off = n.getDay() === 0 ? -6 : 1 - n.getDay();
+    var a = new Date(n); a.setDate(n.getDate() + off); var b = new Date(a); b.setDate(a.getDate() + 4);
+    var M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('week-range').textContent = M[a.getMonth()] + ' ' + a.getDate() + ' – ' + M[b.getMonth()] + ' ' + b.getDate() + ' · Ankara time';
+    setInterval(function () { Schedule.updatePlayhead(week); }, 30000);
 })();
 </script>
 </body>
