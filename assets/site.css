@@ -244,7 +244,7 @@ code, kbd { font-family: var(--mono); font-size: 0.875em; background: var(--bg-2
 
 /* Leave screen (schedule) — dark, with the glitch title from the current site */
 body.leave-mode { --text-primary: #ECEAE4; --text-secondary: #8E8B84; background: #0C0C0E; color: var(--text-primary); }
-body.leave-mode .frame > * { display: none !important; }
+body.leave-mode .frame { display: none !important; }
 body.leave-mode, body.leave-mode * { cursor: default !important; user-select: none; -webkit-user-select: none; }
 .leave-screen { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
 body.leave-mode .leave-screen { display: flex !important; }
