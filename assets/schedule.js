@@ -256,7 +256,15 @@ window.Schedule = (function () {
       }
       el.textContent = out.replace(/\s+$/, '');
       if (i >= steps) { clearInterval(el._timer); el.textContent = to; if (done) done(); }
-    }, 38);
+    }, 32);
+  }
+
+  function tear(block) {
+    block.classList.remove('is-glitching');
+    void block.offsetWidth; // restart the animation
+    block.classList.add('is-glitching');
+    clearTimeout(block._tear);
+    block._tear = setTimeout(function () { block.classList.remove('is-glitching'); }, 320);
   }
 
   document.addEventListener('click', function (e) {
@@ -266,19 +274,23 @@ window.Schedule = (function () {
     if (!label) return;
     if (label.dataset.original === undefined) label.dataset.original = label.textContent;
     var original = label.dataset.original;
+
+    // A second tap while it is still glitching: it gets angry.
+    var angry = !!block._busy;
+    if (angry) block.classList.add('is-angry');
+    var message = angry ? MESSAGE + '!' : MESSAGE;
+
     clearInterval(label._timer); clearTimeout(label._hold);
-
-    block.classList.remove('is-glitching');
-    void block.offsetWidth; // restart the animation on repeated taps
-    block.classList.add('is-glitching');
-    setTimeout(function () { block.classList.remove('is-glitching'); }, 520);
-
-    morph(label, label.textContent, MESSAGE, 10, function () {
+    block._busy = true;
+    tear(block);
+    morph(label, label.textContent, message, 6, function () {
       label._hold = setTimeout(function () {
-        block.classList.remove('is-glitching'); void block.offsetWidth; block.classList.add('is-glitching');
-        setTimeout(function () { block.classList.remove('is-glitching'); }, 520);
-        morph(label, MESSAGE, original, 10);
-      }, 900);
+        tear(block);
+        morph(label, message, original, 6, function () {
+          block._busy = false;
+          block.classList.remove('is-angry');
+        });
+      }, angry ? 700 : 420);
     });
   });
 })();

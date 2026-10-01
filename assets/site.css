@@ -439,8 +439,11 @@ input::placeholder { color: var(--fg-3); }
 
 /* Easter egg: tap a break or a leave day (see schedule.js) */
 .tl-ev--hatch, .tl-leave { -webkit-tap-highlight-color: transparent; }
-.tl-ev--hatch.is-glitching, .tl-leave.is-glitching { animation: tear 0.52s steps(1, end); z-index: 2; }
-.tl-ev--hatch.is-glitching strong, .tl-leave.is-glitching span { animation: split 0.52s steps(1, end); }
+.tl-ev--hatch.is-glitching, .tl-leave.is-glitching { animation: tear 0.32s steps(1, end); z-index: 2; }
+.tl-ev--hatch.is-glitching strong, .tl-leave.is-glitching span { animation: split 0.32s steps(1, end); }
+.tl-ev--hatch.is-angry, .tl-leave.is-angry { background: var(--now); color: #fff; transition: background 0.08s; }
+.tl-ev--hatch.is-angry .t, .tl-ev--hatch.is-angry .l { opacity: 0.9; }
+.tl-leave.is-angry span { background: transparent; color: #fff; }
 @keyframes tear {
   0%   { transform: translate(0, 0);     clip-path: inset(0 0 0 0); }
   10%  { transform: translate(-3px, 0);  clip-path: inset(12% 0 58% 0); }
