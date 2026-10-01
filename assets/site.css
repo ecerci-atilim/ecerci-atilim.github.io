@@ -436,3 +436,30 @@ input::placeholder { color: var(--fg-3); }
   .content { padding: 0; max-width: none; }
   a { color: inherit; text-decoration: none; }
 }
+
+/* Easter egg: tap a break or a leave day (see schedule.js) */
+.tl-ev--hatch, .tl-leave { -webkit-tap-highlight-color: transparent; }
+.tl-ev--hatch.is-glitching, .tl-leave.is-glitching { animation: tear 0.32s steps(1, end); z-index: 2; }
+.tl-ev--hatch.is-glitching strong, .tl-leave.is-glitching span { animation: split 0.32s steps(1, end); }
+.tl-ev--hatch.is-angry, .tl-leave.is-angry { background: var(--now); color: #fff; transition: background 0.08s; }
+.tl-ev--hatch.is-angry .t, .tl-ev--hatch.is-angry .l { opacity: 0.9; }
+.tl-leave.is-angry span { background: transparent; color: #fff; }
+@keyframes tear {
+  0%   { transform: translate(0, 0);     clip-path: inset(0 0 0 0); }
+  10%  { transform: translate(-3px, 0);  clip-path: inset(12% 0 58% 0); }
+  20%  { transform: translate(3px, 1px); clip-path: inset(55% 0 8% 0); }
+  30%  { transform: translate(-2px, 0);  clip-path: inset(0 0 0 0); }
+  40%  { transform: translate(4px, -1px); clip-path: inset(30% 0 40% 0); }
+  50%  { transform: translate(-1px, 0);  clip-path: inset(0 0 0 0); }
+  60%  { transform: translate(2px, 0);   clip-path: inset(70% 0 4% 0); }
+  70%  { transform: translate(-3px, 1px); clip-path: inset(0 0 0 0); }
+  85%  { transform: translate(1px, 0);   clip-path: inset(18% 0 66% 0); }
+  100% { transform: translate(0, 0);     clip-path: inset(0 0 0 0); }
+}
+@keyframes split {
+  0%   { text-shadow: 2px 0 var(--now), -2px 0 #00d1ff; }
+  25%  { text-shadow: -3px 0 var(--now), 3px 0 #00d1ff; }
+  50%  { text-shadow: 4px 0 var(--now), -4px 0 #00d1ff; }
+  75%  { text-shadow: -2px 0 var(--now), 2px 0 #00d1ff; }
+  100% { text-shadow: none; }
+}

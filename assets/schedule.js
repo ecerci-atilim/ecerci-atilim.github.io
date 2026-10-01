@@ -235,3 +235,62 @@ window.Schedule = (function () {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
 })();
+
+// Easter egg: tapping a break or a leave day makes it glitch and, for a
+// moment, say what it means.
+(function () {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var SYMBOLS = '█▓▒░◇◈╳╋▪▫◢◣◤◥▚▞⌬◉#@*?$%&';
+  var MESSAGE = 'Do not disturb';
+  function sym() { return SYMBOLS.charAt(Math.floor(Math.random() * SYMBOLS.length)); }
+
+  // Morph `from` into `to` over `steps` ticks: characters settle left to right.
+  function morph(el, from, to, steps, done) {
+    var len = Math.max(from.length, to.length), i = 0;
+    el._timer = setInterval(function () {
+      i++;
+      var settled = Math.floor(len * i / steps), out = '';
+      for (var k = 0; k < len; k++) {
+        if (k < settled) out += to.charAt(k);
+        else out += (from.charAt(k) === ' ' && Math.random() < 0.5) ? ' ' : sym();
+      }
+      el.textContent = out.replace(/\s+$/, '');
+      if (i >= steps) { clearInterval(el._timer); el.textContent = to; if (done) done(); }
+    }, 32);
+  }
+
+  function tear(block) {
+    block.classList.remove('is-glitching');
+    void block.offsetWidth; // restart the animation
+    block.classList.add('is-glitching');
+    clearTimeout(block._tear);
+    block._tear = setTimeout(function () { block.classList.remove('is-glitching'); }, 320);
+  }
+
+  document.addEventListener('click', function (e) {
+    var block = e.target.closest('.tl-ev--hatch, .tl-leave');
+    if (!block) return;
+    var label = block.querySelector('strong, span');
+    if (!label) return;
+    if (label.dataset.original === undefined) label.dataset.original = label.textContent;
+    var original = label.dataset.original;
+
+    // A second tap while it is still glitching: it gets angry.
+    var angry = !!block._busy;
+    if (angry) block.classList.add('is-angry');
+    var message = angry ? MESSAGE + '!' : MESSAGE;
+
+    clearInterval(label._timer); clearTimeout(label._hold);
+    block._busy = true;
+    tear(block);
+    morph(label, label.textContent, message, 6, function () {
+      label._hold = setTimeout(function () {
+        tear(block);
+        morph(label, message, original, 6, function () {
+          block._busy = false;
+          block.classList.remove('is-angry');
+        });
+      }, angry ? 700 : 1000);
+    });
+  });
+})();
