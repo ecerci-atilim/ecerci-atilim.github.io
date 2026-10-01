@@ -65,6 +65,19 @@ Notes:
 - Commit and push; the Pages workflow deploys `main`. If the site does not
   update within a few minutes, run the workflow manually from the Actions tab.
 
+## Updating CSS or JS
+
+Pages link `assets/*.css` and `assets/*.js` with a version tag
+(`site.css?v=1a2b3c4d`). After changing anything in `assets/`, run
+
+```sh
+python3 scripts/version-assets.py
+```
+
+so the tags change and phones stop using the cached old copy. Editing
+`schedule-config.js` does not need this; GitHub Pages serves it with a
+10-minute cache.
+
 ## Design
 
 The organising idea is the time axis. A left rail is the spine of every
