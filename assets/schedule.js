@@ -290,7 +290,7 @@ window.Schedule = (function () {
           block._busy = false;
           block.classList.remove('is-angry');
         });
-      }, angry ? 700 : 420);
+      }, angry ? 700 : 1000);
     });
   });
 })();
