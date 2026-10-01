@@ -3,281 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive QR Code Generator</title>
-    
+    <title>QR Generator - Emre Cerci</title>
+    <meta name="description" content="Generate QR codes for URLs, text, Wi-Fi networks and contact cards. Runs entirely in the browser.">
+    <meta name="theme-color" content="#F7F5F0" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#161513" media="(prefers-color-scheme: dark)">
+
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/site.css">
+    <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+    <script src="assets/site.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0/lib/qr-code-styling.js"></script>
 
-    <!-- Theme system -->
-    <script src="theme.js"></script>
-
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            line-height: 1.6;
-            background-color: #f8f9fa;
-            color: #212529;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.07);
-        }
-        h1 {
-            text-align: center;
-            color: #0056b3;
-            margin-bottom: 25px;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 15px;
-        }
-        .main-content {
-            display: flex;
-            gap: 30px;
-        }
-        .options-panel {
-            flex: 3;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .preview-panel {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            border: 1px dashed #ced4da;
-            border-radius: 8px;
-            min-height: 300px;
-        }
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 10px;
-        }
-        .tab {
-            padding: 10px 15px;
-            cursor: pointer;
-            border: none;
-            background-color: transparent;
-            font-size: 1em;
-            color: #6c757d;
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
-        }
-        .tab.active {
-            color: #0056b3;
-            border-bottom-color: #007bff;
-            font-weight: 600;
-        }
-        .form-section { display: none; }
-        .form-section.active { display: block; }
-        .form-group { margin-bottom: 15px; }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #495057;
-        }
-        input[type="text"], input[type="url"], input[type="email"], input[type="tel"], input[type="password"], input[type="number"], textarea, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 1em;
-        }
-        textarea { resize: vertical; min-height: 80px; }
-        .customization-section {
-            border-top: 1px solid #dee2e6;
-            padding-top: 20px;
-        }
-        h3 {
-            margin-bottom: 15px;
-            color: #343a40;
-        }
-        .color-options, .size-options {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        .color-picker-wrapper { display: flex; align-items: center; gap: 5px; }
-        input[type="color"] {
-            width: 40px;
-            height: 40px;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-        }
-        #qr-canvas {
-            border: 1px solid #e9ecef;
-            padding: 10px;
-            background-color: #fff;
-            margin-bottom: 20px;
-        }
-        #download-btn {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        #download-btn:hover { background-color: #0056b3; }
+        .qr-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+        @media (min-width: 820px) { .qr-layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 2.5rem 3.5rem; align-items: start; } .qr-preview { position: sticky; top: 24px; } }
 
-        @media (max-width: 800px) {
-            .main-content { flex-direction: column; }
-            .preview-panel { order: -1; margin-bottom: 20px; }
-        }
+        .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule-2); margin-bottom: 1.25rem; overflow-x: auto; }
+        .tab { appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 8px 14px; font: 500 0.9375rem var(--font-sans); color: var(--fg-2); cursor: pointer; white-space: nowrap; }
+        .tab:hover { color: var(--fg); }
+        .tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+        .form-section { display: none; }
+        .form-section.active { display: grid; gap: 14px; }
+
+        .qr-preview { display: grid; gap: 14px; justify-items: center; }
+        #qr-canvas { padding: 12px; background: #fff; border: 1px solid var(--rule); border-radius: 6px; line-height: 0; max-width: 100%; overflow: hidden; }
+        #qr-canvas canvas, #qr-canvas svg { max-width: 100%; height: auto !important; }
+        .qr-preview .btn { width: 100%; max-width: 324px; }
+        .colors { display: flex; gap: 20px; flex-wrap: wrap; }
+        .colors .field { grid-template-columns: auto auto; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>QR Code Generator</h1>
-        <div class="main-content">
-            <div class="options-panel">
-                <div class="tabs">
-                    <button class="tab active" data-tab="url">URL</button>
-                    <button class="tab" data-tab="text">Text</button>
-                    <button class="tab" data-tab="wifi">Wi-Fi</button>
-                    <button class="tab" data-tab="vcard">Contact</button>
+<div class="frame">
+
+    <aside class="rail">
+        <div>
+            <a class="rail-name" href="index.html">Emre Cerci</a>
+            <p class="rail-role">Research Assistant &amp; PhD Candidate, Atılım University. Wireless communications, FTN signaling.</p>
+        </div>
+        <nav class="rail-nav" aria-label="Site">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="schedule.html">Schedule</a>
+        </nav>
+        <div class="rail-now" id="rail-now"><span class="dot" aria-hidden="true"></span><span class="txt">…</span><a href="schedule.html">Full schedule</a></div>
+        <div class="rail-foot">
+            <div class="links">
+                <a href="mailto:emre.cerci@atilim.edu.tr">Email</a>
+                <a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a>
+                <a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a>
+            </div>
+            <button class="theme-toggle" type="button" aria-label="Toggle dark mode">Dark</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="page-head">
+            <p class="eyebrow">Tool</p>
+            <h1>QR Generator</h1>
+            <p class="lede">URL, text, Wi-Fi and contact codes. Everything is generated in your browser; nothing is uploaded.</p>
+        </div>
+
+        <div class="qr-layout">
+            <div>
+                <div class="tabs" role="tablist" aria-label="Content type">
+                    <button class="tab" role="tab" aria-selected="true" data-tab="url">URL</button>
+                    <button class="tab" role="tab" aria-selected="false" data-tab="text">Text</button>
+                    <button class="tab" role="tab" aria-selected="false" data-tab="wifi">Wi-Fi</button>
+                    <button class="tab" role="tab" aria-selected="false" data-tab="vcard">Contact</button>
                 </div>
 
-                <div id="form-url" class="form-section active">
-                    <div class="form-group">
+                <div id="form-url" class="form-section active" role="tabpanel">
+                    <div class="field">
                         <label for="url-input">Website URL</label>
-                        <input type="url" id="url-input" placeholder="https://example.com" value="https://www.google.com">
+                        <input type="url" id="url-input" placeholder="https://example.com" value="https://ecerci-atilim.github.io">
                     </div>
                 </div>
 
-                <div id="form-text" class="form-section">
-                    <div class="form-group">
-                        <label for="text-input">Your Text</label>
-                        <textarea id="text-input" placeholder="Enter any text here..."></textarea>
+                <div id="form-text" class="form-section" role="tabpanel">
+                    <div class="field">
+                        <label for="text-input">Text</label>
+                        <textarea id="text-input" placeholder="Any text…"></textarea>
                     </div>
                 </div>
-                
-                <div id="form-wifi" class="form-section">
-                    <div class="form-group">
-                        <label for="wifi-ssid">Network Name (SSID)</label>
-                        <input type="text" id="wifi-ssid" placeholder="My Home Network">
+
+                <div id="form-wifi" class="form-section" role="tabpanel">
+                    <div class="field">
+                        <label for="wifi-ssid">Network name (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="My network">
                     </div>
-                    <div class="form-group">
+                    <div class="field">
                         <label for="wifi-password">Password</label>
                         <input type="password" id="wifi-password" placeholder="Password">
                     </div>
-                    <div class="form-group">
+                    <div class="field">
                         <label for="wifi-encryption">Encryption</label>
                         <select id="wifi-encryption">
-                            <option value="WPA" selected>WPA/WPA2</option>
+                            <option value="WPA" selected>WPA / WPA2</option>
                             <option value="WEP">WEP</option>
                             <option value="nopass">None</option>
                         </select>
                     </div>
                 </div>
-                
-                <div id="form-vcard" class="form-section">
-                     <div class="form-group"><label for="vcard-fn">Full Name</label><input type="text" id="vcard-fn" placeholder="John Doe"></div>
-                     <div class="form-group"><label for="vcard-org">Organization</label><input type="text" id="vcard-org" placeholder="ACME Inc."></div>
-                     <div class="form-group"><label for="vcard-tel">Phone</label><input type="tel" id="vcard-tel" placeholder="+1-202-555-0199"></div>
-                     <div class="form-group"><label for="vcard-email">Email</label><input type="email" id="vcard-email" placeholder="john.doe@example.com"></div>
+
+                <div id="form-vcard" class="form-section" role="tabpanel">
+                    <div class="form-grid">
+                        <div class="field span-2"><label for="vcard-fn">Full name</label><input type="text" id="vcard-fn" placeholder="Jane Doe"></div>
+                        <div class="field span-2"><label for="vcard-org">Organisation</label><input type="text" id="vcard-org" placeholder="Atılım University"></div>
+                        <div class="field"><label for="vcard-tel">Phone</label><input type="tel" id="vcard-tel" placeholder="+90 312 000 00 00"></div>
+                        <div class="field"><label for="vcard-email">Email</label><input type="email" id="vcard-email" placeholder="jane@example.com"></div>
+                    </div>
                 </div>
 
-                <div class="customization-section">
-                    <h3>Customization</h3>
-                    <div class="form-group size-options">
+                <div class="section-head"><h2>Appearance</h2></div>
+                <div class="form-grid">
+                    <div class="field">
                         <label for="size-input">Size (px)</label>
                         <input type="number" id="size-input" value="300" min="100" max="1000" step="10">
                     </div>
-                    <div class="form-group color-options">
-                        <div class="color-picker-wrapper">
-                            <label for="color-dark">Dots</label>
-                            <input type="color" id="color-dark" value="#000000">
-                        </div>
-                        <div class="color-picker-wrapper">
-                            <label for="color-light">Background</label>
-                            <input type="color" id="color-light" value="#ffffff">
-                        </div>
+                    <div class="colors">
+                        <div class="field"><label for="color-dark">Dots</label><input type="color" id="color-dark" value="#000000"></div>
+                        <div class="field"><label for="color-light">Background</label><input type="color" id="color-light" value="#ffffff"></div>
                     </div>
                 </div>
             </div>
-            <div class="preview-panel">
-                <div id="qr-canvas"></div>
-                <button id="download-btn">Download PNG</button>
+
+            <div class="qr-preview">
+                <div id="qr-canvas" role="img" aria-label="QR code preview"></div>
+                <button id="download-btn" class="btn btn--primary">Download PNG</button>
             </div>
         </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const qrCode = new QRCodeStyling({
-                width: 300,
-                height: 300,
-                data: "https://www.google.com",
-                dotsOptions: { color: "#000000", type: "rounded" },
-                backgroundOptions: { color: "#ffffff" },
-                imageOptions: { crossOrigin: "anonymous", margin: 10 }
-            });
-            qrCode.append(document.getElementById("qr-canvas"));
+        <footer class="content-foot">
+            <span>© <span data-year>2026</span> Emre Cerci · Atılım University</span>
+            <span><a href="mailto:emre.cerci@atilim.edu.tr">Email</a><a href="https://github.com/ecerci-atilim" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/emre-çerçi-82601242/" rel="noopener">LinkedIn</a></span>
+        </footer>
+    </main>
 
-            const updateQrCode = () => {
-                const activeTab = document.querySelector('.tab.active').dataset.tab;
-                let data = "";
-                
-                if (activeTab === 'url') {
-                    data = document.getElementById('url-input').value;
-                } else if (activeTab === 'text') {
-                    data = document.getElementById('text-input').value;
-                } else if (activeTab === 'wifi') {
-                    const ssid = document.getElementById('wifi-ssid').value;
-                    const password = document.getElementById('wifi-password').value;
-                    const encryption = document.getElementById('wifi-encryption').value;
-                    if (ssid) data = `WIFI:T:${encryption};S:${ssid};P:${password};;`;
-                } else if (activeTab === 'vcard') {
-                    const fn = document.getElementById('vcard-fn').value;
-                    const org = document.getElementById('vcard-org').value;
-                    const tel = document.getElementById('vcard-tel').value;
-                    const email = document.getElementById('vcard-email').value;
-                    data = `BEGIN:VCARD\nVERSION:3.0\nFN:${fn}\nORG:${org}\nTEL:${tel}\nEMAIL:${email}\nEND:VCARD`;
-                }
-                
-                const newOptions = {
-                    width: document.getElementById('size-input').value,
-                    height: document.getElementById('size-input').value,
-                    data: data || " ",
-                    dotsOptions: { color: document.getElementById('color-dark').value },
-                    backgroundOptions: { color: document.getElementById('color-light').value }
-                };
-                qrCode.update(newOptions);
-            };
-            
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelector('.tab.active').classList.remove('active');
-                    document.querySelector('.form-section.active').classList.remove('active');
-                    tab.classList.add('active');
-                    document.getElementById(`form-${tab.dataset.tab}`).classList.add('active');
-                    updateQrCode();
-                });
-            });
+</div>
 
-            document.querySelectorAll('input, textarea, select').forEach(input => {
-                input.addEventListener('input', updateQrCode);
-            });
+<script src="schedule-config.js"></script>
+<script src="assets/schedule.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var qrCode = new QRCodeStyling({
+        width: 300, height: 300,
+        data: 'https://ecerci-atilim.github.io',
+        dotsOptions: { color: '#000000', type: 'rounded' },
+        backgroundOptions: { color: '#ffffff' },
+        imageOptions: { crossOrigin: 'anonymous', margin: 10 }
+    });
+    qrCode.append(document.getElementById('qr-canvas'));
 
-            document.getElementById('download-btn').addEventListener('click', () => {
-                qrCode.download({ name: "qr-code", extension: "png" });
-            });
+    function activeTab() { return document.querySelector('.tab[aria-selected="true"]').dataset.tab; }
 
+    function updateQrCode() {
+        var tab = activeTab(), data = '';
+        if (tab === 'url') {
+            data = document.getElementById('url-input').value;
+        } else if (tab === 'text') {
+            data = document.getElementById('text-input').value;
+        } else if (tab === 'wifi') {
+            var ssid = document.getElementById('wifi-ssid').value;
+            var pw = document.getElementById('wifi-password').value;
+            var enc = document.getElementById('wifi-encryption').value;
+            if (ssid) data = 'WIFI:T:' + enc + ';S:' + ssid + ';P:' + pw + ';;';
+        } else if (tab === 'vcard') {
+            data = 'BEGIN:VCARD\nVERSION:3.0\nFN:' + document.getElementById('vcard-fn').value +
+                   '\nORG:' + document.getElementById('vcard-org').value +
+                   '\nTEL:' + document.getElementById('vcard-tel').value +
+                   '\nEMAIL:' + document.getElementById('vcard-email').value + '\nEND:VCARD';
+        }
+        var size = Math.min(1000, Math.max(100, parseInt(document.getElementById('size-input').value, 10) || 300));
+        qrCode.update({
+            width: size, height: size,
+            data: data || ' ',
+            dotsOptions: { color: document.getElementById('color-dark').value },
+            backgroundOptions: { color: document.getElementById('color-light').value }
+        });
+    }
+
+    document.querySelectorAll('.tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.tab').forEach(function (t) { t.setAttribute('aria-selected', 'false'); });
+            document.querySelectorAll('.form-section').forEach(function (s) { s.classList.remove('active'); });
+            tab.setAttribute('aria-selected', 'true');
+            document.getElementById('form-' + tab.dataset.tab).classList.add('active');
             updateQrCode();
         });
-    </script>
+    });
+    document.querySelectorAll('input, textarea, select').forEach(function (el) { el.addEventListener('input', updateQrCode); });
+    document.getElementById('download-btn').addEventListener('click', function () { qrCode.download({ name: 'qr-code', extension: 'png' }); });
+
+    updateQrCode();
+});
+</script>
 </body>
 </html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Seating Generator Pro</title>
+    <!-- Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Theme system -->
+    <script src="theme.js"></script>
+
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #2d3748 0%, #1a202c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent-color: #63b3ed;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-color: #48bb78;
+            --danger-color: #f56565;
+            
+            --shadow-soft: 0 8px 30px rgba(0,0,0,0.3);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            padding: 40px 20px;
+        }
+
+        /* --- ANIMATED BACKGROUND --- */
+        .floating-shapes {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 0; pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 50%;
+            animation: float 25s infinite ease-in-out;
+        }
+        .shape:nth-child(1) { width: 300px; height: 300px; left: -100px; top: -50px; }
+        .shape:nth-child(2) { width: 200px; height: 200px; right: 10%; top: 40%; animation-delay: -5s; }
+        .shape:nth-child(3) { width: 150px; height: 150px; left: 20%; bottom: 10%; animation-delay: -10s; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-40px); } }
+
+        /* --- LAYOUT --- */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative; z-index: 1;
+        }
+
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); transform: translateX(-5px); }
+
+        /* --- HEADER & STATS --- */
+        .header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
+        }
+        .app-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem; font-weight: 800;
+            background: var(--text-primary);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        
+        .btn-help {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary); border: 1px solid var(--glass-border);
+            padding: 10px 20px; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; gap: 8px; font-weight: 600;
+            transition: var(--transition);
+        }
+        .btn-help:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Stats Panel */
+        #stats-panel {
+            display: none; /* JS enables this */
+            grid-template-columns: repeat(3, 1fr); gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: var(--glass-bg); backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius: 16px;
+            padding: 20px; text-align: center;
+        }
+        .stat-value { display: block; font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 700; color: var(--accent-color); }
+        .stat-label { font-size: 0.9rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- CONTROLS GRID --- */
+        .controls-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 24px;
+            padding: 30px; box-shadow: var(--shadow-soft);
+        }
+
+        .section-label {
+            font-size: 1.1rem; font-weight: 700; color: var(--text-primary);
+            margin-bottom: 20px; display: block; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;
+        }
+
+        /* Inputs */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .full-width { grid-column: span 2; }
+        
+        .form-group label { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; }
+        
+        .modern-input {
+            width: 100%; padding: 12px;
+            background: var(--input-bg); border: 1px solid var(--glass-border);
+            border-radius: 12px; color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: var(--transition);
+        }
+        .modern-input:focus { outline: none; border-color: var(--accent-color); background: rgba(0,0,0,0.5); }
+        
+        /* Classroom List */
+        .classroom-container {
+            height: 300px; overflow-y: auto;
+            background: var(--input-bg); border-radius: 12px; padding: 10px;
+            border: 1px solid var(--glass-border);
+        }
+        .classroom-container::-webkit-scrollbar { width: 6px; }
+        .classroom-container::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+
+        .checkbox-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; border-radius: 8px; transition: background 0.2s;
+            cursor: pointer;
+        }
+        .checkbox-item:hover { background: rgba(255,255,255,0.05); }
+        .checkbox-item input { accent-color: var(--accent-color); width: 16px; height: 16px; }
+        .checkbox-item span { font-size: 0.9rem; color: var(--text-secondary); margin-left: auto; }
+
+        /* Radios */
+        .radio-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .radio-card {
+            position: relative; display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border: 1px solid var(--glass-border);
+            border-radius: 12px; cursor: pointer; transition: var(--transition);
+        }
+        .radio-card:hover { background: rgba(255,255,255,0.03); border-color: var(--accent-color); }
+        .radio-card input { accent-color: var(--accent-color); width: 16px; height: 16px; }
+
+        /* Actions */
+        .action-area { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        
+        .btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            font-weight: 600; font-size: 1rem; cursor: pointer;
+            transition: var(--transition); display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        
+        .btn-outline { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); }
+        .btn-outline:hover { background: rgba(99, 179, 237, 0.1); }
+        
+        .btn-primary { background: var(--accent-gradient); color: white; }
+        .btn-primary:hover { box-shadow: 0 0 20px rgba(190, 190, 190, 0.4); }
+
+        .print-actions { display: flex; gap: 10px; margin-top: 10px; display: none; } /* Hidden initially */
+        .btn-print { flex: 1; background: #2d3748; color: white; border: 1px solid var(--glass-border); }
+        .btn-print:hover { background: #4a5568; }
+
+        /* --- NEW: CUSTOM FILE UPLOAD --- */
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+        .file-upload-label {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; padding: 25px;
+            background: rgba(255,255,255,0.02);
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            gap: 10px;
+        }
+        .file-upload-label:hover {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+        .file-upload-icon {
+            width: 32px; height: 32px;
+            color: var(--accent-color);
+        }
+        .file-name-display {
+            font-size: 0.9rem;
+            text-align: center;
+            word-break: break-all;
+        }
+
+        /* --- OUTPUT AREA --- */
+        .seating-wrapper { margin-bottom: 40px; animation: fadeInUp 0.5s ease; }
+        .room-title { font-family: 'Outfit', sans-serif; font-size: 1.5rem; margin-bottom: 15px; color: var(--text-primary); border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; }
+        
+        .seating-grid {
+            display: grid; gap: 10px; padding: 20px;
+            background: var(--input-bg); border-radius: 16px; border: 1px solid var(--glass-border);
+            overflow-x: auto;
+        }
+
+        .board-indicator {
+            grid-column: 1 / -1; background: rgba(255,255,255,0.1);
+            color: var(--text-secondary); text-align: center; padding: 8px;
+            border-radius: 8px; margin-bottom: 15px; font-weight: 700; letter-spacing: 2px;
+        }
+
+        /* Screen Seat */
+        .seat {
+            background: rgba(255, 255, 255, 0.9); /* Light background for readability */
+            color: #1a202c; /* Dark text */
+            border-radius: 8px; min-height: 80px; padding: 8px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; transition: transform 0.2s;
+        }
+        .seat.occupied { cursor: grab; border-left: 4px solid var(--success-color); }
+        .seat.occupied:active { cursor: grabbing; }
+        .seat.empty { background: rgba(255, 255, 255, 0.05); color: var(--text-secondary); border: 1px dashed var(--glass-border); }
+        
+        .seat-num { position: absolute; top: 5px; left: 5px; font-size: 0.7rem; font-weight: 700; opacity: 0.5; }
+        .st-name { font-weight: 700; font-size: 0.85rem; text-align: center; margin-top: 15px; line-height: 1.2; }
+        .st-id { font-size: 0.75rem; text-align: center; opacity: 0.7; font-family: monospace; }
+        .empty-txt { margin: auto; font-size: 0.8rem; font-weight: 600; opacity: 0.5; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+            z-index: 100; display: none; align-items: center; justify-content: center;
+        }
+        .modal-card {
+            background: #1a202c; width: 95%; max-width: 700px;
+            border-radius: 24px; padding: 30px; border: 1px solid var(--glass-border);
+            max-height: 85vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+        .modal-header h3 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: var(--text-primary); }
+        .close-btn { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
+        
+        .instruction-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .instruction-item { margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid var(--glass-border); }
+        .instruction-item.full { grid-column: 1 / -1; }
+        .instruction-item h4 { color: var(--accent-color); margin-bottom: 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+        .instruction-item ul { padding-left: 20px; color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem; }
+        .instruction-item li { margin-bottom: 5px; }
+
+        #message-area { margin-bottom: 20px; padding: 15px; border-radius: 12px; display: none; }
+        .error { background: rgba(245, 101, 101, 0.2); color: #feb2b2; border: 1px solid #f56565; }
+        .warning { background: rgba(237, 137, 54, 0.2); color: #fbd38d; border: 1px solid #ed8936; }
+
+        /* --- PRINT STYLES (Overrides Everything for Paper) --- */
+        .print-header, .print-footer, .print-absent-check, .print-signature-area { display: none; }
+
+        @media print {
+            @page { margin: 5mm; size: portrait; }
+            body { 
+                background: white !important; color: black !important;
+                font-family: 'Times New Roman', serif !important;
+                padding: 0; width: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact;
+            }
+            
+            /* Hide UI */
+            .floating-shapes, .back-btn, .header-row, .controls-grid, .modal-overlay, #message-area, #stats-panel, .btn, .instructions {
+                display: none !important;
+            }
+            .app-container { max-width: 100%; margin: 0; padding: 0; }
+            .seating-wrapper { page-break-after: always; page-break-inside: avoid; width: 100%; display: flex; flex-direction: column; height: 99vh; }
+            .seating-wrapper:last-child { page-break-after: auto; }
+            .room-title { display: none; } /* Hide screen title */
+
+            /* Professional Header */
+            .print-header { display: block; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 10px; }
+            .print-header-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            .print-header-table td { padding: 2px; vertical-align: bottom; }
+            .print-header-title { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+
+            /* Grid Table Look */
+            .seating-grid {
+                display: grid; background: #000; /* Border color */
+                border: 2px solid #000; gap: 1px; padding: 0;
+                width: 100%; box-sizing: border-box; overflow: visible !important; border-radius: 0;
+            }
+
+            .board-indicator {
+                background: #e0e0e0 !important; color: #000 !important;
+                border: none !important; border-bottom: 2px solid #000 !important;
+                border-radius: 0 !important; padding: 5px; margin: 0;
+                font-family: 'Times New Roman', serif; letter-spacing: 0;
+            }
+
+            .seat, .grid-gap {
+                background: #fff !important; border: none !important; border-radius: 0 !important;
+                padding: 4px; page-break-inside: avoid; min-height: 65px;
+                color: #000 !important; box-shadow: none; border-left: none;
+            }
+
+            .seat-num { font-size: 10px; color: #000; font-weight: normal; position: static; opacity: 1; }
+            .st-name { margin: 0; font-size: 11px; font-weight: bold; text-transform: uppercase; color: #000; text-align: center; width: 100%; }
+            .st-id { font-size: 10px; color: #000; font-family: 'Courier New', monospace; opacity: 1; margin-top: 2px; }
+            
+            .seat.empty .empty-txt { 
+                display: block; font-size: 10px; color: #000 !important; opacity: 0.5;
+                text-transform: uppercase; letter-spacing: 1px; font-family: sans-serif;
+            }
+
+            /* Extras */
+            .print-absent-check { display: block; font-size: 9px; text-align: right; margin-top: 2px; }
+            .check-box-visual { display: inline-block; width: 10px; height: 10px; border: 1px solid #000; margin-left: 3px; vertical-align: middle; }
+            
+            body.print-attendance .print-signature-area { display: block; margin-top: auto; padding-top: 4px; width: 100%; }
+            body.print-attendance .signature-line { border-bottom: 1px solid #000 !important; height: 1px; width: 100%; margin: 0 auto; }
+            body.print-attendance .signature-label { font-size: 7px; text-align: center; display: block; font-style: italic; margin-top: 1px; }
+
+            .print-footer { display: block; margin-top: auto; padding-top: 10px; font-size: 12px; page-break-inside: avoid; }
+            .footer-proctor-section { display: flex; justify-content: space-between; border-top: 2px solid #000; padding-top: 10px; margin-bottom: 15px; }
+            .footer-notes-section { border: 1px solid #000 !important; height: 60px; padding: 8px; position: relative; }
+            .footer-notes-label { font-weight: bold; font-size: 11px; background: #fff; position: absolute; top: -8px; left: 10px; padding: 0 5px; }
+
+            body.print-attendance .door-title { display: none; }
+            body.print-door .attendance-title, body.print-door .print-signature-area, body.print-door .print-footer, body.print-door .print-absent-check { display: none; }
+            body.print-door .seat { justify-content: center; }
+        }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Mobile Responsive */
+        @media (max-width: 900px) {
+            .controls-grid { grid-template-columns: 1fr; }
+            .instruction-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="app-container">
+        <a href="index.html" class="back-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Home
+        </a>
+
+        <div class="header-row">
+            <div>
+                <h1 class="app-title">Exam Seating Pro</h1>
+                <p style="color:var(--text-secondary);">Advanced seating arrangement generator</p>
+            </div>
+            <button id="help-btn" class="btn-help">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Instructions
+            </button>
+        </div>
+
+        <div id="stats-panel">
+            <div class="stat-card">
+                <span id="stat-students" class="stat-value">0</span>
+                <span class="stat-label">Students</span>
+            </div>
+            <div class="stat-card">
+                <span id="stat-capacity" class="stat-value">0</span>
+                <span class="stat-label">Capacity</span>
+            </div>
+            <div class="stat-card">
+                <span id="stat-occupancy" class="stat-value">0%</span>
+                <span class="stat-label">Occupancy</span>
+            </div>
+        </div>
+
+        <div id="message-area"></div>
+
+        <div class="controls-grid">
+            <!-- Left Panel -->
+            <div class="glass-panel">
+                <span class="section-label">1. Exam Metadata & Classrooms</span>
+                <div class="input-grid">
+                    <div class="form-group">
+                        <label>Course Code</label>
+                        <input type="text" id="course-code" class="modern-input" placeholder="e.g. EE103">
+                    </div>
+                    <div class="form-group">
+                        <label>Course Name</label>
+                        <input type="text" id="course-name" class="modern-input" placeholder="Introduction to Electrical and Electronics Engineering">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Exam Name</label>
+                        <input type="text" id="exam-name" class="modern-input" placeholder="Midterm 1">
+                    </div>
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="exam-date" class="modern-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="exam-time" class="modern-input">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Proctor (Screen Only)</label>
+                        <input type="text" id="proctor-name" class="modern-input" placeholder="Instructor Name">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Classrooms</label>
+                    <div id="classroom-checkbox-container" class="classroom-container">
+                        <!-- JS injects checkboxes -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="glass-panel">
+                <span class="section-label">2. Configuration & Data</span>
+                
+                <div class="radio-group">
+                    <label class="form-group"><label>Capacity Mode</label></label>
+                    <label class="radio-card">
+                        <input type="radio" name="seatingMode" value="normal">
+                        <div>
+                            <div style="font-weight:600;">Normal Capacity</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">Full room usage</div>
+                        </div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="seatingMode" value="exam" checked>
+                        <div>
+                            <div style="font-weight:600;">Exam Capacity</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">Reduced/Spaced seating</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="radio-group">
+                    <label class="form-group"><label>Filling Strategy</label></label>
+                    <label class="radio-card">
+                        <input type="radio" name="fillingMode" value="packed" checked>
+                        <div>
+                            <div style="font-weight:600;">Packed & Priority</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">Seniors at front/aisles</div>
+                        </div>
+                    </label>
+                    <label class="radio-card">
+                        <input type="radio" name="fillingMode" value="spread">
+                        <div>
+                            <div style="font-weight:600;">Spread Out</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">Max distance between students</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="action-area">
+                    <button id="download-template-btn" class="btn btn-outline">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Download Template
+                    </button>
+                    
+                    <!-- MODERN FILE UPLOAD -->
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="student-list-upload" accept=".csv, .txt">
+                        <label for="student-list-upload" class="file-upload-label">
+                            <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="12" y1="18" x2="12" y2="12"></line>
+                                <line x1="9" y1="15" x2="15" y2="15"></line>
+                            </svg>
+                            <span id="file-name-display" class="file-name-display">Click to upload Student List (CSV)</span>
+                        </label>
+                    </div>
+
+                    <button id="generate-btn" class="btn btn-primary">
+                        Generate Plan
+                    </button>
+                    
+                    <div id="print-group" class="print-actions">
+                        <button id="print-attendance-btn" class="btn btn-print">Print Attendance</button>
+                        <button id="print-door-btn" class="btn btn-print">Print Door Plan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="seating-plan-output"></div>
+    </div>
+
+    <!-- Enhanced Instructions Modal -->
+    <div id="instruction-modal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Detailed Instructions</h3>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="instruction-grid">
+                    <div class="instruction-item">
+                        <h4><span>📋</span> 1. Preparation</h4>
+                        <ul>
+                            <li><strong>Metadata:</strong> Fill in Course Code, Name, Exam details. These appear on the printed header.</li>
+                            <li><strong>Proctor:</strong> Name shown on screen; creates a signature line on the attendance sheet.</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <h4><span>🏫</span> 2. Classroom Selection</h4>
+                        <ul>
+                            <li>Select one or multiple rooms.</li>
+                            <li>Check the capacity indicators (Normal vs Exam) next to room names.</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <h4><span>⚙️</span> 3. Configuration</h4>
+                        <ul>
+                            <li><strong>Capacity Mode:</strong> "Exam" reduces capacity (usually 1/2 or 1/3) for spacing.</li>
+                            <li><strong>Filling Strategy:</strong>
+                                <ul>
+                                    <li><em>Packed:</em> Sorts by ID (Seniors first), fills front/aisles.</li>
+                                    <li><em>Spread:</em> Distributes students evenly across the room.</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item">
+                        <h4><span>📄</span> 4. Data Format</h4>
+                        <ul>
+                            <li><strong>CSV File:</strong> Must contain <code>ID, Name, Surname</code> columns.</li>
+                            <li><strong>UTF-8:</strong> Ensure proper encoding for Turkish characters.</li>
+                            <li>Use "Download Template" for a starting point.</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-item full">
+                        <h4><span>🖱️</span> 5. Interaction & Printing</h4>
+                        <ul>
+                            <li><strong>Drag & Drop:</strong> After generation, swap students by dragging them to another seat (occupied or empty).</li>
+                            <li><strong>Print Attendance:</strong> Professional list with signature/absent fields.</li>
+                            <li><strong>Print Door Plan:</strong> Anonymous layout for posting on doors.</li>
+                            <li><em>Note: Printing is optimized for Black & White ink saving.</em></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA ---
+        const classroomsDB = [ { id: '1003', name: 'Room 1003', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1009', name: 'Room 1009', capacity: 84, examCapacity: 28, cols: 10, rows: 9 }, { id: '1015', name: 'Room 1015', capacity: 60, examCapacity: 20, cols: 8, rows: 8 }, { id: '1017', name: 'Room 1017', capacity: 63, examCapacity: 24, cols: 6, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1019', name: 'Room 1019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1023', name: 'Room 1023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1024', name: 'Room 1024', capacity: 132, examCapacity: 44, cols: 4, isIrregular: true, colSeats: [11, 11, 11, 11] }, { id: '1025', name: 'Room 1025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '1026II', name: 'Room 1026II', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1027', name: 'Room 1027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '1029', name: 'Room 1029', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }, { id: '2003', name: 'Room 2003', capacity: 63, examCapacity: 21, cols: 8, rows: 8 }, { id: '2009', name: 'Room 2009', capacity: 63, examCapacity: 24, cols: 8, rows: 8 }, { id: '2015', name: 'Room 2015', capacity: 70, examCapacity: 28, cols: 9, rows: 8 }, { id: '2017', name: 'Room 2017', capacity: 84, examCapacity: 28, cols: 4, isIrregular: true, colSeats: [7, 7, 7, 7] }, { id: '2019', name: 'Room 2019', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2023', name: 'Room 2023', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2025', name: 'Room 2025', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2027', name: 'Room 2027', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2029', name: 'Room 2029', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2031', name: 'Room 2031', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2035', name: 'Room 2035', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: '2043', name: 'Room 2043', capacity: 60, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1003', name: 'Room B1003', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1006', name: 'Room B1006', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1007', name: 'Room B1007', capacity: 48, examCapacity: 24, cols: 4, isIrregular: true, colSeats: [6, 6, 6, 6] }, { id: 'B1008', name: 'Room B1008', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1010', name: 'Room B1010', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1012', name: 'Room B1012', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1014', name: 'Room B1014', capacity: 96, examCapacity: 32, cols: 4, isIrregular: true, colSeats: [8, 8, 8, 8] }, { id: 'B1015', name: 'Room B1015', capacity: 56, examCapacity: 24, cols: 8, rows: 7 }, { id: 'B1017', name: 'Room B1017', capacity: 56, examCapacity: 28, cols: 8, rows: 7 }, { id: 'B1019', name: 'Room B1019', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1023', name: 'Room B1023', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1025', name: 'Room B1025', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1027', name: 'Room B1027', capacity: 25, examCapacity: 10, cols: 5, rows: 5 }, { id: 'B1029', name: 'Room B1029', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1033', name: 'Room B1033', capacity: 60, examCapacity: 24, cols: 8, rows: 8 }, { id: 'B1037', name: 'Room B1037', capacity: 111, examCapacity: 37, cols: 4, isIrregular: true, colSeats: [6, 11, 10, 10] }];
+
+        // --- 2. DOM ---
+        const els = {
+            classContainer: document.getElementById('classroom-checkbox-container'),
+            generateBtn: document.getElementById('generate-btn'),
+            printGroup: document.getElementById('print-group'),
+            output: document.getElementById('seating-plan-output'),
+            msg: document.getElementById('message-area'),
+            stats: document.getElementById('stats-panel'),
+            modal: document.getElementById('instruction-modal'),
+            helpBtn: document.getElementById('help-btn'),
+            closeModal: document.getElementById('close-modal'),
+            fileInput: document.getElementById('student-list-upload'),
+            fileNameDisplay: document.getElementById('file-name-display'),
+            inputs: {
+                code: document.getElementById('course-code'),
+                name: document.getElementById('course-name'),
+                exam: document.getElementById('exam-name'),
+                date: document.getElementById('exam-date'),
+                time: document.getElementById('exam-time'),
+                proctor: document.getElementById('proctor-name')
+            }
+        };
+
+        // --- 3. INIT ---
+        window.onload = () => {
+            // Populate Classrooms
+            classroomsDB.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
+            classroomsDB.forEach(r => {
+                const div = document.createElement('label');
+                div.className = 'checkbox-item';
+                div.innerHTML = `<input type="checkbox" value="${r.id}"> ${r.name} <span>Cap: ${r.capacity} / ${r.examCapacity}</span>`;
+                els.classContainer.appendChild(div);
+            });
+
+            // Listeners
+            els.generateBtn.onclick = generatePlan;
+            document.getElementById('download-template-btn').onclick = downloadTemplate;
+            els.helpBtn.onclick = () => els.modal.style.display = 'flex';
+            els.closeModal.onclick = () => els.modal.style.display = 'none';
+            els.modal.onclick = (e) => { if(e.target===els.modal) els.modal.style.display='none'; };
+
+            // File Upload Listener
+            els.fileInput.onchange = () => {
+                if (els.fileInput.files.length > 0) {
+                    els.fileNameDisplay.textContent = els.fileInput.files[0].name;
+                    els.fileNameDisplay.style.color = "var(--text-primary)";
+                }
+            };
+
+            // Print
+            document.getElementById('print-attendance-btn').onclick = () => printDoc('attendance');
+            document.getElementById('print-door-btn').onclick = () => printDoc('door');
+        };
+
+        function printDoc(type) {
+            document.body.classList.add(type === 'attendance' ? 'print-attendance' : 'print-door');
+            window.print();
+            document.body.classList.remove('print-attendance', 'print-door');
+        }
+
+        function downloadTemplate() {
+            let csv = "data:text/csv;charset=utf-8,ID,Name,Surname\n";
+            for(let i=0; i<30; i++) csv += `${2023000+i},Name${i},Surname${i}\n`;
+            const link = document.createElement('a');
+            link.href = encodeURI(csv); link.download = 'student_list.csv';
+            link.click();
+        }
+
+        // --- 4. LOGIC ---
+        function generatePlan() {
+            els.msg.style.display = 'none';
+            els.output.innerHTML = '';
+            els.printGroup.style.display = 'none';
+            els.stats.style.display = 'none';
+
+            const mode = document.querySelector('input[name="seatingMode"]:checked').value;
+            const fill = document.querySelector('input[name="fillingMode"]:checked').value;
+            const rooms = Array.from(els.classContainer.querySelectorAll('input:checked'))
+                .map(cb => classroomsDB.find(r => r.id === cb.value));
+            
+            const file = els.fileInput.files[0];
+
+            if(!rooms.length) return showMsg('Select at least one classroom.', 'error');
+            if(!file) return showMsg('Upload a student list.', 'error');
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const students = parseCSV(e.target.result);
+                if(!students.length) return showMsg('Invalid CSV format.', 'error');
+
+                // Stats
+                const getCap = r => mode==='exam' ? r.examCapacity : r.capacity;
+                const totalCap = rooms.reduce((s,r) => s + getCap(r), 0);
+                
+                document.getElementById('stat-students').textContent = students.length;
+                document.getElementById('stat-capacity').textContent = totalCap;
+                document.getElementById('stat-occupancy').textContent = Math.round((students.length/totalCap)*100) + '%';
+                els.stats.style.display = 'grid';
+
+                if(students.length > totalCap) showMsg('Warning: Not enough seats.', 'warning');
+
+                // Logic: Global Shuffle -> Balanced Dist -> Local Sort
+                const shuffled = shuffle(students);
+                const dist = distribute(rooms, shuffled, getCap);
+                
+                let idx = 0;
+                dist.forEach((count, room) => {
+                    let roomStudents = shuffled.slice(idx, idx+count);
+                    roomStudents.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true})); // Priority
+                    renderRoom(room, roomStudents, getCap(room), fill);
+                    idx += count;
+                });
+
+                if(els.output.children.length) els.printGroup.style.display = 'flex';
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(txt) {
+            return txt.trim().split('\n').slice(1).map(l => {
+                const p = l.split(',');
+                return p.length >=3 ? { id:p[0].trim(), name:p[1].trim(), surname:p[2].trim() } : null;
+            }).filter(Boolean);
+        }
+
+        function shuffle(arr) {
+            for(let i=arr.length-1; i>0; i--){
+                const j = Math.floor(Math.random()*(i+1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function distribute(rooms, students, capFn) {
+            const dist = new Map();
+            const totalS = students.length;
+            const totalC = rooms.reduce((s,r) => s + capFn(r), 0);
+            let assigned = 0;
+            const remain = new Map();
+
+            rooms.forEach(r => {
+                const c = capFn(r);
+                let n = Math.floor((c/totalC) * totalS);
+                if(n > c) n = c;
+                dist.set(r, n);
+                assigned += n;
+                remain.set(r, c - n);
+            });
+
+            let left = totalS - assigned;
+            while(left > 0) {
+                let best = null, maxFree = -1;
+                rooms.forEach(r => {
+                    if(remain.get(r) > maxFree) { maxFree = remain.get(r); best = r; }
+                });
+                if(!best || maxFree <= 0) break;
+                dist.set(best, dist.get(best)+1);
+                remain.set(best, remain.get(best)-1);
+                left--;
+            }
+            return dist;
+        }
+
+        function renderRoom(room, students, cap, mode) {
+            const wrap = document.createElement('div');
+            wrap.className = 'seating-wrapper';
+
+            // Print Header
+            let dStr = els.inputs.date.value ? new Date(els.inputs.date.value).toLocaleDateString('tr-TR') : '___/___/____';
+            wrap.innerHTML = `
+                <div class="print-header">
+                    <div class="print-header-title attendance-title">EXAM ATTENDANCE SHEET</div>
+                    <div class="print-header-title door-title">EXAM SEATING PLAN</div>
+                    <table class="print-header-table">
+                        <tr><td style="width:60%"><strong>Course:</strong> ${els.inputs.code.value || '___'} - ${els.inputs.name.value || '___'}</td><td style="text-align:right"><strong>Exam:</strong> ${els.inputs.exam.value || '___'}</td></tr>
+                        <tr><td><strong>Room:</strong> ${room.name}</td><td style="text-align:right"><strong>Date:</strong> ${dStr} - ${els.inputs.time.value || '__:__'}</td></tr>
+                    </table>
+                </div>
+                <h2 class="room-title">Seating Plan: ${room.name}</h2>
+            `;
+
+            // Grid
+            const grid = document.createElement('div');
+            grid.className = 'seating-grid';
+            grid.style.gridTemplateColumns = `repeat(${room.cols}, 1fr)`;
+            
+            const board = document.createElement('div');
+            board.className = 'board-indicator'; board.textContent = 'BOARD / TAHTA';
+            grid.appendChild(board);
+
+            // Seats Logic
+            const rows = room.isIrregular ? Math.max(...room.colSeats) : room.rows;
+            let validSeats = [];
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<room.cols; c++) {
+                    if(!room.isIrregular || r < room.colSeats[c]) validSeats.push({r,c});
+                }
+            }
+
+            let sortedSeats = [];
+            if(mode === 'packed') {
+                const center = (room.cols-1)/2;
+                sortedSeats = [...validSeats].sort((a,b) => (a.r*1000 + Math.abs(a.c-center)) - (b.r*1000 + Math.abs(b.c-center)));
+            } else {
+                if(students.length) {
+                    for(let i=0; i<students.length; i++) {
+                        let idx = Math.floor(i * (validSeats.length/students.length));
+                        if(idx >= validSeats.length) idx = validSeats.length-1;
+                        sortedSeats.push(validSeats[idx]);
+                    }
+                } else sortedSeats = validSeats;
+            }
+
+            const assignMap = new Map();
+            students.forEach((s, i) => {
+                if(i < sortedSeats.length) assignMap.set(`${sortedSeats[i].r},${sortedSeats[i].c}`, s);
+            });
+
+            // Render Cells
+            for(let r=0; r<rows; r++) {
+                for(let c=0; c<room.cols; c++) {
+                    if(!room.isIrregular || r < room.colSeats[c]) {
+                        const st = assignMap.get(`${r},${c}`);
+                        
+                        // Seat Number Calc
+                        let num = 0, cnt = 0;
+                        for(let cc=0; cc<room.cols; cc++) {
+                            for(let rr=0; rr<rows; rr++) {
+                                if(!room.isIrregular || rr < room.colSeats[cc]) { cnt++; if(rr===r && cc===c) num=cnt; }
+                            }
+                        }
+
+                        const cell = document.createElement('div');
+                        cell.className = st ? 'seat occupied' : 'seat empty';
+                        cell.innerHTML = `<span class="seat-num">${num}</span>`;
+                        if(st) {
+                            cell.draggable = true;
+                            cell.innerHTML += `
+                                <div class="student-info" data-id="${st.id}" data-name="${st.name}" data-surname="${st.surname}">
+                                    <div class="st-name">${st.name} ${st.surname}</div>
+                                    <div class="st-id">${st.id}</div>
+                                </div>
+                                <div class="print-absent-check">Absent <span class="check-box-visual"></span></div>
+                                <div class="print-signature-area"><div class="signature-line"></div><div class="signature-label">Signature</div></div>
+                            `;
+                            addDrag(cell);
+                        } else {
+                            cell.innerHTML += `<div class="empty-txt">EMPTY</div>`;
+                        }
+                        grid.appendChild(cell);
+                    } else {
+                        grid.appendChild(document.createElement('div')).className = 'grid-gap';
+                    }
+                }
+            }
+            wrap.appendChild(grid);
+
+            // Footer
+            const foot = document.createElement('div');
+            foot.className = 'print-footer';
+            foot.innerHTML = `
+                <div class="footer-proctor-section"><div><strong>Proctor:</strong> _______________________</div><div><strong>Sign:</strong> _______________</div></div>
+                <div class="footer-notes-section"><span class="footer-notes-label">Notes</span></div>
+            `;
+            wrap.appendChild(foot);
+            els.output.appendChild(wrap);
+        }
+
+        function showMsg(txt, type) {
+            els.msg.textContent = txt; els.msg.className = type; els.msg.style.display = 'block';
+        }
+
+        // Drag Drop
+        let dragSrc = null;
+        function addDrag(el) {
+            el.addEventListener('dragstart', function(e) {
+                dragSrc = this; e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', this.innerHTML);
+                this.style.opacity = '0.4';
+            });
+            el.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+            el.addEventListener('dragenter', function() { this.style.border = '2px dashed #63b3ed'; });
+            el.addEventListener('dragleave', function() { this.style.border = ''; });
+            el.addEventListener('dragend', function() { this.style.opacity = '1'; document.querySelectorAll('.seat').forEach(s=>s.style.border=''); });
+            el.addEventListener('drop', function(e) {
+                e.stopPropagation();
+                if(dragSrc !== this) {
+                    const srcInfo = getInfo(dragSrc);
+                    const tgtInfo = getInfo(this);
+                    
+                    const srcNum = dragSrc.querySelector('.seat-num').textContent;
+                    const tgtNum = this.querySelector('.seat-num').textContent;
+
+                    updateCell(dragSrc, srcNum, tgtInfo);
+                    updateCell(this, tgtNum, srcInfo);
+                }
+                return false;
+            });
+        }
+
+        function getInfo(el) {
+            const info = el.querySelector('.student-info');
+            return info ? { 
+                html: info.outerHTML, 
+                occupied: true 
+            } : { 
+                html: `<div class="empty-txt">EMPTY</div>`, 
+                occupied: false 
+            };
+        }
+
+        function updateCell(el, num, info) {
+            el.className = info.occupied ? 'seat occupied' : 'seat empty';
+            el.draggable = info.occupied;
+            el.innerHTML = `<span class="seat-num">${num}</span>` + info.html;
+            if(info.occupied) {
+                el.innerHTML += `
+                    <div class="print-absent-check">Absent <span class="check-box-visual"></span></div>
+                    <div class="print-signature-area"><div class="signature-line"></div><div class="signature-label">Signature</div></div>
+                `;
+                addDrag(el);
+            }
+        }
+    </script>
+</body>
+</html>
