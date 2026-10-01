@@ -10,12 +10,10 @@
     <script>(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
     <script src="assets/site.js" defer></script>
     <style>
-        .tl-wrap { display: none; }
-        @media (min-width: 760px) { .tl-wrap { display: block; } .agenda { display: none; } }
         .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px 32px; flex-wrap: wrap; margin-bottom: 26px; }
         .clock { font-family: var(--mono); font-size: 13px; color: var(--fg-3); font-variant-numeric: tabular-nums; }
         .clock b { color: var(--fg); font-weight: 500; }
-        @media print { .tl-wrap { display: block !important; } .agenda, .rail, .content-foot { display: none !important; } .frame { display: block; } }
+        @media print { .daybar { display: none !important; } }
                 /* Glitch effect */
         .glitch {
             position: relative;
@@ -165,8 +163,7 @@
             <div class="clock" id="clock"></div>
         </div>
 
-        <div class="tl-wrap"><div class="tl" id="tl"></div></div>
-        <div class="agenda" id="agenda"></div>
+        <div id="sched"></div>
         <div class="legend" id="legend"></div>
 
         <footer class="content-foot">
@@ -515,16 +512,13 @@
                 });
         return;
     }
-    var tl = document.getElementById('tl'), ag = document.getElementById('agenda'), rn = document.getElementById('rail-now');
-    Schedule.renderTimeline(tl);
-    Schedule.renderAgenda(ag);
+    Schedule.mount(document.getElementById('sched'));
     Schedule.legend(document.getElementById('legend'));
     function tick() {
         var n = Schedule.now();
         document.getElementById('clock').innerHTML = n.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ' · <b>' + n.toLocaleTimeString('en-GB') + '</b>';
     }
     tick(); setInterval(tick, 1000);
-    setInterval(function () { Schedule.updatePlayhead(tl); Schedule.renderAgenda(ag); }, 30000);
 })();
 </script>
 </body>

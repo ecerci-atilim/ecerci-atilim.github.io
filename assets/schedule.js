@@ -35,8 +35,17 @@ window.Schedule = (function () {
     return 'solid';
   }
 
+  // Mon..Sat of the current week; on Sunday, or on a Saturday with nothing
+  // scheduled, the coming week is more useful than the one that just ended.
   function weekDates(n) {
-    var out = {}, off = n.getDay() === 0 ? -6 : 1 - n.getDay();
+    var dow = n.getDay(), off = 1 - dow;
+    if (dow === 0) off = 1;
+    else if (dow === 6) {
+      var sat = new Date(n);
+      if (!events('saturday').length && !isLeave(sat)) off = 2;
+      else off = -5;
+    }
+    var out = {};
     WEEK.forEach(function (d, i) { var x = new Date(n); x.setDate(n.getDate() + off + i); out[d] = x; });
     return out;
   }
@@ -52,9 +61,11 @@ window.Schedule = (function () {
 
   /* ---- timeline ---- */
   function renderTimeline(el, opts) {
-    var n = now(), dates = weekDates(n), days = visibleDays(dates), b = bounds(days), today = ymd(n);
-    var compact = !!(opts && opts.compact);
-    el.className = 'tl' + (compact ? ' tl--compact' : '');
+    opts = opts || {};
+    var n = now(), dates = weekDates(n), all = visibleDays(dates), b = bounds(all), today = ymd(n);
+    var days = opts.day && all.indexOf(opts.day) !== -1 ? [opts.day] : all;
+    var compact = !!opts.compact && days.length > 1;
+    el.className = 'tl' + (compact ? ' tl--compact' : '') + (days.length === 1 ? ' tl--day' : '');
     el.style.setProperty('--days', days.length);
     el.style.setProperty('--slots', b.slots);
     var h = '<div class="tl-head"><div class="axis"></div>';
@@ -88,13 +99,14 @@ window.Schedule = (function () {
     el.innerHTML = h;
     el._bounds = b;
     el._today = today;
+    el._opts = opts;
     updatePlayhead(el);
   }
 
   function updatePlayhead(el) {
     var b = el._bounds; if (!b) return;
     var n = now(), min = n.getHours() * 60 + n.getMinutes(), today = ymd(n);
-    if (today !== el._today) { renderTimeline(el, { compact: el.classList.contains('tl--compact') }); return; }
+    if (today !== el._today) { renderTimeline(el, el._opts); return; }
     Array.prototype.forEach.call(el.querySelectorAll('.tl-now, .tl-now-label'), function (x) { x.remove(); });
     var col = el.querySelector('.tl-day.is-today');
     if (!col || min < b.start || min > b.end) return;
@@ -105,32 +117,65 @@ window.Schedule = (function () {
     el.querySelector('.tl-axis').appendChild(lab);
   }
 
-  /* ---- agenda (phones) ---- */
-  function renderAgenda(el) {
-    var n = now(), dates = weekDates(n), days = visibleDays(dates), today = ymd(n), min = n.getHours() * 60 + n.getMinutes();
-    var h = '';
-    days.forEach(function (d) {
-      var dt = dates[d], t = ymd(dt) === today;
-      h += '<section class="day' + (t ? ' is-today' : '') + '"><div class="day-head">' + LABEL[d] + '<small>' + MON[dt.getMonth()] + ' ' + dt.getDate() + (t ? ' · TODAY' : '') + '</small></div>';
-      if (isLeave(dt)) { h += '<div class="empty">On leave.</div>'; }
-      else {
-        var list = events(d);
-        if (!list.length) h += '<div class="empty">Nothing scheduled.</div>';
-        else {
-          h += '<ul>'; var marked = false;
-          list.forEach(function (ev) {
-            var s = toMin(ev.start), e = toMin(ev.end);
-            if (t && !marked && min < s) { h += '<li class="now-mark">' + hm(min) + '</li>'; marked = true; }
-            h += '<li class="ev tl-ev--' + styleOf(ev.category) + '"><span class="t">' + hm(s) + '–' + hm(e) + '</span><span><strong>' + esc(ev.activity) + '</strong>' + (ev.location ? '<span class="l"> · ' + esc(ev.location) + '</span>' : '') + '</span></li>';
-            if (t && !marked && min >= s && min < e) { h += '<li class="now-mark">' + hm(min) + '</li>'; marked = true; }
-          });
-          if (t && !marked && min >= DEF_START && min < DEF_END) h += '<li class="now-mark">' + hm(min) + '</li>';
-          h += '</ul>';
-        }
+  /* ---- responsive mount: whole week on wide screens, one day with a day
+         bar on phones and portrait tablets ---- */
+  var NARROW = '(max-width: 759px), (orientation: portrait) and (max-width: 1100px)';
+  function mount(host, opts) {
+    opts = opts || {};
+    host.innerHTML = '<div class="daybar" role="tablist" aria-label="Day"></div><div class="tl"></div>';
+    var bar = host.firstChild, tl = host.lastChild, mq = window.matchMedia(NARROW), day = null;
+
+    function defaultDay() {
+      var n = now(), dates = weekDates(n), days = visibleDays(dates), t = ymd(n);
+      for (var i = 0; i < days.length; i++) if (ymd(dates[days[i]]) === t) return days[i];
+      return days[0];
+    }
+    function renderBar() {
+      var n = now(), dates = weekDates(n), days = visibleDays(dates), t = ymd(n), h = '';
+      days.forEach(function (d) {
+        var dt = dates[d], isT = ymd(dt) === t;
+        h += '<button type="button" role="tab" data-day="' + d + '" aria-selected="' + (d === day) + '"' + (isT ? ' class="is-today"' : '') + '>' +
+             LABEL[d].slice(0, 3) + '<small>' + dt.getDate() + (isT ? ' · today' : '') + '</small></button>';
+      });
+      bar.innerHTML = h;
+    }
+    function render() {
+      if (mq.matches) {
+        if (!day) day = defaultDay();
+        bar.hidden = false; renderBar();
+        renderTimeline(tl, { day: day });
+      } else {
+        bar.hidden = true;
+        renderTimeline(tl, { compact: !!opts.compact });
       }
-      h += '</section>';
+      if (opts.onRender) opts.onRender(mq.matches ? day : null);
+    }
+    function go(step) {
+      var days = visibleDays(weekDates(now())), i = days.indexOf(day) + step;
+      if (i < 0 || i >= days.length) return;
+      day = days[i]; render();
+      var sel = bar.querySelector('[aria-selected="true"]'); if (sel) sel.focus({ preventScroll: true });
+    }
+    bar.addEventListener('click', function (e) {
+      var btn = e.target.closest('button[data-day]'); if (!btn) return;
+      day = btn.getAttribute('data-day'); render();
     });
-    el.innerHTML = h;
+    bar.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+    });
+    // swipe between days
+    var x0 = null, y0 = null;
+    tl.addEventListener('touchstart', function (e) { if (!mq.matches) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+    tl.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) go(dx < 0 ? 1 : -1);
+    }, { passive: true });
+    if (mq.addEventListener) mq.addEventListener('change', render); else mq.addListener(render);
+    render();
+    setInterval(function () { updatePlayhead(tl); }, 30000);
+    return { render: render, timeline: tl };
   }
 
   /* ---- one-line status ---- */
@@ -173,11 +218,11 @@ window.Schedule = (function () {
   function legend(el) {
     var cats = window.scheduleCategories || {}, h = '';
     for (var k in cats) h += '<span><i class="' + styleOf(k) + '"></i>' + esc(cats[k].label || k) + '</span>';
-    h += '<span><i class="hatch"></i>On leave</span><span><i class="now"></i>Now</span>';
+    h += '<span><i class="leave"></i>On leave</span><span><i class="now"></i>Now</span>';
     el.innerHTML = h;
   }
 
-  return { now: now, renderTimeline: renderTimeline, updatePlayhead: updatePlayhead, renderAgenda: renderAgenda, renderStatus: renderStatus, legend: legend, status: status };
+  return { now: now, weekDates: weekDates, renderTimeline: renderTimeline, updatePlayhead: updatePlayhead, mount: mount, renderStatus: renderStatus, legend: legend, status: status };
 })();
 
 // Every page carries the rail; keep its one-line status current.

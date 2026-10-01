@@ -58,7 +58,10 @@ Notes:
   the visible range grows automatically if something starts before 08:30
   or ends after 17:30.
 - Saturday only appears when it has an event or a leave day.
-- On screens narrower than 760px the table becomes a per-day list.
+- On phones and portrait tablets the schedule shows one day at a time
+  (today by default); the day bar or a sideways swipe switches days. On a
+  Sunday, or a Saturday with nothing scheduled, the coming week is shown.
+- Leave days (`leaveDays`) are covered with a light orange cross pattern.
 - Commit and push; the Pages workflow deploys `main`. If the site does not
   update within a few minutes, run the workflow manually from the Actions tab.
 

@@ -41,6 +41,8 @@
   --rule-3: #8E8E89;
   --hatch: #C9C9C4;
   --now: #CF3319;
+  --leave: #E07A1F;
+  --leave-bg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12'%3E%3Cpath d='M4 4l4 4M8 4l-4 4' stroke='%23E07A1F' stroke-opacity='.55' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
   --selection: rgba(20, 20, 20, 0.12);
 
   /* One colour, one meaning. Components only ever use ink or "now". */
@@ -194,8 +196,8 @@ code, kbd { font-family: var(--mono); font-size: 0.875em; background: var(--bg-2
 .tl--compact .tl-ev { left: 3px; right: 3px; padding: 2px 4px; font-size: 10px; line-height: 1.2; border-radius: 1px; }
 .tl--compact .tl-ev .t, .tl--compact .tl-ev .l { display: none; }
 @media (max-width: 599px) { .tl--compact .tl-ev strong { display: none; } }
-.tl-leave { position: absolute; inset: 0; background: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 7px); }
-.tl-leave span { position: absolute; top: 8px; left: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-2); }
+.tl-leave { position: absolute; inset: 0; background: var(--leave-bg) 0 0 / 12px 12px repeat, color-mix(in srgb, var(--leave) 6%, transparent); }
+.tl-leave span { position: absolute; top: 8px; left: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: color-mix(in srgb, var(--leave) 85%, var(--fg)); background: var(--bg); padding: 2px 5px; }
 
 /* the present */
 .tl-now { position: absolute; left: 0; right: 0; height: 0; border-top: 2px solid var(--now); z-index: 3; pointer-events: none; }
@@ -203,31 +205,28 @@ code, kbd { font-family: var(--mono); font-size: 0.875em; background: var(--bg-2
 .tl-now-label { position: absolute; right: 16px; transform: translateY(-50%); font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--now); background: var(--bg); padding: 0 2px; z-index: 3; font-variant-numeric: tabular-nums; }
 .tl--compact .tl-now-label { font-size: 10px; right: 12px; }
 
+/* Day bar (phones, portrait tablets) */
+.daybar { display: flex; gap: 0; margin: 0 0 14px; border-bottom: 1px solid var(--fg); }
+.daybar[hidden] { display: none; }
+.daybar button { flex: 1; min-width: 0; appearance: none; background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 6px 2px 7px; font: 500 14px/1.25 var(--sans); color: var(--fg-2); cursor: pointer; text-align: center; }
+.daybar button small { display: block; font: 400 11px/1.3 var(--mono); color: var(--fg-3); margin-top: 1px; white-space: nowrap; }
+.daybar button.is-today small { color: var(--now); }
+.daybar button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--fg); }
+.daybar button:focus-visible { outline-offset: -2px; }
+.tl--day { --slot-h: 40px; }
+.tl--day .tl-head { display: none; }
+.tl--day .tl-ev { left: 8px; right: 8px; padding: 7px 10px; font-size: 14px; }
+.tl--day .tl-ev .t { font-size: 11.5px; }
+
 .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 14px; font-size: 12.5px; color: var(--fg-2); }
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .legend i { width: 14px; height: 10px; display: inline-block; }
 .legend i.solid { background: var(--fg); }
 .legend i.outline { box-shadow: inset 0 0 0 1.5px var(--fg); }
 .legend i.hatch { background: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 4px); }
+.legend i.leave { background: var(--leave-bg) 0 0 / 8px 8px repeat; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--leave) 45%, transparent); }
 .legend i.now { height: 0; border-top: 2px solid var(--now); width: 14px; }
 
-/* Agenda (phones) */
-.agenda { display: grid; gap: 20px; }
-.agenda .day { border-top: 1px solid var(--fg); padding-top: 8px; }
-.agenda .day-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; font-weight: 500; }
-.agenda .day-head small { font-family: var(--mono); font-size: 11px; color: var(--fg-3); font-weight: 400; }
-.agenda .day.is-today .day-head small { color: var(--now); }
-.agenda ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.agenda li.ev { display: grid; grid-template-columns: 96px 1fr; gap: 0 12px; padding: 8px 10px; font-size: 14px; line-height: 1.35; border-radius: 2px; }
-.agenda li.ev .t { font-family: var(--mono); font-size: 11.5px; padding-top: 2px; }
-.agenda li.ev strong { font-weight: 500; }
-.agenda li.ev .l { font-size: 12.5px; opacity: 0.85; }
-.agenda li.ev.tl-ev--solid { background: var(--fg); color: var(--bg); }
-.agenda li.ev.tl-ev--outline { box-shadow: inset 0 0 0 1.5px var(--fg); }
-.agenda li.ev.tl-ev--hatch { background: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 7px); }
-.agenda li.now-mark { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--now); }
-.agenda li.now-mark::after { content: ""; flex: 1; border-top: 2px solid var(--now); }
-.agenda .empty { font-size: 13.5px; color: var(--fg-3); }
 
 /* --------------------------------------------------------------------------
    Tools list (home)
