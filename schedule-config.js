@@ -37,18 +37,18 @@ window.scheduleData = {
                 {
                     activity:   "Lunch Break",
                     location:   "Out of office",
-                    start:      "11:00",
-                    end:        "12:00",
+                    start:      "11:30",
+                    end:        "12:30",
                     category:   "break",
                 }
     ],
     tuesday:    [
-                {   
-                    activity:   "EE209 Laboratory",
-                    location:   "B2015",
+                {
+                    activity:   "EE209 Office Hours",
+                    location:   "2042",
                     start:      "9:30",
                     end:        "11:30",
-                    category:   "lab",
+                    category:   "office",
                 },
                 {
                     activity:   "EE103 Office Hours",
@@ -73,18 +73,18 @@ window.scheduleData = {
                     end:        "11:30",
                     category:   "lab",
                 },
-                {
-                    activity:   "EE209 Office Hours",
-                    location:   "2042",
-                    start:      "12:30",
-                    end:        "14:30",
-                    category:   "office",
+                {   
+                    activity:   "EE209 Laboratory",
+                    location:   "B2015",
+                    start:      "11:30",
+                    end:        "13:30",
+                    category:   "lab",
                 },
                 {
                     activity:   "Lunch Break",
                     location:   "Out of office",
-                    start:      "11:30",
-                    end:        "12:30",
+                    start:      "13:30",
+                    end:        "14:30",
                     category:   "break",
                 }
             ],
