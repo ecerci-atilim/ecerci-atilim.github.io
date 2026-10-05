@@ -164,7 +164,8 @@
 
 </div>
 
-<script src="schedule-config.js"></script>
+<!-- schedule-config.js is edited directly on GitHub; the per-minute query keeps caches from serving an old schedule -->
+<script>document.write('<script src="schedule-config.js?t=' + Math.floor(Date.now() / 60000) + '"><\/script>');</script>
 <script src="assets/schedule.js?v=8e963599"></script>
 <script>
     // --- Elements ---
