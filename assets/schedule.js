@@ -16,7 +16,7 @@ window.Schedule = (function () {
     var p = {}; fmt.formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
     return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
   }
-  function toMin(s) { var p = String(s).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+  function toMin(s) { var p = String(s).trim().split(/[:.]/); return (+p[0]) * 60 + (+p[1] || 0); }
   function pad(n) { return String(n).padStart(2, '0'); }
   function hm(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
   function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }

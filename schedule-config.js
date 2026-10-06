@@ -24,8 +24,6 @@
 //   end:       "12:30",
 //   category:  "break" },
 
-const { act } = require("react");
-
 window.onLeave = false;
 
 window.scheduleCategories = {
@@ -39,7 +37,7 @@ window.scheduleData = {
                 {
                     activity:   "EE353 Laboratory",
                     location:   "B4016",
-                    start:      "11.30",
+                    start:      "11:30",
                     end:        "13:20",
                     category:   "lab",
                 },
