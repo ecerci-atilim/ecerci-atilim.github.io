@@ -1,0 +1,5 @@
+{
+    // Plain browser scripts: an auto-inserted require()/import breaks the page.
+    "javascript.suggest.autoImports": false,
+    "javascript.updateImportsOnFileMove.enabled": "never"
+}

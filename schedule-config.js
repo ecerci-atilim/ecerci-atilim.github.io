@@ -35,19 +35,33 @@ window.scheduleCategories = {
 window.scheduleData = {
     monday:     [
                 {
+                    activity:   "EE353 Laboratory",
+                    location:   "B4016",
+                    start:      "11:30",
+                    end:        "13:20",
+                    category:   "lab",
+                },
+                {
                     activity:   "Lunch Break",
                     location:   "Out of office",
-                    start:      "11:30",
-                    end:        "12:30",
+                    start:      "13:30",
+                    end:        "14:30",
                     category:   "break",
                 }
     ],
     tuesday:    [
                 {
+                    activity:   "EE353 Laboratory",
+                    location:   "B4016",
+                    start:      "9:30",
+                    end:        "11:20",
+                    category:   "lab",
+                },
+                {
                     activity:   "EE209 Office Hours",
                     location:   "2042",
-                    start:      "9:30",
-                    end:        "11:30",
+                    start:      "14:30",
+                    end:        "16:30",
                     category:   "office",
                 },
                 {
