@@ -58,14 +58,7 @@ window.scheduleData = {
                     category:   "lab",
                 },
                 {
-                    activity:   "EE209 Office Hours",
-                    location:   "2042",
-                    start:      "14:30",
-                    end:        "16:30",
-                    category:   "office",
-                },
-                {
-                    activity:   "EE103 Office Hours",
+                    activity:   "EE103-EE209 Office Hours",
                     location:   "2042",
                     start:      "12:30",
                     end:        "14:30",
