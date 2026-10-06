@@ -75,8 +75,9 @@ python3 scripts/version-assets.py
 ```
 
 so the tags change and phones stop using the cached old copy. Editing
-`schedule-config.js` does not need this; GitHub Pages serves it with a
-10-minute cache.
+`schedule-config.js` does not need this: pages request it as
+`schedule-config.js?t=<minute>`, so a new schedule shows up within about a
+minute of the deploy finishing.
 
 ## Design
 
